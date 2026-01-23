@@ -4,7 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.example.balancify.presentation.home.HomeScreen
+import androidx.navigation.compose.rememberNavController
+import com.example.balancify.navigatin.NavigationRoot
 import com.example.balancify.ui.theme.BalancifyTheme
 
 
@@ -14,7 +15,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BalancifyTheme {
-                HomeScreen()
+                val navController = rememberNavController()
+                NavigationRoot(navController = navController)
             }
         }
     }

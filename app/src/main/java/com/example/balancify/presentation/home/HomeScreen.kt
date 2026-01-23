@@ -1,5 +1,6 @@
 package com.example.balancify.presentation.home
 
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.PieChart
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -16,6 +18,7 @@ import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -45,6 +48,7 @@ enum class NavDestination(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen() {
     val navController = rememberNavController()
@@ -54,6 +58,7 @@ fun HomeScreen() {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        topBar = { TopAppBar(title = { Text(NavDestination.entries[selectedRoute].label) }) },
         bottomBar = {
             NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
                 NavDestination.entries.forEachIndexed { index, destination ->
@@ -61,7 +66,9 @@ fun HomeScreen() {
                         selected = index == selectedRoute,
                         label = { Text(destination.label) },
                         onClick = {
-                            navController.navigate(route = destination.screen.route)
+                            navController.navigate(route = destination.screen.route) {
+                                restoreState = true
+                            }
                             selectedRoute = index
                         },
                         icon = {
@@ -87,7 +94,8 @@ fun HomeScreen() {
         ) {
             NavHost(
                 navController,
-                startDestination = startDestination.screen.route
+                startDestination = startDestination.screen.route,
+                enterTransition = { scaleIn(initialScale = 0.8f) },
             ) {
                 NavDestination.entries.forEach { destination ->
                     composable(destination.screen.route) {
