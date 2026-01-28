@@ -1,6 +1,6 @@
 package com.example.balancify.domain.repository
 
-import com.example.balancify.core.RepositoryResult
+import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.domain.model.UserModel
 
 interface UserRepository {

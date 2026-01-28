@@ -1,6 +1,6 @@
 package com.example.balancify.data.repository
 
-import com.example.balancify.core.RepositoryResult
+import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.data.data_source.user.UserLocalDataSource
 import com.example.balancify.data.data_source.user.UserRemoteDataSource
 import com.example.balancify.domain.model.UserModel

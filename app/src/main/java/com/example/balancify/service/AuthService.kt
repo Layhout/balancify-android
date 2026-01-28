@@ -13,7 +13,7 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.ClearCredentialException
 import com.example.balancify.R
-import com.example.balancify.core.BG_COLORS
+import com.example.balancify.core.constant.BG_COLORS
 import com.example.balancify.domain.model.UserModel
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption

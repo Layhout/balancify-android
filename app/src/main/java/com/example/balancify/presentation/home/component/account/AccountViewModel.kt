@@ -2,7 +2,7 @@ package com.example.balancify.presentation.home.component.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.balancify.core.RepositoryResult
+import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.domain.repository.UserRepository
 import com.example.balancify.service.AuthService
 import kotlinx.coroutines.channels.Channel

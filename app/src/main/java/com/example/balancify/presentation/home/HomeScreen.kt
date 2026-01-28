@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.balancify.core.AppScreen
+import com.example.balancify.core.constant.AppScreen
 import com.example.balancify.presentation.home.component.account.AccountScreen
 import com.example.balancify.presentation.home.component.dashboard.DashboardScreen
 import com.example.balancify.presentation.home.component.expense.ExpenseScreen
