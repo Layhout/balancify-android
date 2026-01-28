@@ -83,4 +83,6 @@ dependencies {
     implementation(libs.koin.ktor)
     implementation(libs.koin.test)
     implementation(libs.nanoid)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.coil.compose)
 }

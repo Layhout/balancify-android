@@ -18,14 +18,14 @@ fun NavigationRoot(
 
     NavHost(
         navController = navController,
-        startDestination = if (authService.isLoggedIn) Routes.Home else Routes.Intro,
+        startDestination = if (authService.isLoggedIn) Routes.Home else Routes.Login,
         enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
     ) {
-        composable<Routes.Intro> {
+        composable<Routes.Login> {
             LoginScreen(
                 onLoginComplete = {
                     navController.navigate(Routes.Home) {
-                        popUpTo(Routes.Intro) {
+                        popUpTo(Routes.Login) {
                             inclusive = true
                         }
                     }
@@ -33,7 +33,15 @@ fun NavigationRoot(
             )
         }
         composable<Routes.Home> {
-            HomeScreen()
+            HomeScreen(
+                onLogoutComplete = {
+                    navController.navigate(Routes.Login) {
+                        popUpTo(Routes.Home) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
     }
 }

@@ -1,15 +1,21 @@
 package com.example.balancify.di
 
+import com.example.balancify.data.data_source.user.UserLocalDataSource
+import com.example.balancify.data.data_source.user.UserLocalDataSourceImp
 import com.example.balancify.data.data_source.user.UserRemoteDataSource
 import com.example.balancify.data.data_source.user.UserRemoteDataSourceImp
 import com.example.balancify.data.repository.UserRepositoryImp
 import com.example.balancify.domain.repository.UserRepository
+import com.example.balancify.domain.use_case.user.AddLocalUser
 import com.example.balancify.domain.use_case.user.AddUser
+import com.example.balancify.domain.use_case.user.GetLocalUser
 import com.example.balancify.domain.use_case.user.GetUser
 import com.example.balancify.domain.use_case.user.UserUseCases
+import com.example.balancify.presentation.home.component.account.AccountViewModel
 import com.example.balancify.presentation.login.LoginViewModel
 import com.example.balancify.service.AuthService
 import com.example.balancify.service.DatabaseService
+import com.example.balancify.service.LocalDatabaseService
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
@@ -18,15 +24,20 @@ import org.koin.dsl.module
 val appModule = module {
     singleOf(::AuthService)
     singleOf(::DatabaseService)
+    singleOf(::LocalDatabaseService)
 
     singleOf(::UserRemoteDataSourceImp) bind UserRemoteDataSource::class
+    singleOf(::UserLocalDataSourceImp) bind UserLocalDataSource::class
     singleOf(::UserRepositoryImp) bind UserRepository::class
     single {
         UserUseCases(
             getUser = GetUser(get()),
             addUser = AddUser(get()),
+            getLocalUser = GetLocalUser(get()),
+            addLocalUser = AddLocalUser(get())
         )
     }
 
     viewModelOf(::LoginViewModel)
+    viewModelOf(::AccountViewModel)
 }

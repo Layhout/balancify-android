@@ -1,5 +1,8 @@
 package com.example.balancify.core
 
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.stringPreferencesKey
+
 enum class AppScreen(
     val route: String
 ) {
@@ -28,3 +31,12 @@ val BG_COLORS = listOf<String>(
     "#ec4899cc",
     "#f43f5ecc",
 )
+
+data class LocalDataStoreKey<T>(
+    val key: Preferences.Key<T>,
+    val defaultValue: T
+) {
+    companion object {
+        val USER = LocalDataStoreKey(stringPreferencesKey("user"), "")
+    }
+}

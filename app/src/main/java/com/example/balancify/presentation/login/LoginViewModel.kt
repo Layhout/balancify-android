@@ -1,8 +1,9 @@
 package com.example.balancify.presentation.login
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.balancify.core.RepositoryResult
+import com.example.balancify.domain.model.UserModel
 import com.example.balancify.domain.repository.UserRepository
 import com.example.balancify.service.AuthResult
 import com.example.balancify.service.AuthService
@@ -25,26 +26,51 @@ class LoginViewModel(
             initialValue = LoginState()
         )
 
-    fun loadSignInBottomSheet(context: Context, onSuccess: () -> Unit) {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            processSignInResult(authService.signInWithBottomSheet(context), onSuccess)
-            _state.update { it.copy(isLoading = false) }
-        }
-    }
+    fun onAction(action: LoginAction) {
+        when (action) {
+            is LoginAction.OnScreenLoad -> {
+                viewModelScope.launch {
+                    _state.update { it.copy(isLoading = true) }
+                    processSignInResult(
+                        authService.signInWithBottomSheet(action.context),
+                        action.onSuccess
+                    )
+                    _state.update { it.copy(isLoading = false) }
+                }
+            }
 
-    fun onClickSignIn(context: Context, onSuccess: () -> Unit) {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            processSignInResult(authService.signInWithDialog(context), onSuccess)
-            _state.update { it.copy(isLoading = false) }
+            is LoginAction.OnSignInClick -> {
+                viewModelScope.launch {
+                    _state.update { it.copy(isLoading = true) }
+                    processSignInResult(
+                        authService.signInWithDialog(action.context),
+                        action.onSuccess
+                    )
+                    _state.update { it.copy(isLoading = false) }
+                }
+            }
         }
     }
 
     private suspend fun processSignInResult(result: AuthResult, onSuccess: () -> Unit) {
-        if (result.isNewUser && result.user != null) {
-            userRepository.addUser(result.user)
+        var user: UserModel? = result.user?.also {
+            if (result.isNewUser) {
+                userRepository.addUser(it)
+            }
         }
+
+        if (user == null) {
+            val result = userRepository.getUser(result.userId ?: "")
+
+            if (result is RepositoryResult.Success) {
+                user = result.data
+            }
+        }
+
+        user?.let {
+            userRepository.addLocalUser(it)
+        }
+
         if (result.successful) {
             onSuccess()
         }
