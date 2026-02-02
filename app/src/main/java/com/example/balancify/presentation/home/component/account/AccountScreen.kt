@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -19,34 +18,39 @@ import com.example.balancify.presentation.home.component.account.component.Logou
 import com.example.balancify.presentation.home.component.account.component.LogoutCard
 import com.example.balancify.presentation.home.component.account.component.OptionCard
 import com.example.balancify.presentation.home.component.account.component.UserProFile
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AccountScreen(
     viewModel: AccountViewModel = koinViewModel(),
-    onLogoutConfirm: () -> Unit
+    onLogoutComplete: () -> Unit,
+    onNavigateToFriend: () -> Unit
 ) {
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
-    val coroutineScope = rememberCoroutineScope()
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            AccountEvent.OnLogoutSuccessful -> {
-                coroutineScope.launch {
-                    onLogoutConfirm()
-                }
+            is AccountEvent.OnLogoutSuccessful -> {
+                onLogoutComplete()
             }
 
             is AccountEvent.OnLogoutError -> {
                 Toast.makeText(context, event.message, Toast.LENGTH_LONG).show()
             }
+
+            is AccountEvent.OnNavigateToFriend -> {
+                onNavigateToFriend()
+            }
         }
     }
 
     Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 64.dp)
+        ) {
             UserProFile()
             Spacer(modifier = Modifier.height(48.dp))
             OptionCard()

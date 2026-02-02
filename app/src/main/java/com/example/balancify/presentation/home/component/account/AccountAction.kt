@@ -6,4 +6,5 @@ sealed interface AccountAction {
     data object OnLogoutClick : AccountAction
     data object OnLogoutDismiss : AccountAction
     data class OnLogoutConfirmClick(val context: Context) : AccountAction
+    data object OnFriendClick : AccountAction
 }

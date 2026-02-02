@@ -29,7 +29,7 @@ fun UserProFile(viewModel: AccountViewModel = koinViewModel()) {
         Avatar(
             imageUrl = user?.imageUrl ?: "",
             modifier = Modifier
-                .size(110.dp),
+                .size(100.dp),
             fallbackText = user?.name ?: "",
             bgColor = Color(user?.profileBgColor?.toColorInt() ?: 0),
             textStyle = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),

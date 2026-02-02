@@ -41,7 +41,7 @@ fun LogoutBottomSheet(
 ) {
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
 
     ModalBottomSheet(
         onDismissRequest = {
@@ -86,7 +86,7 @@ fun LogoutBottomSheet(
             Row(modifier = Modifier.fillMaxWidth()) {
                 OutlinedButton(
                     onClick = {
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        coroutineScope.launch { sheetState.hide() }.invokeOnCompletion {
                             if (!sheetState.isVisible) {
                                 viewModel.onAction(AccountAction.OnLogoutDismiss)
                             }

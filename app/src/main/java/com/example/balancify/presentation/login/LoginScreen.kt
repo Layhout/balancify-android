@@ -10,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.presentation.login.component.AppLogo
 import com.example.balancify.presentation.login.component.BackgroundGradient
 import com.example.balancify.presentation.login.component.Footer
@@ -19,12 +18,10 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = koinViewModel<LoginViewModel>(),
+    viewModel: LoginViewModel = koinViewModel(),
     onLoginComplete: () -> Unit,
 ) {
     val context = LocalContext.current
-    val state = viewModel.state.collectAsStateWithLifecycle()
-    state.value.isLoading
 
     LaunchedEffect(null) {
         viewModel.onAction(LoginAction.OnScreenLoad(context, onLoginComplete))
