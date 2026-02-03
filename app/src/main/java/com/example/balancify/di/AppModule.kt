@@ -49,7 +49,7 @@ val appModule = module {
     singleOf(::FriendRepositoryImp) bind FriendRepository::class
     single {
         FriendUseCases(
-            getFriends = GetFriends(get())
+            getFriends = GetFriends(get(), get())
         )
     }
 

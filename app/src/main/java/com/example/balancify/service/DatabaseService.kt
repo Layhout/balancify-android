@@ -1,6 +1,5 @@
 package com.example.balancify.service
 
-import com.example.balancify.BuildConfig
 import com.example.balancify.core.constant.PageResult
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.CollectionReference
@@ -17,7 +16,8 @@ class DatabaseService {
     private val db = Firebase.firestore
 
     private fun buildCollectionPath(collection: String): String {
-        return if (BuildConfig.DEBUG) "test/dev/${collection}" else collection
+        return collection
+//        return if (BuildConfig.DEBUG) "test/dev/${collection}" else collection
     }
 
     private fun collectionRef(collection: String): CollectionReference {

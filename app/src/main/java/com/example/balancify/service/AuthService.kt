@@ -40,6 +40,9 @@ class AuthService {
     val isLoggedIn: Boolean
         get() = auth.currentUser != null
 
+    val userId: String
+        get() = auth.currentUser?.uid ?: ""
+
     suspend fun signInWithBottomSheet(context: Context): AuthResult {
         try {
             val option = GetGoogleIdOption.Builder()

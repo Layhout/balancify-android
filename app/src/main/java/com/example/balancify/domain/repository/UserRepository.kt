@@ -8,4 +8,5 @@ interface UserRepository {
     suspend fun addUser(user: UserModel): RepositoryResult<Unit>
     suspend fun getLocalUser(): RepositoryResult<UserModel?>
     suspend fun addLocalUser(user: UserModel): RepositoryResult<Unit>
+    suspend fun getUserByIds(ids: List<String>): RepositoryResult<List<UserModel>>
 }

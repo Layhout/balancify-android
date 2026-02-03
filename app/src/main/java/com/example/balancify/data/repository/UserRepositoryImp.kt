@@ -45,4 +45,13 @@ class UserRepositoryImp(
             return RepositoryResult.Error(e)
         }
     }
+
+    override suspend fun getUserByIds(ids: List<String>): RepositoryResult<List<UserModel>> {
+        try {
+            val result = remoteDataSource.getUserByIds(ids)
+            return RepositoryResult.Success(result)
+        } catch (e: Exception) {
+            return RepositoryResult.Error(e)
+        }
+    }
 }
