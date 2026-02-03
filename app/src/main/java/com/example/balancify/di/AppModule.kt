@@ -10,8 +10,12 @@ import com.example.balancify.data.repository.FriendRepositoryImp
 import com.example.balancify.data.repository.UserRepositoryImp
 import com.example.balancify.domain.repository.FriendRepository
 import com.example.balancify.domain.repository.UserRepository
+import com.example.balancify.domain.use_case.friend.AcceptFriend
+import com.example.balancify.domain.use_case.friend.AddFriendByEmail
 import com.example.balancify.domain.use_case.friend.FriendUseCases
 import com.example.balancify.domain.use_case.friend.GetFriends
+import com.example.balancify.domain.use_case.friend.RejectFriend
+import com.example.balancify.domain.use_case.friend.Unfriend
 import com.example.balancify.domain.use_case.user.AddLocalUser
 import com.example.balancify.domain.use_case.user.AddUser
 import com.example.balancify.domain.use_case.user.GetLocalUser
@@ -49,7 +53,11 @@ val appModule = module {
     singleOf(::FriendRepositoryImp) bind FriendRepository::class
     single {
         FriendUseCases(
-            getFriends = GetFriends(get(), get())
+            getFriends = GetFriends(get(), get()),
+            unfriend = Unfriend(get()),
+            acceptFriend = AcceptFriend(get()),
+            rejectFriend = RejectFriend(get()),
+            addFriendByEmail = AddFriendByEmail(get(), get())
         )
     }
 

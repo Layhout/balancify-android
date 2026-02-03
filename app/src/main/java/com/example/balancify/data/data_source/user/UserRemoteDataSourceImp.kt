@@ -21,4 +21,10 @@ class UserRemoteDataSourceImp(private val db: DatabaseService) : UserRemoteDataS
             whereIn(documentId(), ids)
         }).mapNotNull { it.toObject<UserModel>() }
     }
+
+    override suspend fun getUserByEmail(id: String): UserModel? {
+        return db.getDataWithQuery(collectionName, build = {
+            whereEqualTo("email", id)
+        }).documents.firstOrNull()?.toObject<UserModel>()
+    }
 }

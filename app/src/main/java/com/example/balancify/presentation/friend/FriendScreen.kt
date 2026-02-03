@@ -2,7 +2,6 @@ package com.example.balancify.presentation.friend
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -22,12 +21,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.balancify.component.Empty
 import com.example.balancify.component.InfiniteLazyColumn
 import com.example.balancify.core.constant.BORDER_RADIUS_MD
 import com.example.balancify.core.constant.BORDER_RADIUS_SM
@@ -57,7 +56,7 @@ fun FriendScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text("Friends")
+                        Text("Friends", fontWeight = FontWeight.SemiBold)
                     },
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
@@ -79,26 +78,13 @@ fun FriendScreen(
             }
         ) {
             PullToRefreshBox(
-                isRefreshing = false,
-                onRefresh = {},
+                isRefreshing = state.value.isRefreshing,
+                onRefresh = { viewModel.onAction(FriendAction.OnRefresh) },
                 modifier = Modifier
                     .padding(it),
             ) {
                 if (!state.value.isLoading && state.value.friends.isEmpty()) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Spacer(modifier = Modifier.height(34.dp))
-                        Text(
-                            "(-_-;)",
-                            style = MaterialTheme.typography.displayLarge.copy(
-                                fontWeight = FontWeight.Black
-                            )
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("No friends found.")
-                    }
+                    Empty()
                 }
                 InfiniteLazyColumn(
                     items = state.value.friends,

@@ -1,5 +1,9 @@
 package com.example.balancify.data.data_source.friend
 
+import com.example.balancify.core.constant.BatchDeleteItem
+import com.example.balancify.core.constant.BatchSetItem
+import com.example.balancify.core.constant.BatchUpdateItem
+import com.example.balancify.core.constant.FriendStatus
 import com.example.balancify.domain.model.FriendModel
 import com.example.balancify.domain.model.PaginatedFriendsModel
 import com.example.balancify.service.AuthService
@@ -11,15 +15,14 @@ class FriendRemoteDataSourceImp(
     private val db: DatabaseService,
     private val auth: AuthService
 ) : FriendRemoteDataSource {
-    private val collectionName: String = "friends"
-
+    private fun buildCollectionPath(id: String = auth.userId): String {
+        return "friends/${id}/data"
+    }
 
     override suspend fun getFriends(lastDoc: DocumentSnapshot?): PaginatedFriendsModel {
-        val result = db.getPage("${collectionName}/${auth.userId}/data", 20, lastDoc)
-
-        val size = result.snapshot.documents.size
-
-        println(size)
+        val result = db.getPage(buildCollectionPath(), 20, lastDoc, build = {
+            whereNotEqualTo("status", FriendStatus.REJECTED)
+        })
 
         val friends = result.snapshot.documents.mapNotNull {
             it.toObject<FriendModel>()
@@ -29,7 +32,86 @@ class FriendRemoteDataSourceImp(
 
         return PaginatedFriendsModel(
             friends = friends,
-            canLoadMore = canLoadMore
+            canLoadMore = canLoadMore,
+            lastDoc = result.snapshot.documents.lastOrNull()
         )
+    }
+
+    override suspend fun unfriend(id: String) {
+        db.batchDelete(
+            listOf(
+                BatchDeleteItem(
+                    collection = buildCollectionPath(),
+                    id = id
+                ),
+                BatchDeleteItem(
+                    collection = buildCollectionPath(id),
+                    id = auth.userId
+                )
+            )
+        )
+    }
+
+    override suspend fun acceptFriend(id: String) {
+        db.batchUpdate(
+            listOf(
+                BatchUpdateItem(
+                    collection = buildCollectionPath(),
+                    id = id,
+                    fields = mapOf(
+                        "status" to FriendStatus.ACCEPTED
+                    )
+                ),
+                BatchUpdateItem(
+                    collection = buildCollectionPath(id),
+                    id = auth.userId,
+                    fields = mapOf(
+                        "status" to FriendStatus.ACCEPTED
+                    )
+                )
+            )
+        )
+    }
+
+    override suspend fun rejectFriend(id: String) {
+        db.batchUpdate(
+            listOf(
+                BatchUpdateItem(
+                    collection = buildCollectionPath(),
+                    id = id,
+                    fields = mapOf(
+                        "status" to FriendStatus.REJECTED
+                    )
+                ),
+                BatchUpdateItem(
+                    collection = buildCollectionPath(id),
+                    id = auth.userId,
+                    fields = mapOf(
+                        "status" to FriendStatus.REJECTED
+                    )
+                )
+            )
+        )
+    }
+
+    override suspend fun addFriend(friend: FriendModel, youAsFriend: FriendModel) {
+        db.batchSet(
+            listOf(
+                BatchSetItem(
+                    collection = buildCollectionPath(),
+                    id = friend.userId,
+                    data = friend
+                ),
+                BatchSetItem(
+                    collection = buildCollectionPath(friend.userId),
+                    id = auth.userId,
+                    data = youAsFriend,
+                )
+            )
+        )
+    }
+
+    override suspend fun getFriend(id: String): FriendModel? {
+        return db.getData(buildCollectionPath(), id).toObject<FriendModel>()
     }
 }

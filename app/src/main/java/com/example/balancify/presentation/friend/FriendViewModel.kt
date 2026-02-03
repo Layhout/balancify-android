@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.domain.use_case.friend.FriendUseCases
+import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,17 +30,19 @@ class FriendViewModel(
     private val _events = Channel<FriendEvent>()
     val events = _events.receiveAsFlow()
 
-    private fun loadData() {
+    private fun loadData(lastDoc: DocumentSnapshot? = null) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            val result = friendUseCases.getFriends(null)
+            val result = friendUseCases.getFriends(lastDoc)
 
             if (result is RepositoryResult.Success) {
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        friends = result.data.friends,
+                        isRefreshing = false,
+                        friends = if (lastDoc != null) it.friends + result.data.friends else result.data.friends,
                         canLoadMore = result.data.canLoadMore,
+                        lastDoc = it.lastDoc,
                     )
                 }
             } else {
@@ -55,6 +58,15 @@ class FriendViewModel(
     fun onAction(action: FriendAction) {
         when (action) {
             is FriendAction.OnLoadMore -> {
+                loadData(_state.value.lastDoc)
+            }
+
+            is FriendAction.OnRefresh -> {
+                _state.update {
+                    it.copy(
+                        isRefreshing = true,
+                    )
+                }
                 loadData()
             }
 

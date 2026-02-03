@@ -26,8 +26,8 @@ class GetFriends(
 
         if (userResult is RepositoryResult.Error) return result
 
-        return RepositoryResult.Success(
-            data = PaginatedFriendsModel(
+        return result.copy(
+            data = result.data.copy(
                 friends = result.data.friends.map { friend ->
                     friend.copy(
                         user = (userResult as RepositoryResult.Success)
@@ -35,10 +35,8 @@ class GetFriends(
                                 it.documentId == friend.userId
                             } ?: UserModel()
                     )
-                },
-                canLoadMore = result.data.canLoadMore
+                }
             )
         )
-
     }
 }

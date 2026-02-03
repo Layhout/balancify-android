@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -50,17 +51,18 @@ fun FriendCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Avatar(
-                imageUrl = data.user.imageUrl,
+                imageUrl = data.user?.imageUrl ?: "",
                 modifier = Modifier.size(42.dp)
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    data.user.name,
+                    data.user?.name ?: "",
                     style = MaterialTheme.typography.titleSmall.copy(
                         fontWeight = FontWeight.SemiBold
                     )
                 )
-                Text(data.user.email, style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(data.user?.email ?: "", style = MaterialTheme.typography.labelMedium)
             }
             Row {
                 when (data.status) {

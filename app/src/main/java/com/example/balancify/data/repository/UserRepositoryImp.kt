@@ -54,4 +54,13 @@ class UserRepositoryImp(
             return RepositoryResult.Error(e)
         }
     }
+
+    override suspend fun getUserByEmail(email: String): RepositoryResult<UserModel?> {
+        try {
+            val result = remoteDataSource.getUserByEmail(email)
+            return RepositoryResult.Success(result)
+        } catch (e: Exception) {
+            return RepositoryResult.Error(e)
+        }
+    }
 }

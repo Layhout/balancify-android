@@ -39,7 +39,7 @@ class AuthService {
 
     val isLoggedIn: Boolean
         get() = auth.currentUser != null
-
+    
     val userId: String
         get() = auth.currentUser?.uid ?: ""
 

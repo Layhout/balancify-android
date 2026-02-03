@@ -1,5 +1,8 @@
 package com.example.balancify.service
 
+import com.example.balancify.core.constant.BatchDeleteItem
+import com.example.balancify.core.constant.BatchSetItem
+import com.example.balancify.core.constant.BatchUpdateItem
 import com.example.balancify.core.constant.PageResult
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.CollectionReference
@@ -88,44 +91,40 @@ class DatabaseService {
     }
 
     suspend fun batchSet(
-        collection: String,
-        items: List<Pair<String, Any>>,
-        merge: Boolean = true
+        items: List<BatchSetItem>
     ) {
         if (items.isEmpty()) return
 
         db.runBatch { batch ->
-            items.forEach { (id, data) ->
-                val ref = documentRef(collection, id)
-                if (merge) batch.set(ref, data, SetOptions.merge())
-                else batch.set(ref, data)
+            items.forEach { item ->
+                val ref = documentRef(item.collection, item.id)
+                if (item.merge) batch.set(ref, item.data, SetOptions.merge())
+                else batch.set(ref, item.data)
             }
         }.await()
     }
 
     suspend fun batchUpdate(
-        collection: String,
-        items: List<Pair<String, Map<String, Any?>>>
+        items: List<BatchUpdateItem>
     ) {
         if (items.isEmpty()) return
 
         db.runBatch { batch ->
-            items.forEach { (id, fields) ->
-                val ref = documentRef(collection, id)
-                batch.update(ref, fields)
+            items.forEach { item ->
+                val ref = documentRef(item.collection, item.id)
+                batch.update(ref, item.fields)
             }
         }.await()
     }
 
     suspend fun batchDelete(
-        collection: String,
-        ids: List<String>
+        items: List<BatchDeleteItem>
     ) {
-        if (ids.isEmpty()) return
+        if (items.isEmpty()) return
 
         db.runBatch { batch ->
-            ids.forEach { id ->
-                batch.delete(documentRef(collection, id))
+            items.forEach { item ->
+                batch.delete(documentRef(item.collection, item.id))
             }
         }.await()
     }
