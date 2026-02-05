@@ -8,4 +8,7 @@ sealed interface Routes {
 
     @Serializable
     data object Home : Routes
+
+    @Serializable
+    data object Friend : Routes
 }

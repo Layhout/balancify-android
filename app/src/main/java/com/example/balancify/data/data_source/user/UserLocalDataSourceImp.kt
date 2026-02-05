@@ -1,6 +1,6 @@
 package com.example.balancify.data.data_source.user
 
-import com.example.balancify.core.LocalDataStoreKey
+import com.example.balancify.core.constant.LocalDataStoreKey
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.service.LocalDatabaseService
 import kotlinx.serialization.json.Json

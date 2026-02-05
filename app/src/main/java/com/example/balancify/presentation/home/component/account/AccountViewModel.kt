@@ -2,8 +2,8 @@ package com.example.balancify.presentation.home.component.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.balancify.core.RepositoryResult
-import com.example.balancify.domain.repository.UserRepository
+import com.example.balancify.core.constant.RepositoryResult
+import com.example.balancify.domain.use_case.user.UserUseCases
 import com.example.balancify.service.AuthService
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AccountViewModel(
-    private val userRepository: UserRepository,
+    private val userUseCases: UserUseCases,
     private val authService: AuthService,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AccountState())
@@ -50,13 +50,17 @@ class AccountViewModel(
                     }
                 }
             }
+
+            is AccountAction.OnFriendClick -> {
+                viewModelScope.launch { _events.send(AccountEvent.OnNavigateToFriend) }
+            }
         }
     }
 
 
     private fun loadData() {
         viewModelScope.launch {
-            val result = userRepository.getLocalUser()
+            val result = userUseCases.getLocalUser()
             if (result is RepositoryResult.Success) {
                 _state.update { it.copy(user = result.data) }
             }

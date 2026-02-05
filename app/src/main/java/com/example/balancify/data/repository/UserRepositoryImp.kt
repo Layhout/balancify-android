@@ -1,6 +1,6 @@
 package com.example.balancify.data.repository
 
-import com.example.balancify.core.RepositoryResult
+import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.data.data_source.user.UserLocalDataSource
 import com.example.balancify.data.data_source.user.UserRemoteDataSource
 import com.example.balancify.domain.model.UserModel
@@ -41,6 +41,24 @@ class UserRepositoryImp(
         try {
             localDataSource.addUser(user)
             return RepositoryResult.Success(Unit)
+        } catch (e: Exception) {
+            return RepositoryResult.Error(e)
+        }
+    }
+
+    override suspend fun getUserByIds(ids: List<String>): RepositoryResult<List<UserModel>> {
+        try {
+            val result = remoteDataSource.getUserByIds(ids)
+            return RepositoryResult.Success(result)
+        } catch (e: Exception) {
+            return RepositoryResult.Error(e)
+        }
+    }
+
+    override suspend fun getUserByEmail(email: String): RepositoryResult<UserModel?> {
+        try {
+            val result = remoteDataSource.getUserByEmail(email)
+            return RepositoryResult.Success(result)
         } catch (e: Exception) {
             return RepositoryResult.Error(e)
         }

@@ -19,7 +19,6 @@ import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -27,10 +26,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.balancify.core.AppScreen
+import com.example.balancify.core.constant.AppScreen
 import com.example.balancify.presentation.home.component.account.AccountScreen
 import com.example.balancify.presentation.home.component.dashboard.DashboardScreen
 import com.example.balancify.presentation.home.component.expense.ExpenseScreen
@@ -50,7 +50,7 @@ enum class NavDestination(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onLogoutComplete: () -> Unit) {
+fun HomeScreen(onLogoutComplete: () -> Unit, onNavigateToFriend: () -> Unit) {
     val navController = rememberNavController()
     val startDestination = NavDestination.DASHBOARD
     var selectedRoute by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
@@ -58,13 +58,12 @@ fun HomeScreen(onLogoutComplete: () -> Unit) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { TopAppBar(title = { Text(NavDestination.entries[selectedRoute].label) }) },
         bottomBar = {
             NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
                 NavDestination.entries.forEachIndexed { index, destination ->
                     NavigationBarItem(
                         selected = index == selectedRoute,
-                        label = { Text(destination.label) },
+                        label = { Text(destination.label, fontWeight = FontWeight.SemiBold) },
                         onClick = {
                             if (selectedRoute != index) {
                                 navController.navigate(route = destination.screen.route) {
@@ -116,7 +115,10 @@ fun HomeScreen(onLogoutComplete: () -> Unit) {
                             NavDestination.DASHBOARD -> DashboardScreen()
                             NavDestination.EXPENSES -> ExpenseScreen()
                             NavDestination.GROUPS -> GroupScreen()
-                            NavDestination.ACCOUNT -> AccountScreen(onLogoutConfirm = onLogoutComplete)
+                            NavDestination.ACCOUNT -> AccountScreen(
+                                onLogoutComplete = onLogoutComplete,
+                                onNavigateToFriend = onNavigateToFriend,
+                            )
                         }
                     }
                 }

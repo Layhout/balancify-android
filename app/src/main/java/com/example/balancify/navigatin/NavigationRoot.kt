@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.balancify.presentation.friend.FriendScreen
 import com.example.balancify.presentation.home.HomeScreen
 import com.example.balancify.presentation.login.LoginScreen
 import com.example.balancify.service.AuthService
@@ -22,15 +23,13 @@ fun NavigationRoot(
         enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) },
     ) {
         composable<Routes.Login> {
-            LoginScreen(
-                onLoginComplete = {
-                    navController.navigate(Routes.Home) {
-                        popUpTo(Routes.Login) {
-                            inclusive = true
-                        }
+            LoginScreen {
+                navController.navigate(Routes.Home) {
+                    popUpTo(Routes.Login) {
+                        inclusive = true
                     }
-                },
-            )
+                }
+            }
         }
         composable<Routes.Home> {
             HomeScreen(
@@ -40,8 +39,16 @@ fun NavigationRoot(
                             inclusive = true
                         }
                     }
+                },
+                onNavigateToFriend = {
+                    navController.navigate(Routes.Friend)
                 }
             )
+        }
+        composable<Routes.Friend> {
+            FriendScreen {
+                navController.popBackStack()
+            }
         }
     }
 }

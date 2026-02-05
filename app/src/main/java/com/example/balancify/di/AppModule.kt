@@ -1,16 +1,27 @@
 package com.example.balancify.di
 
+import com.example.balancify.data.data_source.friend.FriendRemoteDataSource
+import com.example.balancify.data.data_source.friend.FriendRemoteDataSourceImp
 import com.example.balancify.data.data_source.user.UserLocalDataSource
 import com.example.balancify.data.data_source.user.UserLocalDataSourceImp
 import com.example.balancify.data.data_source.user.UserRemoteDataSource
 import com.example.balancify.data.data_source.user.UserRemoteDataSourceImp
+import com.example.balancify.data.repository.FriendRepositoryImp
 import com.example.balancify.data.repository.UserRepositoryImp
+import com.example.balancify.domain.repository.FriendRepository
 import com.example.balancify.domain.repository.UserRepository
+import com.example.balancify.domain.use_case.friend.AcceptFriend
+import com.example.balancify.domain.use_case.friend.AddFriendByEmail
+import com.example.balancify.domain.use_case.friend.FriendUseCases
+import com.example.balancify.domain.use_case.friend.GetFriends
+import com.example.balancify.domain.use_case.friend.RejectFriend
+import com.example.balancify.domain.use_case.friend.Unfriend
 import com.example.balancify.domain.use_case.user.AddLocalUser
 import com.example.balancify.domain.use_case.user.AddUser
 import com.example.balancify.domain.use_case.user.GetLocalUser
 import com.example.balancify.domain.use_case.user.GetUser
 import com.example.balancify.domain.use_case.user.UserUseCases
+import com.example.balancify.presentation.friend.FriendViewModel
 import com.example.balancify.presentation.home.component.account.AccountViewModel
 import com.example.balancify.presentation.login.LoginViewModel
 import com.example.balancify.service.AuthService
@@ -38,6 +49,19 @@ val appModule = module {
         )
     }
 
+    singleOf(::FriendRemoteDataSourceImp) bind FriendRemoteDataSource::class
+    singleOf(::FriendRepositoryImp) bind FriendRepository::class
+    single {
+        FriendUseCases(
+            getFriends = GetFriends(get(), get()),
+            unfriend = Unfriend(get()),
+            acceptFriend = AcceptFriend(get()),
+            rejectFriend = RejectFriend(get()),
+            addFriendByEmail = AddFriendByEmail(get(), get())
+        )
+    }
+
     viewModelOf(::LoginViewModel)
     viewModelOf(::AccountViewModel)
+    viewModelOf(::FriendViewModel)
 }
