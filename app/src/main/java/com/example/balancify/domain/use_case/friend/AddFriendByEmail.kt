@@ -11,13 +11,13 @@ class AddFriendByEmail(
     private val repository: FriendRepository,
     private val userRepository: UserRepository,
 ) {
-    suspend operator fun invoke(email: String): RepositoryResult<Unit> {
+    suspend operator fun invoke(email: String): RepositoryResult<FriendModel> {
         val userResult = userRepository.getUserByEmail(email)
 
         if (userResult is RepositoryResult.Error) return userResult
 
         val foundUser = (userResult as RepositoryResult.Success).data
-            ?: return RepositoryResult.Error(Exception("User not found"))
+            ?: return RepositoryResult.Error(Exception("USER404"))
 
         val friendResult = repository.getFriend(foundUser.id)
 
@@ -35,12 +35,12 @@ class AddFriendByEmail(
         if (localUserResult is RepositoryResult.Error) return localUserResult
 
         val localUser = (localUserResult as RepositoryResult.Success).data
-            ?: return RepositoryResult.Error(Exception("User not found"))
+            ?: return RepositoryResult.Error(Exception("Error local user"))
 
         val friend = FriendModel(
             userId = foundUser.id,
             name = foundUser.name,
-            status = FriendStatus.REQUESTING,
+            status = FriendStatus.PENDING,
             nameTrigrams = foundUser.name.getTrigram(),
         )
 
@@ -51,6 +51,10 @@ class AddFriendByEmail(
             nameTrigrams = localUser.name.getTrigram(),
         )
 
-        return repository.addFriend(friend, youAsFriend)
+        val result = repository.addFriend(friend, youAsFriend)
+
+        if (result is RepositoryResult.Error) return result
+
+        return RepositoryResult.Success(friend.copy(user = foundUser))
     }
 }

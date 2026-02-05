@@ -31,7 +31,10 @@ import com.example.balancify.component.InfiniteLazyColumn
 import com.example.balancify.core.constant.BORDER_RADIUS_MD
 import com.example.balancify.core.constant.BORDER_RADIUS_SM
 import com.example.balancify.core.util.ObserveAsEvents
+import com.example.balancify.presentation.friend.component.AddFriendDialog
 import com.example.balancify.presentation.friend.component.FriendCard
+import com.example.balancify.presentation.friend.component.InviteLinkBottomSheet
+import com.example.balancify.presentation.friend.component.UnfriendConfirmationDialog
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +72,9 @@ fun FriendScreen(
                 )
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = { }) {
+                FloatingActionButton(onClick = {
+                    viewModel.onAction(FriendAction.OnAddFriendClick)
+                }) {
                     Icon(
                         Icons.Rounded.Add,
                         "New Expense"
@@ -97,32 +102,44 @@ fun FriendScreen(
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
                 ) { index, item ->
-
                     if (index != 0) Spacer(modifier = Modifier.height(2.dp))
+
                     FriendCard(
-                        shape = when (index) {
-                            0 -> RoundedCornerShape(
-                                topStart = BORDER_RADIUS_MD,
-                                topEnd = BORDER_RADIUS_MD,
-                                bottomStart = BORDER_RADIUS_SM,
-                                bottomEnd = BORDER_RADIUS_SM,
-                            )
+                        data = item,
+                        shape =
+                            if (state.value.friends.size == 1) {
+                                RoundedCornerShape(BORDER_RADIUS_MD)
+                            } else {
+                                when (index) {
+                                    0 -> RoundedCornerShape(
+                                        topStart = BORDER_RADIUS_MD,
+                                        topEnd = BORDER_RADIUS_MD,
+                                        bottomStart = BORDER_RADIUS_SM,
+                                        bottomEnd = BORDER_RADIUS_SM,
+                                    )
 
-                            state.value.friends.size - 1 -> {
-                                RoundedCornerShape(
-                                    topStart = BORDER_RADIUS_SM,
-                                    topEnd = BORDER_RADIUS_SM,
-                                    bottomStart = BORDER_RADIUS_MD,
-                                    bottomEnd = BORDER_RADIUS_MD,
-                                )
-                            }
+                                    state.value.friends.size - 1 -> {
+                                        RoundedCornerShape(
+                                            topStart = BORDER_RADIUS_SM,
+                                            topEnd = BORDER_RADIUS_SM,
+                                            bottomStart = BORDER_RADIUS_MD,
+                                            bottomEnd = BORDER_RADIUS_MD,
+                                        )
+                                    }
 
-                            else -> RoundedCornerShape(BORDER_RADIUS_SM)
-                        },
-                        data = item
+                                    else -> RoundedCornerShape(BORDER_RADIUS_SM)
+                                }
+                            },
                     )
                 }
             }
         }
+
+        if (state.value.unfriendConfirmationDialogVisible)
+            UnfriendConfirmationDialog()
+        if (state.value.addFriendDialogVisible)
+            AddFriendDialog()
+        if (state.value.inviteLinkBottomSheetVisible)
+            InviteLinkBottomSheet()
     }
 }

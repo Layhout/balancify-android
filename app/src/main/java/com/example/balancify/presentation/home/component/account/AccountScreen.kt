@@ -4,15 +4,19 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.balancify.BuildConfig
 import com.example.balancify.core.util.ObserveAsEvents
 import com.example.balancify.presentation.home.component.account.component.LogoutBottomSheet
 import com.example.balancify.presentation.home.component.account.component.LogoutCard
@@ -56,6 +60,15 @@ fun AccountScreen(
             OptionCard()
             Spacer(modifier = Modifier.height(16.dp))
             LogoutCard()
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                "v${BuildConfig.VERSION_NAME}",
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = MaterialTheme.colorScheme.outlineVariant
+                ),
+                modifier = Modifier.fillMaxWidth(),
+            )
 
             if (state.value.isLogoutBottomSheetVisible) {
                 LogoutBottomSheet()

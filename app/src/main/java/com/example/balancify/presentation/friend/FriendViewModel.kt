@@ -1,11 +1,17 @@
 package com.example.balancify.presentation.friend
 
+import android.content.ClipData
+import androidx.compose.ui.platform.toClipEntry
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.balancify.core.constant.FriendStatus
 import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.domain.use_case.friend.FriendUseCases
+import com.example.balancify.domain.use_case.user.UserUseCases
 import com.google.firebase.firestore.DocumentSnapshot
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
@@ -15,7 +21,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class FriendViewModel(
-    private val friendUseCases: FriendUseCases
+    private val friendUseCases: FriendUseCases,
+    private val userUseCases: UserUseCases,
 ) : ViewModel() {
     private val _state = MutableStateFlow(FriendState())
 
@@ -29,6 +36,25 @@ class FriendViewModel(
 
     private val _events = Channel<FriendEvent>()
     val events = _events.receiveAsFlow()
+
+    private suspend fun alertError(message: String?) {
+        _events.send(
+            FriendEvent.OnError(message ?: "Unknown error")
+        )
+    }
+
+    suspend fun getInviteLink(): String {
+        return viewModelScope.async {
+            val result = userUseCases.getLocalUser()
+            if (result is RepositoryResult.Success) {
+                return@async "https://balancify.vercel.app/app/invite/${result.data?.referralCode}"
+            } else {
+                alertError((result as RepositoryResult.Error).throwable.message)
+            }
+
+            return@async ""
+        }.await()
+    }
 
     private fun loadData(lastDoc: DocumentSnapshot? = null) {
         viewModelScope.launch {
@@ -46,13 +72,31 @@ class FriendViewModel(
                     )
                 }
             } else {
-                _events.send(
-                    FriendEvent.OnError(
-                        (result as RepositoryResult.Error).throwable.message ?: "Unknown error"
-                    )
-                )
+                alertError((result as RepositoryResult.Error).throwable.message)
             }
         }
+    }
+
+    private fun updateFriendList(id: String, status: FriendStatus) {
+        _state.update { friendState ->
+            val updatedFriends = friendState.friends.toMutableList()
+            val index = updatedFriends.indexOfFirst { it.userId == id }
+            updatedFriends[index] =
+                updatedFriends[index].copy(status = status)
+            friendState.copy(
+                enableAllAction = true,
+                friends = updatedFriends
+            )
+        }
+    }
+
+    private fun isValidEmail(): Boolean {
+        if (_state.value.email.isNotEmpty()) {
+            // Email is considered erroneous until it completely matches EMAIL_ADDRESS.
+            return android.util.Patterns.EMAIL_ADDRESS.matcher(_state.value.email).matches()
+        }
+
+        return false
     }
 
     fun onAction(action: FriendAction) {
@@ -70,7 +114,147 @@ class FriendViewModel(
                 loadData()
             }
 
-            FriendAction.OnAddFriendClick -> {
+            is FriendAction.OnAddFriendClick -> {
+                _state.update { it.copy(addFriendDialogVisible = true) }
+            }
+
+            is FriendAction.OnUnfriendClick -> {
+                _state.update {
+                    it.copy(
+                        focusingFriendId = action.id,
+                        unfriendConfirmationDialogVisible = true,
+                    )
+                }
+            }
+
+            is FriendAction.OnConfirmUnfriendClick -> {
+                viewModelScope.launch {
+                    _state.update { it.copy(enableAllAction = false) }
+                    val result = friendUseCases.unfriend(_state.value.focusingFriendId!!)
+                    if (result is RepositoryResult.Success) {
+                        _state.update { friendState ->
+                            friendState.copy(
+                                focusingFriendId = null,
+                                unfriendConfirmationDialogVisible = false,
+                                enableAllAction = true,
+                                friends = friendState.friends.filter {
+                                    it.userId != _state.value.focusingFriendId
+                                }
+                            )
+                        }
+                    } else {
+                        alertError((result as RepositoryResult.Error).throwable.message)
+                    }
+                }
+            }
+
+            is FriendAction.OnDismissUnfriendClick -> {
+                _state.update {
+                    it.copy(
+                        focusingFriendId = null,
+                        unfriendConfirmationDialogVisible = false,
+                    )
+                }
+            }
+
+            is FriendAction.OnAcceptFriendClick -> {
+                viewModelScope.launch {
+                    _state.update { it.copy(enableAllAction = false) }
+                    val result = friendUseCases.acceptFriend(action.id)
+                    if (result is RepositoryResult.Success) {
+                        updateFriendList(action.id, FriendStatus.ACCEPTED)
+                    } else {
+                        alertError((result as RepositoryResult.Error).throwable.message)
+                    }
+                }
+            }
+
+            is FriendAction.OnRejectFriendClick -> {
+                viewModelScope.launch {
+                    _state.update { it.copy(enableAllAction = false) }
+                    val result = friendUseCases.rejectFriend(action.id)
+                    if (result is RepositoryResult.Success) {
+                        updateFriendList(action.id, FriendStatus.REJECTED)
+                    } else {
+                        alertError((result as RepositoryResult.Error).throwable.message)
+                    }
+                }
+            }
+
+            is FriendAction.OnDismissAddFriendDialog -> {
+                _state.update {
+                    it.copy(
+                        addFriendDialogVisible = false,
+                        email = "",
+                    )
+                }
+            }
+
+            is FriendAction.OnEmailUpdate -> {
+                _state.update { it.copy(email = action.email, invalidEmail = false) }
+            }
+
+            is FriendAction.OnAddFriendConfirmClick -> {
+                if (!isValidEmail()) {
+                    _state.update { it.copy(invalidEmail = true) }
+                } else {
+                    viewModelScope.launch {
+                        val localUserResult = userUseCases.getLocalUser()
+                        if (localUserResult is RepositoryResult.Success && localUserResult.data?.email == _state.value.email) {
+                            alertError("You cannot add yourself as a friend.")
+                            return@launch
+                        }
+                        if (localUserResult is RepositoryResult.Error) {
+                            alertError(localUserResult.throwable.message)
+                            return@launch
+                        }
+
+                        _state.update { it.copy(enableAllAction = false) }
+                        val result = friendUseCases.addFriendByEmail(_state.value.email)
+                        if (result is RepositoryResult.Success) {
+                            _state.update {
+                                it.copy(
+                                    enableAllAction = true,
+                                    addFriendDialogVisible = false,
+                                    email = "",
+                                    friends = listOf(result.data) + it.friends
+                                )
+                            }
+                        } else if (result is RepositoryResult.Error && result.throwable.message == "USER404") {
+                            val inviteLink = getInviteLink()
+
+                            _state.update {
+                                it.copy(
+                                    enableAllAction = true,
+                                    addFriendDialogVisible = false,
+                                    email = "",
+                                    inviteLinkBottomSheetVisible = true,
+                                    inviteLink = inviteLink,
+                                )
+                            }
+                        } else {
+                            alertError((result as RepositoryResult.Error).throwable.message)
+                        }
+                    }
+                }
+            }
+
+            is FriendAction.OnDismissInviteLinkBottomSheet -> {
+                _state.update { it.copy(inviteLinkBottomSheetVisible = false) }
+            }
+
+            is FriendAction.OnInviteLinkClick -> {
+                viewModelScope.launch {
+                    val clipData =
+                        ClipData.newPlainText(
+                            "Invite Link",
+                            state.value.inviteLink
+                        )
+                    action.clipboard.setClipEntry(clipData.toClipEntry())
+                    _state.update { it.copy(isInviteLinkCopied = true) }
+                    delay(3000)
+                    _state.update { it.copy(isInviteLinkCopied = false) }
+                }
             }
         }
     }

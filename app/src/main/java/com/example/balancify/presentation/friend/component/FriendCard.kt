@@ -25,19 +25,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.component.Avatar
 import com.example.balancify.component.PillBox
 import com.example.balancify.core.constant.BORDER_RADIUS_MD
 import com.example.balancify.core.constant.FriendStatus
 import com.example.balancify.core.ext.darken
 import com.example.balancify.domain.model.FriendModel
+import com.example.balancify.presentation.friend.FriendAction
+import com.example.balancify.presentation.friend.FriendViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun FriendCard(
     modifier: Modifier = Modifier,
     shape: RoundedCornerShape = RoundedCornerShape(BORDER_RADIUS_MD),
-    data: FriendModel = FriendModel()
+    data: FriendModel = FriendModel(),
+    viewModel: FriendViewModel = koinViewModel(),
 ) {
+    val state = viewModel.state.collectAsStateWithLifecycle()
+
     Card(
         modifier = modifier
             .fillMaxWidth(),
@@ -67,8 +74,13 @@ fun FriendCard(
             Row {
                 when (data.status) {
                     FriendStatus.ACCEPTED -> IconButton(
+                        enabled = state.value.enableAllAction,
                         modifier = Modifier.size(38.dp),
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            viewModel.onAction(
+                                FriendAction.OnUnfriendClick(id = data.userId)
+                            )
+                        },
                     ) {
                         Icon(
                             Icons.Outlined.PersonRemove,
@@ -79,8 +91,13 @@ fun FriendCard(
 
                     FriendStatus.REQUESTING -> {
                         IconButton(
+                            enabled = state.value.enableAllAction,
                             modifier = Modifier.size(38.dp),
-                            onClick = { /*TODO*/ },
+                            onClick = {
+                                viewModel.onAction(
+                                    FriendAction.OnRejectFriendClick(id = data.userId)
+                                )
+                            },
                         ) {
                             Icon(
                                 Icons.Outlined.Close,
@@ -90,8 +107,13 @@ fun FriendCard(
                         }
                         Spacer(modifier = Modifier.width(4.dp))
                         IconButton(
+                            enabled = state.value.enableAllAction,
                             modifier = Modifier.size(38.dp),
-                            onClick = { /*TODO*/ },
+                            onClick = {
+                                viewModel.onAction(
+                                    FriendAction.OnAcceptFriendClick(id = data.userId)
+                                )
+                            },
                         ) {
                             Icon(
                                 Icons.Outlined.Check,

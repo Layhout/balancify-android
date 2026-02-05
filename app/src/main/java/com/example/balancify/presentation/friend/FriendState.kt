@@ -7,6 +7,15 @@ data class FriendState(
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val canLoadMore: Boolean = false,
+    val enableAllAction: Boolean = true,
+    val unfriendConfirmationDialogVisible: Boolean = false,
+    val addFriendDialogVisible: Boolean = false,
+    val invalidEmail: Boolean = false,
+    val inviteLinkBottomSheetVisible: Boolean = false,
+    val isInviteLinkCopied: Boolean = false,
+    val email: String = "",
+    val inviteLink: String = "",
     val friends: List<FriendModel> = emptyList(),
     val lastDoc: DocumentSnapshot? = null,
+    val focusingFriendId: String? = null
 )
