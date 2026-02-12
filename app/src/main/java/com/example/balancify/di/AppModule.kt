@@ -22,6 +22,8 @@ import com.example.balancify.domain.use_case.user.GetLocalUser
 import com.example.balancify.domain.use_case.user.GetUser
 import com.example.balancify.domain.use_case.user.UserUseCases
 import com.example.balancify.presentation.friend.FriendViewModel
+import com.example.balancify.presentation.group_form.GroupFormViewModel
+import com.example.balancify.presentation.home.HomeViewModel
 import com.example.balancify.presentation.home.component.account.AccountViewModel
 import com.example.balancify.presentation.login.LoginViewModel
 import com.example.balancify.service.AuthService
@@ -62,6 +64,8 @@ val appModule = module {
     }
 
     viewModelOf(::LoginViewModel)
+    viewModelOf(::HomeViewModel)
     viewModelOf(::AccountViewModel)
     viewModelOf(::FriendViewModel)
+    viewModelOf(::GroupFormViewModel)
 }

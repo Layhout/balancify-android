@@ -10,9 +10,7 @@ import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.DataUsage
 import androidx.compose.material.icons.outlined.Groups
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
@@ -31,6 +29,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.balancify.core.constant.AppScreen
+import com.example.balancify.presentation.home.component.FabMenu
 import com.example.balancify.presentation.home.component.account.AccountScreen
 import com.example.balancify.presentation.home.component.dashboard.DashboardScreen
 import com.example.balancify.presentation.home.component.expense.ExpenseScreen
@@ -50,7 +49,11 @@ enum class NavDestination(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onLogoutComplete: () -> Unit, onNavigateToFriend: () -> Unit) {
+fun HomeScreen(
+    onLogoutComplete: () -> Unit,
+    onNavigateToFriend: () -> Unit,
+    onNavigateToGroupFrom: () -> Unit,
+) {
     val navController = rememberNavController()
     val startDestination = NavDestination.DASHBOARD
     var selectedRoute by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
@@ -88,13 +91,11 @@ fun HomeScreen(onLogoutComplete: () -> Unit, onNavigateToFriend: () -> Unit) {
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { }) {
-                Icon(
-                    Icons.Rounded.Add,
-                    "New Expense"
-                )
-            }
-        }) { innerPadding ->
+            FabMenu(
+                onCreateGroupClick = onNavigateToGroupFrom
+            )
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)

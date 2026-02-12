@@ -65,6 +65,7 @@ fun AddFriendDialog(
                     onValueChange = { viewModel.onAction(FriendAction.OnEmailUpdate(it)) },
                     modifier = Modifier.fillMaxWidth(),
                     isError = state.value.invalidEmail,
+                    shape = RoundedCornerShape(BORDER_RADIUS_MD),
                     supportingText = {
                         if (state.value.invalidEmail) {
                             Text("Invalid Email.")

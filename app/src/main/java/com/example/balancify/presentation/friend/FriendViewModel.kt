@@ -37,8 +37,8 @@ class FriendViewModel(
     private val _events = Channel<FriendEvent>()
     val events = _events.receiveAsFlow()
 
-    private suspend fun alertError(message: String?) {
-        _events.send(
+    private fun alertError(message: String?) {
+        _events.trySend(
             FriendEvent.OnError(message ?: "Unknown error")
         )
     }
@@ -254,6 +254,12 @@ class FriendViewModel(
                     _state.update { it.copy(isInviteLinkCopied = true) }
                     delay(3000)
                     _state.update { it.copy(isInviteLinkCopied = false) }
+                }
+            }
+
+            is FriendAction.OnShareLinkClick -> {
+                viewModelScope.launch {
+                    _events.send(FriendEvent.OnShareLinkClicked)
                 }
             }
         }

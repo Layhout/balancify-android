@@ -1,5 +1,6 @@
 package com.example.balancify.presentation.friend
 
-interface FriendEvent {
+sealed interface FriendEvent {
     data class OnError(val message: String) : FriendEvent
+    data object OnShareLinkClicked : FriendEvent
 }

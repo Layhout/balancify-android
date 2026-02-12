@@ -9,12 +9,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.PersonRemove
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,8 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.component.Avatar
+import com.example.balancify.component.CardOrder
 import com.example.balancify.component.PillBox
-import com.example.balancify.core.constant.BORDER_RADIUS_MD
+import com.example.balancify.component.StyledCard
 import com.example.balancify.core.constant.FriendStatus
 import com.example.balancify.core.ext.darken
 import com.example.balancify.domain.model.FriendModel
@@ -39,16 +38,16 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun FriendCard(
     modifier: Modifier = Modifier,
-    shape: RoundedCornerShape = RoundedCornerShape(BORDER_RADIUS_MD),
     data: FriendModel = FriendModel(),
     viewModel: FriendViewModel = koinViewModel(),
+    order: CardOrder = CardOrder.ALONE,
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    Card(
+    StyledCard(
+        order = order,
         modifier = modifier
             .fillMaxWidth(),
-        shape = shape
     ) {
         Row(
             modifier = Modifier

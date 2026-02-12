@@ -1,5 +1,6 @@
 package com.example.balancify.presentation.home.component.account
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.BuildConfig
 import com.example.balancify.core.util.ObserveAsEvents
@@ -45,6 +47,12 @@ fun AccountScreen(
 
             is AccountEvent.OnNavigateToFriend -> {
                 onNavigateToFriend()
+            }
+
+            is AccountEvent.OnNavigateToDevBlog -> {
+                val webIntent =
+                    Intent(Intent.ACTION_VIEW, "https://balancify.vercel.app/blogs".toUri())
+                context.startActivity(webIntent)
             }
         }
     }

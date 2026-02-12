@@ -54,6 +54,10 @@ class AccountViewModel(
             is AccountAction.OnFriendClick -> {
                 viewModelScope.launch { _events.send(AccountEvent.OnNavigateToFriend) }
             }
+
+            is AccountAction.OnDevBlogClick -> {
+                viewModelScope.launch { _events.send(AccountEvent.OnNavigateToDevBlog) }
+            }
         }
     }
 
