@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 
 class GroupFormViewModel : ViewModel() {
     private val _state = MutableStateFlow(GroupFormState())
@@ -24,6 +25,40 @@ class GroupFormViewModel : ViewModel() {
         when (action) {
             is GroupFormAction.OnAddMemberClick -> {
                 _events.trySend(GroupFormEvent.OnAddMemberClicked)
+            }
+
+            is GroupFormAction.OnAddMember -> {
+                _state.update {
+                    it.copy(
+                        members = it.members + action.member
+                    )
+                }
+            }
+
+            is GroupFormAction.OnRemoveMemberClick -> {
+                _state.update {
+                    it.copy(
+                        members = it.members.filter { member ->
+                            member.userId != action.id
+                        }
+                    )
+                }
+            }
+
+            is GroupFormAction.OnNameChange -> {
+                _state.update {
+                    it.copy(
+                        name = action.name
+                    )
+                }
+            }
+
+            is GroupFormAction.OnDescriptionChange -> {
+                _state.update {
+                    it.copy(
+                        description = action.description
+                    )
+                }
             }
         }
     }

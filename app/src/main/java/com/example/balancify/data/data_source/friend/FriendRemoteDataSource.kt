@@ -1,11 +1,15 @@
 package com.example.balancify.data.data_source.friend
 
+import com.example.balancify.core.constant.PaginatedData
 import com.example.balancify.domain.model.FriendModel
-import com.example.balancify.domain.model.PaginatedFriendsModel
 import com.google.firebase.firestore.DocumentSnapshot
 
 interface FriendRemoteDataSource {
-    suspend fun getFriends(lastDoc: DocumentSnapshot?): PaginatedFriendsModel
+    suspend fun getFriends(
+        lastDoc: DocumentSnapshot?,
+        search: String?,
+    ): PaginatedData<FriendModel>
+
     suspend fun unfriend(id: String)
     suspend fun acceptFriend(id: String)
     suspend fun rejectFriend(id: String)

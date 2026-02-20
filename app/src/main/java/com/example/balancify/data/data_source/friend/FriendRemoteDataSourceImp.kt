@@ -4,8 +4,10 @@ import com.example.balancify.core.constant.BatchDeleteItem
 import com.example.balancify.core.constant.BatchSetItem
 import com.example.balancify.core.constant.BatchUpdateItem
 import com.example.balancify.core.constant.FriendStatus
+import com.example.balancify.core.constant.ITEMS_LIMIT
+import com.example.balancify.core.constant.PaginatedData
+import com.example.balancify.core.ext.getTrigram
 import com.example.balancify.domain.model.FriendModel
-import com.example.balancify.domain.model.PaginatedFriendsModel
 import com.example.balancify.service.AuthService
 import com.example.balancify.service.DatabaseService
 import com.google.firebase.firestore.DocumentSnapshot
@@ -19,8 +21,15 @@ class FriendRemoteDataSourceImp(
         return "friends/${id}/data"
     }
 
-    override suspend fun getFriends(lastDoc: DocumentSnapshot?): PaginatedFriendsModel {
-        val result = db.getPage(buildCollectionPath(), 20, lastDoc, build = {
+    override suspend fun getFriends(
+        lastDoc: DocumentSnapshot?,
+        search: String?
+    ): PaginatedData<FriendModel> {
+        val result = db.getPage(buildCollectionPath(), ITEMS_LIMIT, lastDoc, build = {
+            if (!search.isNullOrBlank()) whereArrayContainsAny(
+                "nameTrigrams",
+                search.getTrigram()
+            )
             whereNotEqualTo("status", FriendStatus.REJECTED)
         })
 
@@ -30,8 +39,8 @@ class FriendRemoteDataSourceImp(
 
         val canLoadMore = result.canLoadMore
 
-        return PaginatedFriendsModel(
-            friends = friends,
+        return PaginatedData(
+            data = friends,
             canLoadMore = canLoadMore,
             lastDoc = result.snapshot.documents.lastOrNull()
         )

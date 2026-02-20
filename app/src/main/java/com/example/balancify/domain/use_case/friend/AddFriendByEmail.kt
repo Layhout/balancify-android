@@ -14,16 +14,16 @@ class AddFriendByEmail(
     suspend operator fun invoke(email: String): RepositoryResult<FriendModel> {
         val userResult = userRepository.getUserByEmail(email)
 
-        if (userResult is RepositoryResult.Error) return userResult
+        if (userResult !is RepositoryResult.Success) return userResult as RepositoryResult.Error
 
-        val foundUser = (userResult as RepositoryResult.Success).data
+        val foundUser = userResult.data
             ?: return RepositoryResult.Error(Exception("USER404"))
 
         val friendResult = repository.getFriend(foundUser.id)
 
-        if (friendResult is RepositoryResult.Error) return friendResult
+        if (friendResult !is RepositoryResult.Success) return friendResult as RepositoryResult.Error
 
-        val foundFriend = (friendResult as RepositoryResult.Success).data
+        val foundFriend = friendResult.data
 
         if (foundFriend != null && foundFriend.status == FriendStatus.ACCEPTED)
             return RepositoryResult.Error(
@@ -32,9 +32,9 @@ class AddFriendByEmail(
 
         val localUserResult = userRepository.getLocalUser()
 
-        if (localUserResult is RepositoryResult.Error) return localUserResult
+        if (localUserResult !is RepositoryResult.Success) return localUserResult as RepositoryResult.Error
 
-        val localUser = (localUserResult as RepositoryResult.Success).data
+        val localUser = localUserResult.data
             ?: return RepositoryResult.Error(Exception("Error local user"))
 
         val friend = FriendModel(
@@ -53,8 +53,8 @@ class AddFriendByEmail(
 
         val result = repository.addFriend(friend, youAsFriend)
 
-        if (result is RepositoryResult.Error) return result
-
+        if (result !is RepositoryResult.Success) return result as RepositoryResult.Error
+        
         return RepositoryResult.Success(friend.copy(user = foundUser))
     }
 }

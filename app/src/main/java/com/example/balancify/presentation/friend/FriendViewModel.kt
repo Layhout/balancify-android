@@ -66,9 +66,9 @@ class FriendViewModel(
                     it.copy(
                         isLoading = false,
                         isRefreshing = false,
-                        friends = if (lastDoc != null) it.friends + result.data.friends else result.data.friends,
+                        friends = if (lastDoc != null) it.friends + result.data.data else result.data.data,
                         canLoadMore = result.data.canLoadMore,
-                        lastDoc = it.lastDoc,
+                        lastDoc = result.data.lastDoc,
                     )
                 }
             } else {
