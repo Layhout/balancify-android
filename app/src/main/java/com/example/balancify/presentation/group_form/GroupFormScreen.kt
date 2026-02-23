@@ -18,14 +18,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.balancify.MainEvent
-import com.example.balancify.MainViewModel
 import com.example.balancify.component.AppBar
 import com.example.balancify.component.CardOrder
 import com.example.balancify.core.constant.SearchResult
@@ -39,13 +38,21 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun GroupFormScreen(
     viewModel: GroupFormViewModel = koinViewModel(),
-    mainViewModel: MainViewModel = koinViewModel(),
+    onSearchResultFound: () -> SearchResult.Friend? = { null },
     onNavigateToSearchFriend: () -> Unit,
     onBackClick: () -> Unit
 ) {
     val localFocusManager = LocalFocusManager.current
     val context = LocalContext.current
-    val state = viewModel.state.collectAsStateWithLifecycle()
+    val state = viewModel.state.collectAsState()
+
+    val searchResult = onSearchResultFound()
+
+    LaunchedEffect(searchResult?.data?.userId) {
+        searchResult?.data?.let {
+            viewModel.onAction(GroupFormAction.OnAddMember(it))
+        }
+    }
 
     ObserveAsEvents(viewModel.events) {
         when (it) {
@@ -56,17 +63,9 @@ fun GroupFormScreen(
             is GroupFormEvent.OnAddMemberClicked -> {
                 onNavigateToSearchFriend()
             }
-        }
-    }
 
-    ObserveAsEvents(mainViewModel.events) {
-        when (it) {
-            is MainEvent.OnSearchResult -> {
-                if (it.result is SearchResult.Group) return@ObserveAsEvents
-
-                (it.result as SearchResult.Friend).data?.let { friend ->
-                    viewModel.onAction(GroupFormAction.OnAddMember(friend))
-                }
+            is GroupFormEvent.OnCreateSuccess -> {
+                onBackClick()
             }
         }
     }
@@ -105,11 +104,12 @@ fun GroupFormScreen(
                         if (index != 0) Spacer(modifier = Modifier.height(2.dp))
                         MemberCard(
                             item = item,
-                            order = when (index) {
-                                0 -> CardOrder.FIRST
-                                state.value.members.size - 1 -> CardOrder.LAST
-                                else -> CardOrder.MIDDLE
-                            },
+                            order = if (state.value.members.size == 1) CardOrder.ALONE else
+                                when (index) {
+                                    0 -> CardOrder.FIRST
+                                    state.value.members.size - 1 -> CardOrder.LAST
+                                    else -> CardOrder.MIDDLE
+                                },
                         )
                     }
                 }

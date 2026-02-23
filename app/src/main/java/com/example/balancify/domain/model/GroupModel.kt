@@ -1,24 +1,18 @@
 package com.example.balancify.domain.model
 
-import android.os.Parcelable
 import com.example.balancify.core.util.DateAsLongSerializer
-import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.ServerTimestamp
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import java.util.Date
 
 @Serializable
-@Parcelize
-data class UserModel(
-    @DocumentId val documentId: String = "",
+data class GroupModel(
     val id: String = "",
-    val email: String = "",
-    val imageUrl: String = "",
     val name: String = "",
-    val notiToken: String = "",
-    val profileBgColor: String = "",
-    val referralCode: String = "",
+    val description: String = "",
     @Serializable(with = DateAsLongSerializer::class)
     @ServerTimestamp val createdAt: Date? = null,
-) : Parcelable
+    val createdBy: String = "",
+    val members: List<UserModel> = emptyList(),
+    val memberIds: List<String> = emptyList(),
+)

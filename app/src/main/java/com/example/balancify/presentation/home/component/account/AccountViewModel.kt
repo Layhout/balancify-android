@@ -2,7 +2,6 @@ package com.example.balancify.presentation.home.component.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.domain.use_case.user.UserUseCases
 import com.example.balancify.service.AuthService
 import kotlinx.coroutines.channels.Channel
@@ -65,8 +64,8 @@ class AccountViewModel(
     private fun loadData() {
         viewModelScope.launch {
             val result = userUseCases.getLocalUser()
-            if (result is RepositoryResult.Success) {
-                _state.update { it.copy(user = result.data) }
+            if (result.isSuccess) {
+                _state.update { it.copy(user = result.getOrNull()) }
             }
         }
     }

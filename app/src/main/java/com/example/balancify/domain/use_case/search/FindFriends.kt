@@ -1,7 +1,6 @@
 package com.example.balancify.domain.use_case.search
 
 import com.example.balancify.core.constant.PaginatedData
-import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.domain.model.FoundItemData
 import com.example.balancify.domain.model.FoundItemModel
 import com.example.balancify.domain.repository.FriendRepository
@@ -15,28 +14,40 @@ class FindFriends(
     suspend operator fun invoke(
         lastDoc: DocumentSnapshot?,
         search: String?,
-    ): RepositoryResult<PaginatedData<FoundItemModel>> {
+    ): Result<PaginatedData<FoundItemModel>> {
+        if (search.isNullOrBlank()) return Result.failure(Exception("Search cannot be empty"))
+
+        if (search.length < 3) return Result.failure(Exception("Search must be at least 3 characters"))
+
         val friendResult = friendRepository.getFriends(lastDoc, search)
 
-        if (friendResult !is RepositoryResult.Success) return friendResult as RepositoryResult.Error
+        if (friendResult.isFailure) return Result.failure(
+            friendResult.exceptionOrNull() ?: Exception(
+                "Unknown error FindFriends use case"
+            )
+        )
 
-        val enrichedResult = friendEnricher(friendResult.data.data)
+        val enrichedResult = friendEnricher(friendResult.getOrNull()?.data ?: emptyList())
 
-        if (enrichedResult !is RepositoryResult.Success) return enrichedResult as RepositoryResult.Error
+        if (enrichedResult.isFailure) return Result.failure(
+            enrichedResult.exceptionOrNull() ?: Exception(
+                "Unknown error FindFriends use case"
+            )
+        )
 
         val result = PaginatedData(
-            data = enrichedResult.data.map {
+            data = enrichedResult.getOrNull()?.map {
                 FoundItemModel(
                     id = it.userId,
                     imageUrl = it.user?.imageUrl ?: "",
                     name = it.name,
                     data = FoundItemData.Friend(it),
                 )
-            },
-            canLoadMore = friendResult.data.canLoadMore,
-            lastDoc = friendResult.data.lastDoc
+            } ?: emptyList(),
+            canLoadMore = friendResult.getOrNull()?.canLoadMore ?: false,
+            lastDoc = friendResult.getOrNull()?.lastDoc
         )
 
-        return RepositoryResult.Success(result)
+        return Result.success(result)
     }
 }

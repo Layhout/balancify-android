@@ -78,15 +78,23 @@ class DatabaseService {
         collection: String,
         pageSize: Long,
         lastDoc: DocumentSnapshot? = null,
-        build: Query.() -> Query = { this }
+        queryBuilder: (Query) -> Query = { it }
     ): PageResult {
-        var query = collectionRef(collection).build().limit(pageSize + 1)
-        if (lastDoc != null) query = query.startAfter(lastDoc)
+        var query = queryBuilder(
+            collectionRef(collection).limit(pageSize + 1)
+        )
 
+        lastDoc?.let {
+            query = query.startAfter(it)
+        }
+
+        val snapshot = query.get().await()
+
+        val canLoadMore = snapshot.size() > pageSize
 
         return PageResult(
-            snapshot = query.get().await(),
-            canLoadMore = query.get().await().size() > pageSize + 1
+            snapshot = snapshot,
+            canLoadMore = canLoadMore
         )
     }
 

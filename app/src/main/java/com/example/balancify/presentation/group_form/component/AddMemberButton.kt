@@ -1,10 +1,9 @@
 package com.example.balancify.presentation.group_form.component
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PersonAdd
@@ -25,8 +24,10 @@ import org.koin.androidx.compose.koinViewModel
 fun AddMemberButton(
     viewModel: GroupFormViewModel = koinViewModel()
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             "Members",
@@ -34,20 +35,14 @@ fun AddMemberButton(
                 fontWeight = FontWeight.SemiBold
             )
         )
-        Spacer(modifier = Modifier.height(4.dp))
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            TextButton(
-                onClick = {
-                    viewModel.onAction(GroupFormAction.OnAddMemberClick)
-                }
-            ) {
-                Icon((Icons.Outlined.PersonAdd), contentDescription = null)
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("Add Members")
+        TextButton(
+            onClick = {
+                viewModel.onAction(GroupFormAction.OnAddMemberClick)
             }
+        ) {
+            Icon((Icons.Outlined.PersonAdd), contentDescription = null)
+            Spacer(modifier = Modifier.width(6.dp))
+            Text("Add Members")
         }
     }
 }

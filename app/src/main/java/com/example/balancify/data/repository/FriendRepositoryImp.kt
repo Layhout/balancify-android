@@ -1,7 +1,6 @@
 package com.example.balancify.data.repository
 
 import com.example.balancify.core.constant.PaginatedData
-import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.data.data_source.friend.FriendRemoteDataSource
 import com.example.balancify.domain.model.FriendModel
 import com.example.balancify.domain.repository.FriendRepository
@@ -13,60 +12,60 @@ class FriendRepositoryImp(
     override suspend fun getFriends(
         lastDoc: DocumentSnapshot?,
         search: String?,
-    ): RepositoryResult<PaginatedData<FriendModel>> {
+    ): Result<PaginatedData<FriendModel>> {
         return try {
             val result = remoteDataSource.getFriends(lastDoc, search)
-            RepositoryResult.Success(result)
+            Result.success(result)
         } catch (e: Exception) {
-            RepositoryResult.Error(e)
+            Result.failure(e)
         }
     }
 
-    override suspend fun unfriend(id: String): RepositoryResult<Unit> {
+    override suspend fun unfriend(id: String): Result<Unit> {
         return try {
             remoteDataSource.unfriend(id)
-            RepositoryResult.Success(Unit)
+            Result.success(Unit)
         } catch (e: Exception) {
-            RepositoryResult.Error(e)
+            Result.failure(e)
         }
     }
 
-    override suspend fun acceptFriend(id: String): RepositoryResult<Unit> {
+    override suspend fun acceptFriend(id: String): Result<Unit> {
         return try {
             remoteDataSource.acceptFriend(id)
-            RepositoryResult.Success(Unit)
+            Result.success(Unit)
         } catch (e: Exception) {
-            RepositoryResult.Error(e)
+            Result.failure(e)
         }
     }
 
-    override suspend fun rejectFriend(id: String): RepositoryResult<Unit> {
+    override suspend fun rejectFriend(id: String): Result<Unit> {
         return try {
             remoteDataSource.rejectFriend(id)
-            RepositoryResult.Success(Unit)
+            Result.success(Unit)
         } catch (e: Exception) {
-            RepositoryResult.Error(e)
+            Result.failure(e)
         }
     }
 
     override suspend fun addFriend(
         friend: FriendModel,
         youAsFriend: FriendModel
-    ): RepositoryResult<Unit> {
+    ): Result<Unit> {
         return try {
             remoteDataSource.addFriend(friend, youAsFriend)
-            RepositoryResult.Success(Unit)
+            Result.success(Unit)
         } catch (e: Exception) {
-            RepositoryResult.Error(e)
+            Result.failure(e)
         }
     }
 
-    override suspend fun getFriend(id: String): RepositoryResult<FriendModel?> {
+    override suspend fun getFriend(id: String): Result<FriendModel?> {
         return try {
             val result = remoteDataSource.getFriend(id)
-            RepositoryResult.Success(result)
+            Result.success(result)
         } catch (e: Exception) {
-            RepositoryResult.Error(e)
+            Result.failure(e)
         }
     }
 }

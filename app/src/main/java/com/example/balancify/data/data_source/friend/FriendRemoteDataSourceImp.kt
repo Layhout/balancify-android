@@ -11,6 +11,7 @@ import com.example.balancify.domain.model.FriendModel
 import com.example.balancify.service.AuthService
 import com.example.balancify.service.DatabaseService
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
 
 class FriendRemoteDataSourceImp(
@@ -25,13 +26,22 @@ class FriendRemoteDataSourceImp(
         lastDoc: DocumentSnapshot?,
         search: String?
     ): PaginatedData<FriendModel> {
-        val result = db.getPage(buildCollectionPath(), ITEMS_LIMIT, lastDoc, build = {
-            if (!search.isNullOrBlank()) whereArrayContainsAny(
-                "nameTrigrams",
-                search.getTrigram()
-            )
-            whereNotEqualTo("status", FriendStatus.REJECTED)
-        })
+        val result = db.getPage(
+            buildCollectionPath(), ITEMS_LIMIT, lastDoc,
+            queryBuilder = {
+                var query = it
+
+                if (!search.isNullOrBlank()) {
+                    query = query.whereArrayContainsAny(
+                        "nameTrigrams",
+                        search.getTrigram()
+                    )
+                }
+
+                query.whereNotEqualTo("status", FriendStatus.REJECTED)
+                    .orderBy("createdAt", Query.Direction.DESCENDING)
+            }
+        )
 
         val friends = result.snapshot.documents.mapNotNull {
             it.toObject<FriendModel>()

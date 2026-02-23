@@ -1,6 +1,5 @@
 package com.example.balancify.domain.service
 
-import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.domain.model.FriendModel
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.domain.repository.UserRepository
@@ -8,15 +7,19 @@ import com.example.balancify.domain.repository.UserRepository
 class FriendEnricher(
     private val userRepository: UserRepository
 ) {
-    suspend operator fun invoke(friends: List<FriendModel>): RepositoryResult<List<FriendModel>> {
+    suspend operator fun invoke(friends: List<FriendModel>): Result<List<FriendModel>> {
         val userIds = friends.map { it.userId }
 
         val userResult = userRepository.getUserByIds(userIds)
-        if (userResult !is RepositoryResult.Success) return userResult as RepositoryResult.Error
+        if (userResult.isFailure) return Result.failure(
+            userResult.exceptionOrNull() ?: Exception(
+                "Unknown error at FriendEnricher use case"
+            )
+        )
 
-        val usersById = userResult.data.associateBy { it.documentId }
+        val usersById = userResult.getOrNull()?.associateBy { it.documentId } ?: emptyMap()
 
-        return RepositoryResult.Success(
+        return Result.success(
             friends.map { friend ->
                 friend.copy(
                     user = usersById[friend.userId] ?: UserModel()

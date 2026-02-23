@@ -1,7 +1,6 @@
 package com.example.balancify.domain.use_case.friend
 
 import com.example.balancify.core.constant.PaginatedData
-import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.domain.model.FriendModel
 import com.example.balancify.domain.repository.FriendRepository
 import com.example.balancify.domain.service.FriendEnricher
@@ -13,17 +12,25 @@ class GetFriends(
 ) {
     suspend operator fun invoke(
         lastDoc: DocumentSnapshot?,
-    ): RepositoryResult<PaginatedData<FriendModel>> {
+    ): Result<PaginatedData<FriendModel>> {
         val result = repository.getFriends(lastDoc)
 
-        if (result !is RepositoryResult.Success) return result
+        if (result.isFailure) return result
 
-        val enrichedResult = friendEnricher(result.data.data)
+        val enrichedResult = friendEnricher(result.getOrNull()?.data ?: emptyList())
 
-        if (enrichedResult !is RepositoryResult.Success) return enrichedResult as RepositoryResult.Error
+        if (enrichedResult.isFailure) return Result.failure(
+            enrichedResult.exceptionOrNull() ?: Exception(
+                "Unknown error GetFriends use case"
+            )
+        )
 
-        return RepositoryResult.Success(
-            result.data.copy(data = enrichedResult.data)
+        return Result.success(
+            result.getOrNull()?.copy(
+                data = enrichedResult.getOrNull()
+                    ?: emptyList()
+            )
+                ?: PaginatedData()
         )
     }
 }

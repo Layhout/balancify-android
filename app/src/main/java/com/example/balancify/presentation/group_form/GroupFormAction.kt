@@ -8,4 +8,5 @@ sealed interface GroupFormAction {
     data class OnRemoveMemberClick(val id: String) : GroupFormAction
     data class OnNameChange(val name: String) : GroupFormAction
     data class OnDescriptionChange(val description: String) : GroupFormAction
+    data object OnCreateClick : GroupFormAction
 }

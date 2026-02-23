@@ -2,7 +2,6 @@ package com.example.balancify.presentation.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.domain.use_case.search.SearchUseCases
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.channels.Channel
@@ -14,7 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SearchViewModel(
-    val searchUseCases: SearchUseCases
+    private val searchUseCases: SearchUseCases
 ) : ViewModel() {
     private val _state = MutableStateFlow(SearchState())
 
@@ -38,18 +37,20 @@ class SearchViewModel(
             _state.update { it.copy(isLoading = true) }
             val result = searchUseCases.findFriends(lastDoc, _state.value.searchTerm)
 
-            if (result is RepositoryResult.Success) {
+            if (result.isSuccess) {
                 _state.update {
                     it.copy(
                         isLoading = false,
                         isRefreshing = false,
-                        foundItems = if (lastDoc != null) it.foundItems + result.data.data else result.data.data,
-                        canLoadMore = result.data.canLoadMore,
-                        lastDoc = result.data.lastDoc,
+                        foundItems = if (lastDoc != null) it.foundItems + (result.getOrNull()?.data
+                            ?: emptyList())
+                        else (result.getOrNull()?.data ?: emptyList()),
+                        canLoadMore = result.getOrNull()?.canLoadMore ?: false,
+                        lastDoc = result.getOrNull()?.lastDoc,
                     )
                 }
             } else {
-                alertError((result as RepositoryResult.Error).throwable.message)
+                alertError(result.exceptionOrNull()?.message)
             }
         }
     }
@@ -63,6 +64,7 @@ class SearchViewModel(
                         searchTerm = action.searchTerm,
                     )
                 }
+                loadData()
             }
 
             is SearchAction.OnSearchTypeReceive -> {
@@ -82,6 +84,10 @@ class SearchViewModel(
 
             is SearchAction.OnLoadMore -> {
                 loadData(_state.value.lastDoc)
+            }
+
+            is SearchAction.OnItemClick -> {
+
             }
         }
     }

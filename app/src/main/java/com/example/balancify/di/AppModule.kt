@@ -3,13 +3,17 @@ package com.example.balancify.di
 import com.example.balancify.MainViewModel
 import com.example.balancify.data.data_source.friend.FriendRemoteDataSource
 import com.example.balancify.data.data_source.friend.FriendRemoteDataSourceImp
+import com.example.balancify.data.data_source.group.GroupRemoteDataSource
+import com.example.balancify.data.data_source.group.GroupRemoteDataSourceImp
 import com.example.balancify.data.data_source.user.UserLocalDataSource
 import com.example.balancify.data.data_source.user.UserLocalDataSourceImp
 import com.example.balancify.data.data_source.user.UserRemoteDataSource
 import com.example.balancify.data.data_source.user.UserRemoteDataSourceImp
 import com.example.balancify.data.repository.FriendRepositoryImp
+import com.example.balancify.data.repository.GroupRepositoryImp
 import com.example.balancify.data.repository.UserRepositoryImp
 import com.example.balancify.domain.repository.FriendRepository
+import com.example.balancify.domain.repository.GroupRepository
 import com.example.balancify.domain.repository.UserRepository
 import com.example.balancify.domain.service.FriendEnricher
 import com.example.balancify.domain.use_case.friend.AcceptFriend
@@ -18,6 +22,8 @@ import com.example.balancify.domain.use_case.friend.FriendUseCases
 import com.example.balancify.domain.use_case.friend.GetFriends
 import com.example.balancify.domain.use_case.friend.RejectFriend
 import com.example.balancify.domain.use_case.friend.Unfriend
+import com.example.balancify.domain.use_case.group.CreateGroup
+import com.example.balancify.domain.use_case.group.GroupUseCases
 import com.example.balancify.domain.use_case.search.FindFriends
 import com.example.balancify.domain.use_case.search.SearchUseCases
 import com.example.balancify.domain.use_case.user.AddLocalUser
@@ -51,6 +57,9 @@ val appModule = module {
     singleOf(::UserRepositoryImp) bind UserRepository::class
     singleOf(::FriendRemoteDataSourceImp) bind FriendRemoteDataSource::class
     singleOf(::FriendRepositoryImp) bind FriendRepository::class
+    singleOf(::GroupRemoteDataSourceImp) bind GroupRemoteDataSource::class
+    singleOf(::GroupRepositoryImp) bind GroupRepository::class
+
 
     /* Use Case Services */
     singleOf(::FriendEnricher)
@@ -76,6 +85,11 @@ val appModule = module {
     single {
         SearchUseCases(
             findFriends = FindFriends(get(), get())
+        )
+    }
+    single {
+        GroupUseCases(
+            createGroup = CreateGroup(get(), get())
         )
     }
 

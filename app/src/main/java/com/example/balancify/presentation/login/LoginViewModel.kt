@@ -2,7 +2,6 @@ package com.example.balancify.presentation.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.domain.repository.UserRepository
 import com.example.balancify.service.AuthResult
@@ -62,8 +61,8 @@ class LoginViewModel(
         if (user == null) {
             val result = userRepository.getUser(result.userId ?: "")
 
-            if (result is RepositoryResult.Success) {
-                user = result.data
+            if (result.isSuccess) {
+                user = result.getOrNull()
             }
         }
 

@@ -1,6 +1,5 @@
 package com.example.balancify.data.repository
 
-import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.data.data_source.user.UserLocalDataSource
 import com.example.balancify.data.data_source.user.UserRemoteDataSource
 import com.example.balancify.domain.model.UserModel
@@ -10,57 +9,57 @@ class UserRepositoryImp(
     private val remoteDataSource: UserRemoteDataSource,
     private val localDataSource: UserLocalDataSource
 ) : UserRepository {
-    override suspend fun getUser(id: String): RepositoryResult<UserModel?> {
+    override suspend fun getUser(id: String): Result<UserModel?> {
         return try {
             val result = remoteDataSource.getUser(id)
-            RepositoryResult.Success(result)
+            Result.success(result)
         } catch (e: Exception) {
-            RepositoryResult.Error(e)
+            Result.failure(e)
         }
     }
 
-    override suspend fun addUser(user: UserModel): RepositoryResult<Unit> {
+    override suspend fun addUser(user: UserModel): Result<Unit> {
         return try {
             remoteDataSource.addUser(user)
-            RepositoryResult.Success(Unit)
+            Result.success(Unit)
         } catch (e: Exception) {
-            RepositoryResult.Error(e)
+            Result.failure(e)
         }
     }
 
-    override suspend fun getLocalUser(): RepositoryResult<UserModel?> {
+    override suspend fun getLocalUser(): Result<UserModel?> {
         return try {
             val result = localDataSource.getUser()
-            RepositoryResult.Success(result)
+            Result.success(result)
         } catch (e: Exception) {
-            RepositoryResult.Error(e)
+            Result.failure(e)
         }
     }
 
-    override suspend fun addLocalUser(user: UserModel): RepositoryResult<Unit> {
+    override suspend fun addLocalUser(user: UserModel): Result<Unit> {
         return try {
             localDataSource.addUser(user)
-            RepositoryResult.Success(Unit)
+            Result.success(Unit)
         } catch (e: Exception) {
-            RepositoryResult.Error(e)
+            Result.failure(e)
         }
     }
 
-    override suspend fun getUserByIds(ids: List<String>): RepositoryResult<List<UserModel>> {
+    override suspend fun getUserByIds(ids: List<String>): Result<List<UserModel>> {
         return try {
             val result = remoteDataSource.getUserByIds(ids)
-            RepositoryResult.Success(result)
+            Result.success(result)
         } catch (e: Exception) {
-            RepositoryResult.Error(e)
+            Result.failure(e)
         }
     }
 
-    override suspend fun getUserByEmail(email: String): RepositoryResult<UserModel?> {
+    override suspend fun getUserByEmail(email: String): Result<UserModel?> {
         return try {
             val result = remoteDataSource.getUserByEmail(email)
-            RepositoryResult.Success(result)
+            Result.success(result)
         } catch (e: Exception) {
-            RepositoryResult.Error(e)
+            Result.failure(e)
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.balancify.presentation.group_form.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -44,13 +45,15 @@ fun MemberCard(
                 imageUrl = item.user?.imageUrl ?: "",
                 modifier = Modifier.size(42.dp)
             )
-            Text(
-                item.name,
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.SemiBold
-                ),
-                modifier = Modifier.weight(1f)
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    item.name,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+                Text(item.user?.email ?: "", style = MaterialTheme.typography.labelMedium)
+            }
             IconButton(
                 modifier = Modifier.size(38.dp),
                 onClick = {

@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.example.balancify.core.constant.SearchResult
 import com.example.balancify.core.constant.SearchType
 import com.example.balancify.presentation.friend.FriendScreen
 import com.example.balancify.presentation.group_form.GroupFormScreen
@@ -57,7 +58,7 @@ fun NavigationRoot(
                 navController.popBackStack()
             }
         }
-        composable<Routes.GroupFrom> {
+        composable<Routes.GroupFrom> { entry ->
             GroupFormScreen(
                 onNavigateToSearchFriend = {
                     navController.navigate(
@@ -65,7 +66,15 @@ fun NavigationRoot(
                             type = SearchType.FRIEND
                         )
                     )
-                }
+                },
+                onSearchResultFound = {
+                    val searchResult =
+                        entry.savedStateHandle.get<SearchResult.Friend>("search_result")
+
+                    if (searchResult !is SearchResult.Friend) return@GroupFormScreen null
+
+                    searchResult
+                },
             ) {
                 navController.popBackStack()
             }
@@ -75,6 +84,13 @@ fun NavigationRoot(
 
             SearchScreen(
                 type = arg.type,
+                onResultSelected = { searchResult ->
+                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                        "search_result",
+                        searchResult
+                    )
+                    navController.popBackStack()
+                }
             ) {
                 navController.popBackStack()
             }

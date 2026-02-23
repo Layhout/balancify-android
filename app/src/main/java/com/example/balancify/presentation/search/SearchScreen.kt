@@ -2,6 +2,7 @@ package com.example.balancify.presentation.search
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,8 +31,10 @@ import com.example.balancify.component.CardOrder
 import com.example.balancify.component.Empty
 import com.example.balancify.component.InfiniteLazyColumn
 import com.example.balancify.component.StyledCard
+import com.example.balancify.core.constant.SearchResult
 import com.example.balancify.core.constant.SearchType
 import com.example.balancify.core.util.ObserveAsEvents
+import com.example.balancify.domain.model.FoundItemData
 import com.example.balancify.presentation.search.component.SearchTextField
 import org.koin.androidx.compose.koinViewModel
 
@@ -39,6 +42,7 @@ import org.koin.androidx.compose.koinViewModel
 fun SearchScreen(
     viewModel: SearchViewModel = koinViewModel(),
     type: SearchType,
+    onResultSelected: (SearchResult) -> Unit,
     onBackClick: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -80,9 +84,11 @@ fun SearchScreen(
                     onRefresh = { viewModel.onAction(SearchAction.OnRefresh) },
                 ) {
                     if (!state.value.isLoading && state.value.foundItems.isEmpty()) {
-                        Empty()
+                        Empty(
+                            emptyText = "No Data. Search Someone."
+                        )
                     }
-                    
+
                     InfiniteLazyColumn(
                         items = state.value.foundItems,
                         isLoadingMore = state.value.isLoading,
@@ -90,9 +96,7 @@ fun SearchScreen(
                         onLoadMore = {
                             viewModel.onAction(SearchAction.OnLoadMore)
                         },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp)
+                        modifier = Modifier.fillMaxSize()
                     ) { index, item ->
                         if (index != 0) Spacer(modifier = Modifier.height(2.dp))
 
@@ -110,6 +114,19 @@ fun SearchScreen(
                         ) {
                             Row(
                                 modifier = Modifier
+                                    .clickable(
+                                        onClick = {
+                                            if (type == SearchType.FRIEND) {
+                                                onResultSelected(
+                                                    SearchResult.Friend(
+                                                        (item.data as FoundItemData.Friend).data
+                                                    )
+                                                )
+                                            } else {
+                                                TODO("When implement create expense")
+                                            }
+                                        }
+                                    )
                                     .fillMaxWidth()
                                     .padding(16.dp),
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
