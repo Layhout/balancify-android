@@ -21,4 +21,8 @@ sealed interface Routes {
         val type: SearchType,
     ) : Routes
 
+    @Serializable
+    data class GroupDetail(
+        val id: String,
+    ) : Routes
 }

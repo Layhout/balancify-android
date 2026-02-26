@@ -56,9 +56,9 @@ class FriendViewModel(
         }.await()
     }
 
-    private fun loadData(lastDoc: DocumentSnapshot? = null) {
+    private fun loadData(lastDoc: DocumentSnapshot? = null, isLoading: Boolean = true) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = isLoading) }
             val result = friendUseCases.getFriends(lastDoc)
 
             if (result.isSuccess) {
@@ -112,7 +112,7 @@ class FriendViewModel(
                         isRefreshing = true,
                     )
                 }
-                loadData()
+                loadData(isLoading = false)
             }
 
             is FriendAction.OnAddFriendClick -> {

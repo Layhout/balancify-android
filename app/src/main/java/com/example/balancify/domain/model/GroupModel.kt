@@ -8,8 +8,8 @@ import java.util.Date
 @Serializable
 data class GroupModel(
     val id: String = "",
-    val name: String = "",
-    val description: String = "",
+    val name: String = "--",
+    val description: String = "--",
     @Serializable(with = DateAsLongSerializer::class)
     @ServerTimestamp val createdAt: Date? = null,
     val createdBy: String = "",

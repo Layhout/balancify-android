@@ -14,9 +14,7 @@ class AddFriendByEmail(
         val userResult = userRepository.getUserByEmail(email)
 
         if (userResult.isFailure) return Result.failure(
-            userResult.exceptionOrNull() ?: Exception(
-                "Unknown error AddFriendByEmail use case"
-            )
+            userResult.exceptionOrNull()!!
         )
 
         val foundUser = userResult.getOrNull()
@@ -25,9 +23,7 @@ class AddFriendByEmail(
         val friendResult = repository.getFriend(foundUser.id)
 
         if (friendResult.isFailure) return Result.failure(
-            friendResult.exceptionOrNull() ?: Exception(
-                "Unknown error AddFriendByEmail use case"
-            )
+            friendResult.exceptionOrNull()!!
         )
 
         val foundFriend = friendResult.getOrNull()
@@ -40,9 +36,7 @@ class AddFriendByEmail(
         val localUserResult = userRepository.getLocalUser()
 
         if (localUserResult.isFailure) return Result.failure(
-            localUserResult.exceptionOrNull() ?: Exception(
-                "Unknown error AddFriendByEmail use case"
-            )
+            localUserResult.exceptionOrNull()!!
         )
 
         val localUser = localUserResult.getOrNull()
@@ -65,9 +59,7 @@ class AddFriendByEmail(
         val result = repository.addFriend(friend, youAsFriend)
 
         if (result.isFailure) return Result.failure(
-            result.exceptionOrNull() ?: Exception(
-                "Unknown error AddFriendByEmail use case"
-            )
+            result.exceptionOrNull()!!
         )
 
         return Result.success(friend.copy(user = foundUser))

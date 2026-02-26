@@ -21,7 +21,7 @@ class HomeViewModel : ViewModel() {
             is HomeAction.OnToggleFabClick -> {
                 _state.update {
                     it.copy(
-                        toggleFab = action.check
+                        toggleFab = !it.toggleFab
                     )
                 }
             }

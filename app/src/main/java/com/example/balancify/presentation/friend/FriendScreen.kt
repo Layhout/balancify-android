@@ -79,7 +79,8 @@ fun FriendScreen(
                 isRefreshing = state.value.isRefreshing,
                 onRefresh = { viewModel.onAction(FriendAction.OnRefresh) },
                 modifier = Modifier
-                    .padding(it),
+                    .padding(it)
+                    .padding(horizontal = 16.dp),
             ) {
                 if (!state.value.isLoading && state.value.friends.isEmpty()) {
                     Empty()
@@ -93,22 +94,12 @@ fun FriendScreen(
                     },
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 16.dp)
                 ) { index, item ->
                     if (index != 0) Spacer(modifier = Modifier.height(2.dp))
 
                     FriendCard(
                         data = item,
-                        order =
-                            if (state.value.friends.size == 1) {
-                                CardOrder.ALONE
-                            } else {
-                                when (index) {
-                                    0 -> CardOrder.FIRST
-                                    state.value.friends.size - 1 -> CardOrder.LAST
-                                    else -> CardOrder.MIDDLE
-                                }
-                            },
+                        order = CardOrder.getOrderFrom(index, state.value.friends.size),
                     )
                 }
             }

@@ -1,6 +1,7 @@
 package com.example.balancify.presentation.group_form.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,8 +15,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.presentation.group_form.GroupFormAction
 import com.example.balancify.presentation.group_form.GroupFormViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -24,25 +25,39 @@ import org.koin.androidx.compose.koinViewModel
 fun AddMemberButton(
     viewModel: GroupFormViewModel = koinViewModel()
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            "Members",
-            style = MaterialTheme.typography.labelLarge.copy(
-                fontWeight = FontWeight.SemiBold
-            )
-        )
-        TextButton(
-            onClick = {
-                viewModel.onAction(GroupFormAction.OnAddMemberClick)
-            }
+    val state = viewModel.state.collectAsStateWithLifecycle()
+
+    Column(Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon((Icons.Outlined.PersonAdd), contentDescription = null)
-            Spacer(modifier = Modifier.width(6.dp))
-            Text("Add Members")
+            Text(
+                "Members (${state.value.members.size})",
+                style = MaterialTheme.typography.labelMedium.copy(
+                    color = if (state.value.isMemberInvalid)
+                        MaterialTheme.colorScheme.error
+                    else
+                        MaterialTheme.colorScheme.onBackground
+                )
+            )
+            TextButton(
+                onClick = {
+                    viewModel.onAction(GroupFormAction.OnAddMemberClick)
+                }
+            ) {
+                Icon((Icons.Outlined.PersonAdd), contentDescription = null)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Add Members")
+            }
         }
+        if (state.value.isMemberInvalid)
+            Text(
+                "Member cannot be greater than 10",
+                style = MaterialTheme.typography.labelMedium.copy(
+                    color = MaterialTheme.colorScheme.error
+                )
+            )
     }
 }

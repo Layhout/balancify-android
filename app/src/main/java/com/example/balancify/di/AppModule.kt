@@ -23,6 +23,8 @@ import com.example.balancify.domain.use_case.friend.GetFriends
 import com.example.balancify.domain.use_case.friend.RejectFriend
 import com.example.balancify.domain.use_case.friend.Unfriend
 import com.example.balancify.domain.use_case.group.CreateGroup
+import com.example.balancify.domain.use_case.group.GetGroupDetail
+import com.example.balancify.domain.use_case.group.GetGroups
 import com.example.balancify.domain.use_case.group.GroupUseCases
 import com.example.balancify.domain.use_case.search.FindFriends
 import com.example.balancify.domain.use_case.search.SearchUseCases
@@ -32,9 +34,11 @@ import com.example.balancify.domain.use_case.user.GetLocalUser
 import com.example.balancify.domain.use_case.user.GetUser
 import com.example.balancify.domain.use_case.user.UserUseCases
 import com.example.balancify.presentation.friend.FriendViewModel
+import com.example.balancify.presentation.group_detail.GroupDetailViewModel
 import com.example.balancify.presentation.group_form.GroupFormViewModel
 import com.example.balancify.presentation.home.HomeViewModel
 import com.example.balancify.presentation.home.component.account.AccountViewModel
+import com.example.balancify.presentation.home.component.group.GroupViewModel
 import com.example.balancify.presentation.login.LoginViewModel
 import com.example.balancify.presentation.search.SearchViewModel
 import com.example.balancify.service.AuthService
@@ -89,7 +93,9 @@ val appModule = module {
     }
     single {
         GroupUseCases(
-            createGroup = CreateGroup(get(), get())
+            createGroup = CreateGroup(get(), get()),
+            getGroups = GetGroups(get(), get()),
+            getGroupDetail = GetGroupDetail(get(), get())
         )
     }
 
@@ -101,4 +107,6 @@ val appModule = module {
     viewModelOf(::FriendViewModel)
     viewModelOf(::SearchViewModel)
     viewModelOf(::GroupFormViewModel)
+    viewModelOf(::GroupViewModel)
+    viewModelOf(::GroupDetailViewModel)
 }

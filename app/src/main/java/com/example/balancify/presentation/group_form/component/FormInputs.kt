@@ -31,9 +31,14 @@ fun FormInputs(
             label = { Text("Name *") },
             maxLines = 1,
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(BORDER_RADIUS_MD)
+            shape = RoundedCornerShape(BORDER_RADIUS_MD),
+            isError = state.value.isNameInvalid,
+            supportingText = {
+                if (state.value.isNameInvalid)
+                    Text("Name cannot be empty")
+            }
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         OutlinedTextField(
             value = state.value.description,
             onValueChange = {

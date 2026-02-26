@@ -22,17 +22,13 @@ class FindFriends(
         val friendResult = friendRepository.getFriends(lastDoc, search)
 
         if (friendResult.isFailure) return Result.failure(
-            friendResult.exceptionOrNull() ?: Exception(
-                "Unknown error FindFriends use case"
-            )
+            friendResult.exceptionOrNull()!!
         )
 
         val enrichedResult = friendEnricher(friendResult.getOrNull()?.data ?: emptyList())
 
         if (enrichedResult.isFailure) return Result.failure(
-            enrichedResult.exceptionOrNull() ?: Exception(
-                "Unknown error FindFriends use case"
-            )
+            enrichedResult.exceptionOrNull()!!
         )
 
         val result = PaginatedData(

@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -19,12 +22,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.component.AppBar
 import com.example.balancify.component.CardOrder
 import com.example.balancify.core.constant.SearchResult
@@ -38,17 +41,18 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun GroupFormScreen(
     viewModel: GroupFormViewModel = koinViewModel(),
-    onSearchResultFound: () -> SearchResult.Friend? = { null },
+    onSearchResultFound: () -> SearchResult.Friend?,
     onNavigateToSearchFriend: () -> Unit,
+    onCreateSuccess: (Boolean) -> Unit,
     onBackClick: () -> Unit
 ) {
     val localFocusManager = LocalFocusManager.current
     val context = LocalContext.current
-    val state = viewModel.state.collectAsState()
+    val state = viewModel.state.collectAsStateWithLifecycle()
 
     val searchResult = onSearchResultFound()
 
-    LaunchedEffect(searchResult?.data?.userId) {
+    LaunchedEffect(searchResult?.data) {
         searchResult?.data?.let {
             viewModel.onAction(GroupFormAction.OnAddMember(it))
         }
@@ -65,7 +69,7 @@ fun GroupFormScreen(
             }
 
             is GroupFormEvent.OnCreateSuccess -> {
-                onBackClick()
+                onCreateSuccess(true)
             }
         }
     }
@@ -104,19 +108,21 @@ fun GroupFormScreen(
                         if (index != 0) Spacer(modifier = Modifier.height(2.dp))
                         MemberCard(
                             item = item,
-                            order = if (state.value.members.size == 1) CardOrder.ALONE else
-                                when (index) {
-                                    0 -> CardOrder.FIRST
-                                    state.value.members.size - 1 -> CardOrder.LAST
-                                    else -> CardOrder.MIDDLE
-                                },
+                            order = CardOrder.getOrderFrom(index, state.value.members.size),
                         )
                     }
                 }
                 Button(
-                    onClick = {},
-                    modifier = Modifier.fillMaxWidth()
+                    onClick = {
+                        viewModel.onAction(GroupFormAction.OnCreateClick)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !state.value.isLoading,
                 ) {
+                    if (state.value.isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                    }
                     Text("Create")
                 }
             }

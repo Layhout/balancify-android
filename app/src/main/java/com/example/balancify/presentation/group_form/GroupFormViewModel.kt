@@ -13,10 +13,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class GroupFormViewModel(
-    private val groupUseCases: GroupUseCases
+    private val groupUseCases: GroupUseCases,
 ) : ViewModel() {
     private val _state = MutableStateFlow(GroupFormState())
-
     val state = _state.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000L),
@@ -77,15 +76,32 @@ class GroupFormViewModel(
             }
 
             is GroupFormAction.OnCreateClick -> {
-                if (_state.value.name.isBlank()) {
-                    alertError("Name cannot be empty")
-                    return
+                _state.update {
+                    it.copy(
+                        isNameInvalid = false,
+                        isMemberInvalid = false,
+                    )
                 }
+
+                var isValid = true
+
+                if (_state.value.name.isBlank()) {
+                    _state.update { it.copy(isNameInvalid = true) }
+                    isValid = false
+                }
+
+                if (_state.value.members.size > 10) {
+                    _state.update { it.copy(isMemberInvalid = true) }
+                    isValid = false
+                }
+
+                if (!isValid) return
 
                 viewModelScope.launch {
                     _state.update {
                         it.copy(
-                            isLoading = true
+                            isLoading = true,
+                            isNameInvalid = false,
                         )
                     }
 
@@ -110,5 +126,4 @@ class GroupFormViewModel(
             }
         }
     }
-
 }

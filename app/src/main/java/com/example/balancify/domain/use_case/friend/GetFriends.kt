@@ -20,17 +20,14 @@ class GetFriends(
         val enrichedResult = friendEnricher(result.getOrNull()?.data ?: emptyList())
 
         if (enrichedResult.isFailure) return Result.failure(
-            enrichedResult.exceptionOrNull() ?: Exception(
-                "Unknown error GetFriends use case"
-            )
+            enrichedResult.exceptionOrNull()!!
         )
 
         return Result.success(
             result.getOrNull()?.copy(
                 data = enrichedResult.getOrNull()
                     ?: emptyList()
-            )
-                ?: PaginatedData()
+            ) ?: PaginatedData()
         )
     }
 }

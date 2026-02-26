@@ -20,13 +20,10 @@ class CreateGroup(
         val userResult = userRepository.getLocalUser()
 
         if (userResult.isFailure) return Result.failure(
-            userResult.exceptionOrNull() ?: Exception(
-                "Unknown error CreateGroup use case"
-            )
+            userResult.exceptionOrNull()!!
         )
 
         val groupMembers: List<UserModel> = members + userResult.getOrNull()!!
-
 
         val group = GroupModel(
             name = name,

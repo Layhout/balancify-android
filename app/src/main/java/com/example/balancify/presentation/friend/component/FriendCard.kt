@@ -1,12 +1,7 @@
 package com.example.balancify.presentation.friend.component
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -18,58 +13,33 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.balancify.component.Avatar
 import com.example.balancify.component.CardOrder
 import com.example.balancify.component.PillBox
-import com.example.balancify.component.StyledCard
+import com.example.balancify.component.UserListCard
 import com.example.balancify.core.constant.FriendStatus
 import com.example.balancify.core.ext.darken
 import com.example.balancify.domain.model.FriendModel
+import com.example.balancify.domain.model.UserModel
 import com.example.balancify.presentation.friend.FriendAction
 import com.example.balancify.presentation.friend.FriendViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun FriendCard(
-    modifier: Modifier = Modifier,
     data: FriendModel = FriendModel(),
     viewModel: FriendViewModel = koinViewModel(),
     order: CardOrder = CardOrder.ALONE,
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    StyledCard(
+    UserListCard(
         order = order,
-        modifier = modifier
-            .fillMaxWidth(),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Avatar(
-                imageUrl = data.user?.imageUrl ?: "",
-                modifier = Modifier.size(42.dp)
-            )
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    data.user?.name ?: "",
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        fontWeight = FontWeight.SemiBold
-                    )
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(data.user?.email ?: "", style = MaterialTheme.typography.labelMedium)
-            }
+        user = data.user ?: UserModel(),
+        action = {
             Row {
                 when (data.status) {
                     FriendStatus.ACCEPTED -> IconButton(
@@ -141,5 +111,5 @@ fun FriendCard(
                 }
             }
         }
-    }
+    )
 }

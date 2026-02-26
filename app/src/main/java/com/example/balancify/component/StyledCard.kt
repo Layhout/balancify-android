@@ -11,7 +11,21 @@ import com.example.balancify.core.constant.BORDER_RADIUS_MD
 import com.example.balancify.core.constant.BORDER_RADIUS_SM
 
 enum class CardOrder {
-    FIRST, LAST, MIDDLE, ALONE
+    FIRST,
+    LAST,
+    MIDDLE,
+    ALONE;
+
+    companion object {
+        fun getOrderFrom(index: Int, size: Int): CardOrder {
+            if (size == 1) return ALONE
+            return when (index) {
+                0 -> FIRST
+                size - 1 -> LAST
+                else -> MIDDLE
+            }
+        }
+    }
 }
 
 @Composable

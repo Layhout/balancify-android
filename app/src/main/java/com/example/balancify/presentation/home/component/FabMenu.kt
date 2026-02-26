@@ -31,7 +31,7 @@ fun FabMenu(
             ToggleFloatingActionButton(
                 checked = state.value.toggleFab,
                 onCheckedChange = {
-                    viewModel.onAction(HomeAction.OnToggleFabClick(it))
+                    viewModel.onAction(HomeAction.OnToggleFabClick)
                 }
             ) {
                 Icon(
@@ -49,7 +49,10 @@ fun FabMenu(
             icon = { Icon(Icons.Outlined.DataSaverOn, contentDescription = null) },
         )
         FloatingActionButtonMenuItem(
-            onClick = onCreateGroupClick,
+            onClick = {
+                onCreateGroupClick()
+                viewModel.onAction(HomeAction.OnToggleFabClick)
+            },
             text = { Text("Group") },
             icon = { Icon(Icons.Outlined.GroupAdd, contentDescription = null) },
         )
