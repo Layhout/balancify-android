@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.balancify.component.CardOrder
 import com.example.balancify.component.UserListCard
-import com.example.balancify.domain.model.FriendModel
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.presentation.group_form.GroupFormAction
 import com.example.balancify.presentation.group_form.GroupFormViewModel
@@ -20,19 +19,19 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun MemberCard(
     viewModel: GroupFormViewModel = koinViewModel(),
-    item: FriendModel,
+    item: UserModel,
     order: CardOrder
 ) {
     UserListCard(
         order = order,
-        user = item.user ?: UserModel(),
+        user = item,
         action = {
             IconButton(
                 modifier = Modifier.size(38.dp),
                 onClick = {
                     viewModel.onAction(
                         GroupFormAction.OnRemoveMemberClick(
-                            item.userId
+                            item.id
                         )
                     )
                 }

@@ -81,7 +81,7 @@ fun GroupFormScreen(
     Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         Scaffold(
             topBar = {
-                AppBar("Create a Group", onBackClick)
+                AppBar("${if (state.value.isEditing) "Update" else "Create"} a Group", onBackClick)
             },
         ) {
             Column(
@@ -127,11 +127,7 @@ fun GroupFormScreen(
                         CircularProgressIndicator(modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                     }
-
-                    if (state.value.isEditing)
-                        Text("Update")
-                    else
-                        Text("Create")
+                    Text(if (state.value.isEditing) "Update" else "Create")
                 }
             }
         }
