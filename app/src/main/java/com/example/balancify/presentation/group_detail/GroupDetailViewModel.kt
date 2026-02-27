@@ -35,36 +35,34 @@ class GroupDetailViewModel(
         )
     }
 
-    private fun loadData(fromDB: Boolean = false) {
-        val group = handle.toRoute<Routes.GroupDetail>().group
-        if (!fromDB)
+    private fun loadData() {
+        viewModelScope.launch {
             _state.update {
                 it.copy(
-                    group = group
+                    isLoading = true,
+                    enableAllAction = false,
                 )
             }
-        else
-            viewModelScope.launch {
-                _state.update { it.copy(isLoading = true) }
 
-                val result = groupUseCases.getGroupDetail(group.id)
-
-                if (result.isFailure) {
-                    alertError(result.exceptionOrNull()?.message)
-                }
-
-                _state.update {
-                    it.copy(
-                        group = result.getOrNull()!!,
-                        isLoading = false
-                    )
-                }
+            val id = handle.toRoute<Routes.GroupDetail>().id
+            val result = groupUseCases.getGroupDetail(id)
+            if (result.isFailure) {
+                alertError(result.exceptionOrNull()?.message)
             }
+            
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    enableAllAction = true,
+                    group = result.getOrNull()!!
+                )
+            }
+        }
     }
 
     fun onAction(action: GroupDetailAction) {
         when (action) {
-            GroupDetailAction.OnRefresh -> loadData(fromDB = true)
+            GroupDetailAction.OnRefresh -> loadData()
             GroupDetailAction.OnLoadMore -> TODO()
             GroupDetailAction.OnDropdownMenuToggle -> {
                 _state.update {

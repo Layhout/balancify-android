@@ -35,7 +35,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.balancify.component.AppBar
 import com.example.balancify.core.constant.AppScreen
-import com.example.balancify.domain.model.GroupModel
 import com.example.balancify.presentation.home.component.FabMenu
 import com.example.balancify.presentation.home.component.account.AccountScreen
 import com.example.balancify.presentation.home.component.dashboard.DashboardScreen
@@ -61,7 +60,7 @@ fun HomeScreen(
     onLogoutComplete: () -> Unit,
     onNavigateToFriend: () -> Unit,
     onNavigateToGroupFrom: () -> Unit,
-    onNavigateToGroupDetail: (GroupModel) -> Unit,
+    onNavigateToGroupDetail: (String) -> Unit,
     onGroupListShouldRefreshFound: () -> Boolean?,
 ) {
     val navController = rememberNavController()

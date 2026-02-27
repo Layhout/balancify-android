@@ -37,18 +37,45 @@ class GroupFormViewModel(
     }
 
     private fun isEditGroupCheck() {
-        val group = handle.toRoute<Routes.GroupFrom>().group
+        val groupId = handle.toRoute<Routes.GroupFrom>().id
 
-        group?.let {
-            _state.update {
-                it.copy(
-                    isEditing = true,
-                    name = it.name,
-                    description = it.description,
-                    members = it.members,
-                )
+        groupId?.let {
+            viewModelScope.launch {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        isEditing = true,
+                        isEnableAllAction = false,
+                    )
+                }
+
+                val result = groupUseCases.getGroupDetail(groupId)
+                if (result.isFailure) {
+                    alertError(result.exceptionOrNull()?.message)
+                }
+
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        isEnableAllAction = true,
+                        name = result.getOrNull()?.name ?: "",
+                        description = result.getOrNull()?.description ?: "",
+                        members = result.getOrNull()?.members ?: emptyList(),
+                    )
+                }
             }
         }
+
+//        group?.let {
+//            _state.update {
+//                it.copy(
+//                    isEditing = true,
+//                    name = it.name,
+//                    description = it.description,
+//                    members = it.members,
+//                )
+//            }
+//        }
     }
 
     fun onAction(action: GroupFormAction) {
@@ -58,13 +85,13 @@ class GroupFormViewModel(
             }
 
             is GroupFormAction.OnAddMember -> {
-                if (_state.value.members.any { it.userId == action.member.userId }) {
+                if (_state.value.members.any { it.id == action.member.userId }) {
                     return
                 }
 
                 _state.update {
                     it.copy(
-                        members = listOf(action.member) + it.members
+                        members = listOf(action.member.user ?: UserModel()) + it.members
                     )
                 }
             }
@@ -73,7 +100,7 @@ class GroupFormViewModel(
                 _state.update {
                     it.copy(
                         members = it.members.filter { member ->
-                            member.userId != action.id
+                            member.id != action.id
                         }
                     )
                 }
@@ -128,7 +155,7 @@ class GroupFormViewModel(
                     val result = groupUseCases.createGroup(
                         name = _state.value.name,
                         description = _state.value.description,
-                        members = _state.value.members.map { it.user ?: UserModel() },
+                        members = _state.value.members,
                     )
 
                     if (result.isFailure) {
