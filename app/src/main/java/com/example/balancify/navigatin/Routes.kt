@@ -1,6 +1,7 @@
 package com.example.balancify.navigatin
 
 import com.example.balancify.core.constant.SearchType
+import com.example.balancify.domain.model.GroupModel
 import kotlinx.serialization.Serializable
 
 sealed interface Routes {
@@ -14,7 +15,9 @@ sealed interface Routes {
     data object Friend : Routes
 
     @Serializable
-    data object GroupFrom : Routes
+    data class GroupFrom(
+        val group: GroupModel? = null,
+    ) : Routes
 
     @Serializable
     data class Search(
@@ -23,6 +26,6 @@ sealed interface Routes {
 
     @Serializable
     data class GroupDetail(
-        val id: String,
+        val group: GroupModel,
     ) : Routes
 }

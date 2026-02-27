@@ -65,6 +65,7 @@ fun DetailHeader(
                 Text("Add Expense")
             }
             FilledIconButton(
+                enabled = state.value.enableAllAction,
                 onClick = {
                     viewModel.onAction(GroupDetailAction.OnMemberBottomSheetToggle)
                 },

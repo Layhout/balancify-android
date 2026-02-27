@@ -29,30 +29,42 @@ class GroupDetailViewModel(
     private val _events = Channel<GroupDetailEvent>()
     val events = _events.receiveAsFlow()
 
-    private fun loadData(isLoading: Boolean = true) {
-        viewModelScope.launch {
+    private fun alertError(message: String?) {
+        _events.trySend(
+            GroupDetailEvent.OnError(message ?: "Unknown error")
+        )
+    }
+
+    private fun loadData(fromDB: Boolean = false) {
+        val group = handle.toRoute<Routes.GroupDetail>().group
+        if (!fromDB)
             _state.update {
                 it.copy(
-                    isLoading = isLoading
+                    group = group
                 )
             }
+        else
+            viewModelScope.launch {
+                _state.update { it.copy(isLoading = true) }
 
-            val id = handle.toRoute<Routes.GroupDetail>().id
-            val result = groupUseCases.getGroupDetail(id)
-            if (result.isSuccess) {
+                val result = groupUseCases.getGroupDetail(group.id)
+
+                if (result.isFailure) {
+                    alertError(result.exceptionOrNull()?.message)
+                }
+
                 _state.update {
                     it.copy(
-                        isLoading = false,
-                        group = result.getOrNull()!!
+                        group = result.getOrNull()!!,
+                        isLoading = false
                     )
                 }
             }
-        }
     }
 
     fun onAction(action: GroupDetailAction) {
         when (action) {
-            GroupDetailAction.OnRefresh -> TODO()
+            GroupDetailAction.OnRefresh -> loadData(fromDB = true)
             GroupDetailAction.OnLoadMore -> TODO()
             GroupDetailAction.OnDropdownMenuToggle -> {
                 _state.update {
@@ -67,6 +79,30 @@ class GroupDetailViewModel(
                     it.copy(
                         showMemberBottomSheet = !it.showMemberBottomSheet
                     )
+                }
+            }
+
+            GroupDetailAction.OnLeaveGroupClick -> {
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            enableAllAction = false
+                        )
+                    }
+                    val result = if (_state.value.group.members.size == 1)
+                        groupUseCases.deleteGroup(_state.value.group.id)
+                    else
+                        groupUseCases.leaveGroup(_state.value.group.id)
+
+                    if (result.isFailure) {
+                        alertError(result.exceptionOrNull()?.message)
+                    } else {
+                        _state.update {
+                            it.copy(
+                                enableAllAction = true
+                            )
+                        }
+                    }
                 }
             }
         }

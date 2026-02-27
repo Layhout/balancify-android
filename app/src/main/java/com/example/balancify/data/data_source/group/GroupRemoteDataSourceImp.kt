@@ -1,13 +1,18 @@
 package com.example.balancify.data.data_source.group
 
+import com.example.balancify.core.constant.BatchDeleteItem
 import com.example.balancify.core.constant.BatchSetItem
+import com.example.balancify.core.constant.BatchUpdateItem
 import com.example.balancify.core.constant.ITEMS_LIMIT
 import com.example.balancify.core.constant.PaginatedData
 import com.example.balancify.domain.model.GroupMetadataModel
 import com.example.balancify.domain.model.GroupModel
+import com.example.balancify.domain.model.UserModel
 import com.example.balancify.service.DatabaseService
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldPath.documentId
+import com.google.firebase.firestore.FieldValue.arrayRemove
+import com.google.firebase.firestore.FieldValue.delete
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
 
@@ -65,5 +70,42 @@ class GroupRemoteDataSourceImp(
         val group = result.snapshot.documents.firstOrNull()?.toObject<GroupModel>()
 
         return group ?: throw Exception("Group not found")
+    }
+
+    override suspend fun leaveGroup(id: String, user: UserModel) {
+        db.batchUpdate(
+            listOf(
+                BatchUpdateItem(
+                    collection = collectionName,
+                    id = id,
+                    fields = mapOf(
+                        "members" to arrayRemove(user),
+                        "memberIds" to arrayRemove(user.id)
+                    )
+                ),
+                BatchUpdateItem(
+                    collection = metaDataCollectionName,
+                    id = id,
+                    fields = mapOf(
+                        "membersFlag.${user.id}" to delete()
+                    )
+                )
+            )
+        )
+    }
+
+    override suspend fun deleteGroup(id: String) {
+        db.batchDelete(
+            listOf(
+                BatchDeleteItem(
+                    collection = collectionName,
+                    id = id
+                ),
+                BatchDeleteItem(
+                    collection = metaDataCollectionName,
+                    id = id
+                )
+            )
+        )
     }
 }

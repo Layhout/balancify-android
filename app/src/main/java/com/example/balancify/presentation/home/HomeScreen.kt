@@ -35,6 +35,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.balancify.component.AppBar
 import com.example.balancify.core.constant.AppScreen
+import com.example.balancify.domain.model.GroupModel
 import com.example.balancify.presentation.home.component.FabMenu
 import com.example.balancify.presentation.home.component.account.AccountScreen
 import com.example.balancify.presentation.home.component.dashboard.DashboardScreen
@@ -60,18 +61,18 @@ fun HomeScreen(
     onLogoutComplete: () -> Unit,
     onNavigateToFriend: () -> Unit,
     onNavigateToGroupFrom: () -> Unit,
-    onNavigateToGroupDetail: (String) -> Unit,
-    onCreateGroupFound: () -> Boolean?,
+    onNavigateToGroupDetail: (GroupModel) -> Unit,
+    onGroupListShouldRefreshFound: () -> Boolean?,
 ) {
     val navController = rememberNavController()
     val startDestination = NavDestination.DASHBOARD
     var selectedRoute by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
     var prevSelectedRoute by rememberSaveable { mutableStateOf(startDestination) }
 
-    val didCreateGroup = onCreateGroupFound()
+    val shouldRefreshGroupList = onGroupListShouldRefreshFound()
 
-    LaunchedEffect(didCreateGroup) {
-        didCreateGroup?.let {
+    LaunchedEffect(shouldRefreshGroupList) {
+        shouldRefreshGroupList?.let {
             if (it)
                 onTabClick(
                     index = NavDestination.GROUPS.ordinal,
@@ -144,7 +145,7 @@ fun HomeScreen(
                             NavDestination.DASHBOARD -> DashboardScreen()
                             NavDestination.EXPENSES -> ExpenseScreen()
                             NavDestination.GROUPS -> GroupScreen(
-                                onGroupCreateFound = onCreateGroupFound,
+                                onGroupListShouldRefreshFound = onGroupListShouldRefreshFound,
                                 onNavigateToGroupDetail = onNavigateToGroupDetail
                             )
 

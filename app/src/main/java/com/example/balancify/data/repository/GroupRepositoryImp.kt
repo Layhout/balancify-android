@@ -4,6 +4,7 @@ import com.example.balancify.core.constant.PaginatedData
 import com.example.balancify.data.data_source.group.GroupRemoteDataSource
 import com.example.balancify.domain.model.GroupMetadataModel
 import com.example.balancify.domain.model.GroupModel
+import com.example.balancify.domain.model.UserModel
 import com.example.balancify.domain.repository.GroupRepository
 import com.google.firebase.firestore.DocumentSnapshot
 
@@ -38,6 +39,24 @@ class GroupRepositoryImp(
         return try {
             val result = remoteDataSource.getGroupById(id, userId)
             Result.success(result)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun leaveGroup(id: String, user: UserModel): Result<Unit> {
+        return try {
+            remoteDataSource.leaveGroup(id, user)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteGroup(id: String): Result<Unit> {
+        return try {
+            remoteDataSource.deleteGroup(id)
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -1,12 +1,16 @@
 package com.example.balancify.presentation.group_form
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.domain.use_case.group.GroupUseCases
+import com.example.balancify.navigatin.Routes
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -14,9 +18,10 @@ import kotlinx.coroutines.launch
 
 class GroupFormViewModel(
     private val groupUseCases: GroupUseCases,
+    private val handle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(GroupFormState())
-    val state = _state.stateIn(
+    val state = _state.onStart { isEditGroupCheck() }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000L),
         initialValue = GroupFormState()
@@ -29,6 +34,21 @@ class GroupFormViewModel(
         _events.trySend(
             GroupFormEvent.OnError(message ?: "Unknown error")
         )
+    }
+
+    private fun isEditGroupCheck() {
+        val group = handle.toRoute<Routes.GroupFrom>().group
+
+        group?.let {
+            _state.update {
+                it.copy(
+                    isEditing = true,
+                    name = it.name,
+                    description = it.description,
+                    members = it.members,
+                )
+            }
+        }
     }
 
     fun onAction(action: GroupFormAction) {
@@ -75,7 +95,7 @@ class GroupFormViewModel(
                 }
             }
 
-            is GroupFormAction.OnCreateClick -> {
+            is GroupFormAction.OnSaveClick -> {
                 _state.update {
                     it.copy(
                         isNameInvalid = false,
@@ -114,7 +134,7 @@ class GroupFormViewModel(
                     if (result.isFailure) {
                         alertError(result.exceptionOrNull()?.message)
                     } else {
-                        _events.trySend(GroupFormEvent.OnCreateSuccess)
+                        _events.trySend(GroupFormEvent.OnSaveSuccess)
                     }
 
                     _state.update {

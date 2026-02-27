@@ -6,6 +6,7 @@ data class GroupFormState(
     val isLoading: Boolean = false,
     val isNameInvalid: Boolean = false,
     val isMemberInvalid: Boolean = false,
+    val isEditing: Boolean = false,
     val name: String = "",
     val description: String = "",
     val members: List<FriendModel> = emptyList(),

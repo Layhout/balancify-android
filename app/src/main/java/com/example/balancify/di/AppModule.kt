@@ -23,9 +23,11 @@ import com.example.balancify.domain.use_case.friend.GetFriends
 import com.example.balancify.domain.use_case.friend.RejectFriend
 import com.example.balancify.domain.use_case.friend.Unfriend
 import com.example.balancify.domain.use_case.group.CreateGroup
+import com.example.balancify.domain.use_case.group.DeleteGroup
 import com.example.balancify.domain.use_case.group.GetGroupDetail
 import com.example.balancify.domain.use_case.group.GetGroups
 import com.example.balancify.domain.use_case.group.GroupUseCases
+import com.example.balancify.domain.use_case.group.LeaveGroup
 import com.example.balancify.domain.use_case.search.FindFriends
 import com.example.balancify.domain.use_case.search.SearchUseCases
 import com.example.balancify.domain.use_case.user.AddLocalUser
@@ -95,7 +97,9 @@ val appModule = module {
         GroupUseCases(
             createGroup = CreateGroup(get(), get()),
             getGroups = GetGroups(get(), get()),
-            getGroupDetail = GetGroupDetail(get(), get())
+            getGroupDetail = GetGroupDetail(get(), get()),
+            leaveGroup = LeaveGroup(get(), get()),
+            deleteGroup = DeleteGroup(get()),
         )
     }
 

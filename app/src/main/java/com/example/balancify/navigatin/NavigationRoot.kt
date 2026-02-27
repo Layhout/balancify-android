@@ -69,9 +69,9 @@ fun NavigationRoot(
                 onNavigateToGroupDetail = {
                     navController.navigate(Routes.GroupDetail(it))
                 },
-                onCreateGroupFound = {
+                onGroupListShouldRefreshFound = {
                     entry.savedStateHandle.remove<Boolean>(
-                        SavedStateKey.GROUP_DID_CREATED.value
+                        SavedStateKey.GROUP_LIST_SHOULD_REFRESH.value
                     )
                 },
             )
@@ -90,10 +90,10 @@ fun NavigationRoot(
                         )
                     )
                 },
-                onCreateSuccess = { didSuccess ->
+                onCreateSuccess = {
                     navController.setPrevStackState(
-                        SavedStateKey.GROUP_DID_CREATED.value,
-                        didSuccess
+                        SavedStateKey.GROUP_LIST_SHOULD_REFRESH.value,
+                        true
                     )
                     navController.popBackStack()
                 },
@@ -104,6 +104,13 @@ fun NavigationRoot(
 
                     searchResult as? SearchResult.Friend
                 },
+                onEditSuccess = {
+                    navController.setPrevStackState(
+                        SavedStateKey.GROUP_DID_UPDATE.value,
+                        true
+                    )
+                    navController.popBackStack()
+                }
             ) {
                 navController.popBackStack()
             }
@@ -125,7 +132,18 @@ fun NavigationRoot(
             }
         }
         composable<Routes.GroupDetail> {
-            GroupDetailScreen {
+            GroupDetailScreen(
+                onLeaveGroupSuccess = {
+                    navController.setPrevStackState(
+                        SavedStateKey.GROUP_LIST_SHOULD_REFRESH.value,
+                        true
+                    )
+                    navController.popBackStack()
+                },
+                onNavigateToGroupFrom = {
+                    navController.navigate(Routes.GroupFrom(it))
+                }
+            ) {
                 navController.popBackStack()
             }
         }

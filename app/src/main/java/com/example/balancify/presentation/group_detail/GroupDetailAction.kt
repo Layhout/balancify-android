@@ -5,4 +5,5 @@ sealed interface GroupDetailAction {
     data object OnLoadMore : GroupDetailAction
     data object OnDropdownMenuToggle : GroupDetailAction
     data object OnMemberBottomSheetToggle : GroupDetailAction
+    data object OnLeaveGroupClick : GroupDetailAction
 }

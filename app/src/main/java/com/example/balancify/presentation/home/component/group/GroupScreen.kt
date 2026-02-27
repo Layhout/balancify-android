@@ -38,6 +38,7 @@ import com.example.balancify.component.InfiniteLazyColumn
 import com.example.balancify.component.StackAvatar
 import com.example.balancify.component.StyledCard
 import com.example.balancify.core.util.ObserveAsEvents
+import com.example.balancify.domain.model.GroupModel
 import org.koin.androidx.compose.koinViewModel
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -46,17 +47,17 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun GroupScreen(
     viewModel: GroupViewModel = koinViewModel(),
-    onGroupCreateFound: () -> Boolean? = { null },
-    onNavigateToGroupDetail: (String) -> Unit,
+    onGroupListShouldRefreshFound: () -> Boolean? = { null },
+    onNavigateToGroupDetail: (GroupModel) -> Unit,
 ) {
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    val didCreateGroup = onGroupCreateFound()
+    val shouldRefreshGroupList = onGroupListShouldRefreshFound()
 
-    LaunchedEffect(didCreateGroup) {
-        if (didCreateGroup == true) {
-            viewModel.onAction(GroupAction.OnRefresh)
+    LaunchedEffect(shouldRefreshGroupList) {
+        shouldRefreshGroupList?.let {
+            if (it) viewModel.onAction(GroupAction.OnRefresh)
         }
     }
 
@@ -106,7 +107,7 @@ fun GroupScreen(
                         modifier = Modifier
                             .clickable(
                                 onClick = {
-                                    onNavigateToGroupDetail(item.id)
+                                    onNavigateToGroupDetail(item)
                                 }
                             )
                             .fillMaxWidth()

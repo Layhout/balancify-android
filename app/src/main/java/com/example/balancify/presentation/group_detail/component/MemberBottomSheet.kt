@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -39,6 +41,13 @@ fun MemberBottomSheet(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
         ) {
+            item {
+                Text(
+                    "Member (${state.value.group.members.size})",
+                    style = MaterialTheme.typography.labelMedium
+                )
+                Spacer(Modifier.height(6.dp))
+            }
             itemsIndexed(
                 items = state.value.group.members
             ) { index, item ->

@@ -8,5 +8,6 @@ data class GroupDetailState(
     val canLoadMore: Boolean = false,
     val showDropdown: Boolean = false,
     val showMemberBottomSheet: Boolean = false,
+    val enableAllAction: Boolean = true,
     val group: GroupModel = GroupModel(),
 )

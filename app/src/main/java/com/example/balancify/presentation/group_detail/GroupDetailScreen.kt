@@ -21,6 +21,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.component.AppBar
 import com.example.balancify.component.InfiniteLazyColumn
 import com.example.balancify.core.util.ObserveAsEvents
+import com.example.balancify.domain.model.GroupModel
 import com.example.balancify.presentation.group_detail.component.DetailHeader
 import com.example.balancify.presentation.group_detail.component.MemberBottomSheet
 import org.koin.androidx.compose.koinViewModel
@@ -36,10 +38,21 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun GroupDetailScreen(
     viewModel: GroupDetailViewModel = koinViewModel(),
+    onLeaveGroupSuccess: () -> Unit,
+    onNavigateToGroupFrom: (GroupModel) -> Unit,
+    onGroupDidUpdateFound: () -> Boolean? = { null },
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
+
+    val shouldUpdateGroupDetail = onGroupDidUpdateFound()
+
+    LaunchedEffect(shouldUpdateGroupDetail) {
+        shouldUpdateGroupDetail?.let {
+            if (it) viewModel.onAction(GroupDetailAction.OnRefresh)
+        }
+    }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
@@ -48,6 +61,8 @@ fun GroupDetailScreen(
                 event.message,
                 Toast.LENGTH_LONG
             ).show()
+
+            GroupDetailEvent.OnLeaveGroup -> onLeaveGroupSuccess()
         }
     }
 
@@ -60,6 +75,7 @@ fun GroupDetailScreen(
             topBar = {
                 AppBar("Group Detail", onBackClick) {
                     IconButton(
+                        enabled = state.value.enableAllAction,
                         onClick = {
                             viewModel.onAction(GroupDetailAction.OnDropdownMenuToggle)
                         }
@@ -69,8 +85,6 @@ fun GroupDetailScreen(
                             contentDescription = "More options"
                         )
                     }
-
-                    // DropdownMenu content
                     DropdownMenu(
                         expanded = state.value.showDropdown,
                         onDismissRequest = {
@@ -90,8 +104,10 @@ fun GroupDetailScreen(
                                     Text("Edit")
                                 }
                             },
+                            enabled = state.value.enableAllAction,
                             onClick = {
                                 viewModel.onAction(GroupDetailAction.OnDropdownMenuToggle)
+                                onNavigateToGroupFrom(state.value.group)
                             }
                         )
                         DropdownMenuItem(
@@ -107,8 +123,9 @@ fun GroupDetailScreen(
                                     Text("Leave")
                                 }
                             },
+                            enabled = state.value.enableAllAction,
                             onClick = {
-                                viewModel.onAction(GroupDetailAction.OnDropdownMenuToggle)
+                                viewModel.onAction(GroupDetailAction.OnLeaveGroupClick)
                             }
                         )
                     }

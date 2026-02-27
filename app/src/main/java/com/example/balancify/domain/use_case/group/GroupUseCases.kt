@@ -4,4 +4,6 @@ data class GroupUseCases(
     val createGroup: CreateGroup,
     val getGroups: GetGroups,
     val getGroupDetail: GetGroupDetail,
+    val leaveGroup: LeaveGroup,
+    val deleteGroup: DeleteGroup,
 )

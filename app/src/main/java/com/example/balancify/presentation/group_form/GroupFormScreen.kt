@@ -43,8 +43,9 @@ fun GroupFormScreen(
     viewModel: GroupFormViewModel = koinViewModel(),
     onSearchResultFound: () -> SearchResult.Friend?,
     onNavigateToSearchFriend: () -> Unit,
-    onCreateSuccess: (Boolean) -> Unit,
-    onBackClick: () -> Unit
+    onCreateSuccess: () -> Unit,
+    onEditSuccess: () -> Unit,
+    onBackClick: () -> Unit,
 ) {
     val localFocusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -68,8 +69,11 @@ fun GroupFormScreen(
                 onNavigateToSearchFriend()
             }
 
-            is GroupFormEvent.OnCreateSuccess -> {
-                onCreateSuccess(true)
+            is GroupFormEvent.OnSaveSuccess -> {
+                if (state.value.isEditing)
+                    onEditSuccess()
+                else
+                    onCreateSuccess()
             }
         }
     }
@@ -114,7 +118,7 @@ fun GroupFormScreen(
                 }
                 Button(
                     onClick = {
-                        viewModel.onAction(GroupFormAction.OnCreateClick)
+                        viewModel.onAction(GroupFormAction.OnSaveClick)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !state.value.isLoading,
@@ -123,7 +127,11 @@ fun GroupFormScreen(
                         CircularProgressIndicator(modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                     }
-                    Text("Create")
+
+                    if (state.value.isEditing)
+                        Text("Update")
+                    else
+                        Text("Create")
                 }
             }
         }
