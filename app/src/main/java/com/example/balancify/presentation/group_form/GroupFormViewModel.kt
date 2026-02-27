@@ -65,17 +65,6 @@ class GroupFormViewModel(
                 }
             }
         }
-
-//        group?.let {
-//            _state.update {
-//                it.copy(
-//                    isEditing = true,
-//                    name = it.name,
-//                    description = it.description,
-//                    members = it.members,
-//                )
-//            }
-//        }
     }
 
     fun onAction(action: GroupFormAction) {
