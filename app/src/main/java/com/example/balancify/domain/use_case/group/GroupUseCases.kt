@@ -6,4 +6,5 @@ data class GroupUseCases(
     val getGroupDetail: GetGroupDetail,
     val leaveGroup: LeaveGroup,
     val deleteGroup: DeleteGroup,
+    val updateGroup: UpdateGroup,
 )

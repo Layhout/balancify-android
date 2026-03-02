@@ -91,25 +91,26 @@ fun GroupDetailScreen(
                             viewModel.onAction(GroupDetailAction.OnDropdownMenuToggle)
                         },
                     ) {
-                        DropdownMenuItem(
-                            text = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        Icons.Outlined.Edit,
-                                        contentDescription = null
-                                    )
-                                    Spacer(Modifier.width(12.dp))
-                                    Text("Edit")
+                        if (state.value.isCreateByLocalUser)
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            Icons.Outlined.Edit,
+                                            contentDescription = null
+                                        )
+                                        Spacer(Modifier.width(12.dp))
+                                        Text("Edit")
+                                    }
+                                },
+                                enabled = state.value.enableAllAction,
+                                onClick = {
+                                    viewModel.onAction(GroupDetailAction.OnDropdownMenuToggle)
+                                    onNavigateToGroupFrom(state.value.group)
                                 }
-                            },
-                            enabled = state.value.enableAllAction,
-                            onClick = {
-                                viewModel.onAction(GroupDetailAction.OnDropdownMenuToggle)
-                                onNavigateToGroupFrom(state.value.group)
-                            }
-                        )
+                            )
                         DropdownMenuItem(
                             text = {
                                 Row(

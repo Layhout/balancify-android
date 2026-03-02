@@ -16,7 +16,7 @@ class GroupRepositoryImp(
         groupMetadata: GroupMetadataModel
     ): Result<Unit> {
         return try {
-            remoteDataSource.create(group, groupMetadata)
+            remoteDataSource.createGroup(group, groupMetadata)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -56,6 +56,19 @@ class GroupRepositoryImp(
     override suspend fun deleteGroup(id: String): Result<Unit> {
         return try {
             remoteDataSource.deleteGroup(id)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateGroup(
+        id: String,
+        group: GroupModel,
+        groupMetadata: GroupMetadataModel
+    ): Result<Unit> {
+        return try {
+            remoteDataSource.updateGroup(id, group, groupMetadata)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

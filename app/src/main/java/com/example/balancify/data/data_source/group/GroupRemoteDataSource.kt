@@ -7,9 +7,10 @@ import com.example.balancify.domain.model.UserModel
 import com.google.firebase.firestore.DocumentSnapshot
 
 interface GroupRemoteDataSource {
-    suspend fun create(group: GroupModel, groupMetadata: GroupMetadataModel)
+    suspend fun createGroup(group: GroupModel, groupMetadata: GroupMetadataModel)
     suspend fun getGroupsWithUser(lastDoc: DocumentSnapshot?, id: String): PaginatedData<GroupModel>
     suspend fun getGroupById(id: String, userId: String): GroupModel
     suspend fun leaveGroup(id: String, user: UserModel)
     suspend fun deleteGroup(id: String)
+    suspend fun updateGroup(id: String, group: GroupModel, groupMetadata: GroupMetadataModel)
 }

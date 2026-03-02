@@ -20,4 +20,9 @@ interface GroupRepository {
     suspend fun getGroupById(id: String, userId: String): Result<GroupModel>
     suspend fun leaveGroup(id: String, user: UserModel): Result<Unit>
     suspend fun deleteGroup(id: String): Result<Unit>
+    suspend fun updateGroup(
+        id: String,
+        group: GroupModel,
+        groupMetadata: GroupMetadataModel
+    ): Result<Unit>
 }

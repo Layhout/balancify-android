@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.example.balancify.domain.use_case.group.GroupUseCases
+import com.example.balancify.domain.use_case.user.UserUseCases
 import com.example.balancify.navigatin.Routes
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
 
 class GroupDetailViewModel(
     private val groupUseCases: GroupUseCases,
-    private val handle: SavedStateHandle
+    private val userUseCases: UserUseCases,
+    private val handle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(GroupDetailState())
     val state = _state.onStart { loadData() }.stateIn(
@@ -48,13 +50,23 @@ class GroupDetailViewModel(
             val result = groupUseCases.getGroupDetail(id)
             if (result.isFailure) {
                 alertError(result.exceptionOrNull()?.message)
+                return@launch
             }
-            
+
+            val userResult = userUseCases.getLocalUser()
+            if (userResult.isFailure) {
+                alertError(userResult.exceptionOrNull()?.message)
+                return@launch
+            }
+
             _state.update {
                 it.copy(
                     isLoading = false,
                     enableAllAction = true,
-                    group = result.getOrNull()!!
+                    group = result.getOrNull()!!,
+                    isCreateByLocalUser =
+                        result.getOrNull()!!.createdBy
+                                == userResult.getOrNull()!!.id
                 )
             }
         }

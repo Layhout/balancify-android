@@ -22,7 +22,7 @@ class GroupRemoteDataSourceImp(
     private val collectionName: String = "groups"
     private val metaDataCollectionName: String = "group_metadata"
 
-    override suspend fun create(group: GroupModel, groupMetadata: GroupMetadataModel) {
+    override suspend fun createGroup(group: GroupModel, groupMetadata: GroupMetadataModel) {
         db.batchSet(
             listOf(
                 BatchSetItem(
@@ -104,6 +104,35 @@ class GroupRemoteDataSourceImp(
                 BatchDeleteItem(
                     collection = metaDataCollectionName,
                     id = id
+                )
+            )
+        )
+    }
+
+    override suspend fun updateGroup(
+        id: String,
+        group: GroupModel,
+        groupMetadata: GroupMetadataModel
+    ) {
+        db.batchUpdate(
+            listOf(
+                BatchUpdateItem(
+                    collection = collectionName,
+                    id = id,
+                    fields = mapOf(
+                        "name" to group.name,
+                        "description" to group.description,
+                        "members" to group.members,
+                        "memberIds" to group.memberIds,
+                    )
+                ),
+                BatchUpdateItem(
+                    collection = metaDataCollectionName,
+                    id = id,
+                    fields = mapOf(
+                        "nameTrigrams" to groupMetadata.nameTrigrams,
+                        "membersFlag" to groupMetadata.membersFlag,
+                    )
                 )
             )
         )

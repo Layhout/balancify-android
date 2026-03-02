@@ -15,4 +15,8 @@ data class GroupModel(
     val createdBy: String = "",
     val members: List<UserModel> = emptyList(),
     val memberIds: List<String> = emptyList(),
-)
+) {
+    fun getOwner(): String {
+        return memberIds.find { it == createdBy } ?: ""
+    }
+}

@@ -9,5 +9,6 @@ data class GroupDetailState(
     val showDropdown: Boolean = false,
     val showMemberBottomSheet: Boolean = false,
     val enableAllAction: Boolean = true,
+    val isCreateByLocalUser: Boolean = false,
     val group: GroupModel = GroupModel(),
 )

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.domain.use_case.group.GroupUseCases
+import com.example.balancify.domain.use_case.user.UserUseCases
 import com.example.balancify.navigatin.Routes
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 
 class GroupFormViewModel(
     private val groupUseCases: GroupUseCases,
+    private val userUseCases: UserUseCases,
     private val handle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(GroupFormState())
@@ -52,6 +54,13 @@ class GroupFormViewModel(
                 val result = groupUseCases.getGroupDetail(groupId)
                 if (result.isFailure) {
                     alertError(result.exceptionOrNull()?.message)
+                    return@launch
+                }
+
+                val userResult = userUseCases.getLocalUser()
+                if (userResult.isFailure) {
+                    alertError(userResult.exceptionOrNull()?.message)
+                    return@launch
                 }
 
                 _state.update {
@@ -60,7 +69,12 @@ class GroupFormViewModel(
                         isEnableAllAction = true,
                         name = result.getOrNull()?.name ?: "",
                         description = result.getOrNull()?.description ?: "",
-                        members = result.getOrNull()?.members ?: emptyList(),
+                        members = if (result.getOrNull()?.members == null)
+                            emptyList()
+                        else
+                            result.getOrNull()!!.members.filter { member ->
+                                member.id != userResult.getOrNull()?.id
+                            },
                     )
                 }
             }
@@ -141,7 +155,12 @@ class GroupFormViewModel(
                         )
                     }
 
-                    val result = groupUseCases.createGroup(
+                    val result = if (_state.value.isEditing) groupUseCases.updateGroup(
+                        id = handle.toRoute<Routes.GroupFrom>().id!!,
+                        name = _state.value.name,
+                        description = _state.value.description,
+                        members = _state.value.members,
+                    ) else groupUseCases.createGroup(
                         name = _state.value.name,
                         description = _state.value.description,
                         members = _state.value.members,

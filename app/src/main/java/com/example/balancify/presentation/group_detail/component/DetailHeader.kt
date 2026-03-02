@@ -51,6 +51,15 @@ fun DetailHeader(
             )
         )
         Spacer(Modifier.height(16.dp))
+        Text("Create By", style = MaterialTheme.typography.labelMedium)
+        Spacer(Modifier.height(4.dp))
+        Text(
+            state.value.group.getOwner().ifBlank { "--" },
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.SemiBold
+            )
+        )
+        Spacer(Modifier.height(16.dp))
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
