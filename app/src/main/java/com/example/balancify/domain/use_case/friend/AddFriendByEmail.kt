@@ -1,8 +1,8 @@
 package com.example.balancify.domain.use_case.friend
 
-import com.example.balancify.core.constant.FriendStatus
 import com.example.balancify.core.ext.getTrigram
 import com.example.balancify.domain.model.FriendModel
+import com.example.balancify.domain.model.FriendStatus
 import com.example.balancify.domain.repository.FriendRepository
 import com.example.balancify.domain.repository.UserRepository
 

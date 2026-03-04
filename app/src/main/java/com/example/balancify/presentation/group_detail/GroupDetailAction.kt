@@ -6,4 +6,6 @@ sealed interface GroupDetailAction {
     data object OnDropdownMenuToggle : GroupDetailAction
     data object OnMemberBottomSheetToggle : GroupDetailAction
     data object OnLeaveGroupClick : GroupDetailAction
+    data object OnLeaveDismiss : GroupDetailAction
+    data object OnLeaveConfirmClick : GroupDetailAction
 }

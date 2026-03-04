@@ -1,9 +1,9 @@
 package com.example.balancify.domain.use_case.group
 
-import com.example.balancify.core.constant.PaginatedData
 import com.example.balancify.domain.model.GroupModel
 import com.example.balancify.domain.repository.GroupRepository
 import com.example.balancify.domain.repository.UserRepository
+import com.example.balancify.service.PaginatedData
 import com.google.firebase.firestore.DocumentSnapshot
 
 class GetGroups(

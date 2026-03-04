@@ -1,9 +1,9 @@
 package com.example.balancify.domain.use_case.friend
 
-import com.example.balancify.core.constant.PaginatedData
 import com.example.balancify.domain.model.FriendModel
 import com.example.balancify.domain.repository.FriendRepository
 import com.example.balancify.domain.service.FriendEnricher
+import com.example.balancify.service.PaginatedData
 import com.google.firebase.firestore.DocumentSnapshot
 
 class GetFriends(

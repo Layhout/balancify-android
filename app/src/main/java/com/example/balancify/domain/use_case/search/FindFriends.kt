@@ -1,10 +1,10 @@
 package com.example.balancify.domain.use_case.search
 
-import com.example.balancify.core.constant.PaginatedData
 import com.example.balancify.domain.model.FoundItemData
 import com.example.balancify.domain.model.FoundItemModel
 import com.example.balancify.domain.repository.FriendRepository
 import com.example.balancify.domain.service.FriendEnricher
+import com.example.balancify.service.PaginatedData
 import com.google.firebase.firestore.DocumentSnapshot
 
 class FindFriends(

@@ -55,7 +55,9 @@ fun MemberBottomSheet(
 
                 UserListCard(
                     order = CardOrder.getOrderFrom(index, state.value.group.members.size),
-                    user = item
+                    user = item.copy(
+                        name = "${item.name} ${if (item.id == state.value.group.createdBy) "(Owner)" else ""}"
+                    )
                 )
             }
         }

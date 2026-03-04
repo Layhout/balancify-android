@@ -3,7 +3,7 @@ package com.example.balancify.presentation.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.balancify.domain.model.UserModel
-import com.example.balancify.domain.repository.UserRepository
+import com.example.balancify.domain.use_case.user.UserUseCases
 import com.example.balancify.service.AuthResult
 import com.example.balancify.service.AuthService
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val authService: AuthService,
-    private val userRepository: UserRepository
+    private val userUseCases: UserUseCases,
 ) : ViewModel() {
     private val _state = MutableStateFlow(LoginState())
 
@@ -54,12 +54,12 @@ class LoginViewModel(
     private suspend fun processSignInResult(result: AuthResult, onSuccess: () -> Unit) {
         var user: UserModel? = result.user?.also {
             if (result.isNewUser) {
-                userRepository.addUser(it)
+                userUseCases.addUser(it)
             }
         }
 
         if (user == null) {
-            val result = userRepository.getUser(result.userId ?: "")
+            val result = userUseCases.getUser(result.userId ?: "")
 
             if (result.isSuccess) {
                 user = result.getOrNull()
@@ -67,7 +67,7 @@ class LoginViewModel(
         }
 
         user?.let {
-            userRepository.addLocalUser(it)
+            userUseCases.addLocalUser(it)
         }
 
         if (result.successful) {

@@ -64,7 +64,7 @@ fun NavigationRoot(
                     navController.navigate(Routes.Friend)
                 },
                 onNavigateToGroupFrom = {
-                    navController.navigate(Routes.GroupFrom)
+                    navController.navigate(Routes.GroupFrom())
                 },
                 onNavigateToGroupDetail = {
                     navController.navigate(Routes.GroupDetail(it))

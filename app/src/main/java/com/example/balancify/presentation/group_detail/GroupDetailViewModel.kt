@@ -93,6 +93,14 @@ class GroupDetailViewModel(
             }
 
             GroupDetailAction.OnLeaveGroupClick -> {
+                _state.update {
+                    it.copy(
+                        isLeaveBottomSheetVisible = true
+                    )
+                }
+            }
+
+            GroupDetailAction.OnLeaveConfirmClick -> {
                 viewModelScope.launch {
                     _state.update {
                         it.copy(
@@ -102,17 +110,34 @@ class GroupDetailViewModel(
                     val result = if (_state.value.group.members.size == 1)
                         groupUseCases.deleteGroup(_state.value.group.id)
                     else
-                        groupUseCases.leaveGroup(_state.value.group.id)
+                        groupUseCases.leaveGroup(_state.value.group.id, _state.value.group.members)
 
                     if (result.isFailure) {
                         alertError(result.exceptionOrNull()?.message)
-                    } else {
                         _state.update {
                             it.copy(
                                 enableAllAction = true
                             )
                         }
+                        return@launch
                     }
+
+                    _state.update {
+                        it.copy(
+                            enableAllAction = true,
+                            isLeaveBottomSheetVisible = false
+                        )
+                    }
+
+                    _events.trySend(GroupDetailEvent.OnLeaveGroup)
+                }
+            }
+
+            GroupDetailAction.OnLeaveDismiss -> {
+                _state.update {
+                    it.copy(
+                        isLeaveBottomSheetVisible = false
+                    )
                 }
             }
         }

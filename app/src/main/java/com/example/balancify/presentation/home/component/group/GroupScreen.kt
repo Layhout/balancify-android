@@ -46,27 +46,25 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun GroupScreen(
     viewModel: GroupViewModel = koinViewModel(),
-    onGroupListShouldRefreshFound: () -> Boolean? = { null },
     onNavigateToGroupDetail: (String) -> Unit,
+    shouldRefreshGroupList: Boolean = false
 ) {
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    val shouldRefreshGroupList = onGroupListShouldRefreshFound()
-
     LaunchedEffect(shouldRefreshGroupList) {
-        shouldRefreshGroupList?.let {
-            if (it) viewModel.onAction(GroupAction.OnRefresh)
-        }
+        if (shouldRefreshGroupList) viewModel.onAction(GroupAction.OnRefresh)
     }
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            is GroupEvent.OnError -> Toast.makeText(
-                context,
-                event.message,
-                Toast.LENGTH_LONG
-            ).show()
+            is GroupEvent.OnError -> {
+                Toast.makeText(
+                    context,
+                    event.message,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
@@ -145,7 +143,7 @@ fun GroupScreen(
                                 if (item.members.size > 3)
                                     Avatar(
                                         imageUrl = "",
-                                        modifier = Modifier.size(42.dp),
+                                        modifier = Modifier.size(32.dp),
                                         fallbackText = "+ ${item.members.size - 3}",
                                         bgColor = MaterialTheme.colorScheme.outlineVariant,
                                     )

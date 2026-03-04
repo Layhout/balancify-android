@@ -1,8 +1,9 @@
 package com.example.balancify.domain.model
 
-data class FoundItemModel(
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ExpenseGroupModel(
     val id: String = "",
-    val imageUrl: String = "",
     val name: String = "",
-    val data: FoundItemData? = null,
 )

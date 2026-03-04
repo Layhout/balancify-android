@@ -1,4 +1,4 @@
-package com.example.balancify.core.constant
+package com.example.balancify.service
 
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey

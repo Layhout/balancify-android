@@ -54,7 +54,8 @@ fun DetailHeader(
         Text("Create By", style = MaterialTheme.typography.labelMedium)
         Spacer(Modifier.height(4.dp))
         Text(
-            state.value.group.getOwner().ifBlank { "--" },
+            if (state.value.isCreateByLocalUser) "You" else
+                state.value.group.getOwner().ifBlank { "--" },
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.SemiBold
             )

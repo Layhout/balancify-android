@@ -1,6 +1,8 @@
 package com.example.balancify.di
 
 import com.example.balancify.MainViewModel
+import com.example.balancify.data.data_source.expense.ExpenseRemoteDataSource
+import com.example.balancify.data.data_source.expense.ExpenseRemoteDataSourceImp
 import com.example.balancify.data.data_source.friend.FriendRemoteDataSource
 import com.example.balancify.data.data_source.friend.FriendRemoteDataSourceImp
 import com.example.balancify.data.data_source.group.GroupRemoteDataSource
@@ -9,9 +11,11 @@ import com.example.balancify.data.data_source.user.UserLocalDataSource
 import com.example.balancify.data.data_source.user.UserLocalDataSourceImp
 import com.example.balancify.data.data_source.user.UserRemoteDataSource
 import com.example.balancify.data.data_source.user.UserRemoteDataSourceImp
+import com.example.balancify.data.repository.ExpenseRepositoryImp
 import com.example.balancify.data.repository.FriendRepositoryImp
 import com.example.balancify.data.repository.GroupRepositoryImp
 import com.example.balancify.data.repository.UserRepositoryImp
+import com.example.balancify.domain.repository.ExpenseRepository
 import com.example.balancify.domain.repository.FriendRepository
 import com.example.balancify.domain.repository.GroupRepository
 import com.example.balancify.domain.repository.UserRepository
@@ -66,7 +70,8 @@ val appModule = module {
     singleOf(::FriendRepositoryImp) bind FriendRepository::class
     singleOf(::GroupRemoteDataSourceImp) bind GroupRemoteDataSource::class
     singleOf(::GroupRepositoryImp) bind GroupRepository::class
-
+    singleOf(::ExpenseRemoteDataSourceImp) bind ExpenseRemoteDataSource::class
+    singleOf(::ExpenseRepositoryImp) bind ExpenseRepository::class
 
     /* Use Case Services */
     singleOf(::FriendEnricher)

@@ -20,9 +20,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.component.CardOrder
 import com.example.balancify.component.PillBox
 import com.example.balancify.component.UserListCard
-import com.example.balancify.core.constant.FriendStatus
 import com.example.balancify.core.ext.darken
 import com.example.balancify.domain.model.FriendModel
+import com.example.balancify.domain.model.FriendStatus
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.presentation.friend.FriendAction
 import com.example.balancify.presentation.friend.FriendViewModel

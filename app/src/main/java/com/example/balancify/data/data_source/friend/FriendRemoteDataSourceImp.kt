@@ -1,15 +1,15 @@
 package com.example.balancify.data.data_source.friend
 
-import com.example.balancify.core.constant.BatchDeleteItem
-import com.example.balancify.core.constant.BatchSetItem
-import com.example.balancify.core.constant.BatchUpdateItem
-import com.example.balancify.core.constant.FriendStatus
 import com.example.balancify.core.constant.ITEMS_LIMIT
-import com.example.balancify.core.constant.PaginatedData
 import com.example.balancify.core.ext.getTrigram
 import com.example.balancify.domain.model.FriendModel
+import com.example.balancify.domain.model.FriendStatus
 import com.example.balancify.service.AuthService
+import com.example.balancify.service.BatchDeleteItem
+import com.example.balancify.service.BatchSetItem
+import com.example.balancify.service.BatchUpdateItem
 import com.example.balancify.service.DatabaseService
+import com.example.balancify.service.PaginatedData
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
@@ -119,7 +119,7 @@ class FriendRemoteDataSourceImp(
                 BatchSetItem(
                     collection = buildCollectionPath(),
                     id = friend.userId,
-                    data = friend
+                    data = friend,
                 ),
                 BatchSetItem(
                     collection = buildCollectionPath(friend.userId),

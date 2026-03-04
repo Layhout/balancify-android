@@ -39,7 +39,7 @@ class AuthService {
 
     val isLoggedIn: Boolean
         get() = auth.currentUser != null
-    
+
     val userId: String
         get() = auth.currentUser?.uid ?: ""
 
@@ -130,7 +130,6 @@ class AuthService {
                 userId = signInResult.user?.uid,
                 isNewUser = signInResult.additionalUserInfo?.isNewUser ?: false,
                 user = if (signInResult.additionalUserInfo?.isNewUser ?: false) UserModel(
-                    documentId = signInResult.user?.uid.orEmpty(),
                     id = signInResult.user?.uid.orEmpty(),
                     email = signInResult.user?.email.orEmpty(),
                     imageUrl = signInResult.user?.photoUrl.toString(),

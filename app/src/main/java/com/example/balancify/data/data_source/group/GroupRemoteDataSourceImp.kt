@@ -1,26 +1,24 @@
 package com.example.balancify.data.data_source.group
 
-import com.example.balancify.core.constant.BatchDeleteItem
-import com.example.balancify.core.constant.BatchSetItem
-import com.example.balancify.core.constant.BatchUpdateItem
+import com.example.balancify.core.constant.FirebaseCollectionName
 import com.example.balancify.core.constant.ITEMS_LIMIT
-import com.example.balancify.core.constant.PaginatedData
 import com.example.balancify.domain.model.GroupMetadataModel
 import com.example.balancify.domain.model.GroupModel
-import com.example.balancify.domain.model.UserModel
+import com.example.balancify.service.BatchDeleteItem
+import com.example.balancify.service.BatchSetItem
+import com.example.balancify.service.BatchUpdateItem
 import com.example.balancify.service.DatabaseService
+import com.example.balancify.service.PaginatedData
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldPath.documentId
-import com.google.firebase.firestore.FieldValue.arrayRemove
-import com.google.firebase.firestore.FieldValue.delete
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
 
 class GroupRemoteDataSourceImp(
     private val db: DatabaseService,
 ) : GroupRemoteDataSource {
-    private val collectionName: String = "groups"
-    private val metaDataCollectionName: String = "group_metadata"
+    private val collectionName: String = FirebaseCollectionName.GROUPS.value
+    private val metaDataCollectionName: String = FirebaseCollectionName.GROUP_METADATA.value
 
     override suspend fun createGroup(group: GroupModel, groupMetadata: GroupMetadataModel) {
         db.batchSet(
@@ -72,22 +70,26 @@ class GroupRemoteDataSourceImp(
         return group ?: throw Exception("Group not found")
     }
 
-    override suspend fun leaveGroup(id: String, user: UserModel) {
+    override suspend fun leaveGroup(
+        id: String,
+        group: GroupModel,
+        groupMetadata: GroupMetadataModel,
+    ) {
         db.batchUpdate(
             listOf(
                 BatchUpdateItem(
                     collection = collectionName,
                     id = id,
                     fields = mapOf(
-                        "members" to arrayRemove(user),
-                        "memberIds" to arrayRemove(user.id)
+                        "members" to group.members,
+                        "memberIds" to group.memberIds,
                     )
                 ),
                 BatchUpdateItem(
                     collection = metaDataCollectionName,
                     id = id,
                     fields = mapOf(
-                        "membersFlag.${user.id}" to delete()
+                        "membersFlag" to groupMetadata.membersFlag
                     )
                 )
             )

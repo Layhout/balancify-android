@@ -4,8 +4,8 @@ import android.content.ClipData
 import androidx.compose.ui.platform.toClipEntry
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.balancify.core.constant.FriendStatus
 import com.example.balancify.domain.model.FriendModel
+import com.example.balancify.domain.model.FriendStatus
 import com.example.balancify.domain.use_case.friend.FriendUseCases
 import com.example.balancify.domain.use_case.user.UserUseCases
 import com.google.firebase.firestore.DocumentSnapshot

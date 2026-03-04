@@ -1,7 +1,7 @@
 package com.example.balancify.domain.repository
 
-import com.example.balancify.core.constant.PaginatedData
 import com.example.balancify.domain.model.FriendModel
+import com.example.balancify.service.PaginatedData
 import com.google.firebase.firestore.DocumentSnapshot
 
 interface FriendRepository {

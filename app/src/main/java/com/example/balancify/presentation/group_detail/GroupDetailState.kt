@@ -10,5 +10,6 @@ data class GroupDetailState(
     val showMemberBottomSheet: Boolean = false,
     val enableAllAction: Boolean = true,
     val isCreateByLocalUser: Boolean = false,
+    val isLeaveBottomSheetVisible: Boolean = false,
     val group: GroupModel = GroupModel(),
 )

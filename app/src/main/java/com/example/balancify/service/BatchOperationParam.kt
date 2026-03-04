@@ -1,4 +1,4 @@
-package com.example.balancify.core.constant
+package com.example.balancify.service
 
 data class BatchSetItem(
     val collection: String,

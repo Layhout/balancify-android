@@ -1,11 +1,10 @@
 package com.example.balancify.data.repository
 
-import com.example.balancify.core.constant.PaginatedData
 import com.example.balancify.data.data_source.group.GroupRemoteDataSource
 import com.example.balancify.domain.model.GroupMetadataModel
 import com.example.balancify.domain.model.GroupModel
-import com.example.balancify.domain.model.UserModel
 import com.example.balancify.domain.repository.GroupRepository
+import com.example.balancify.service.PaginatedData
 import com.google.firebase.firestore.DocumentSnapshot
 
 class GroupRepositoryImp(
@@ -15,11 +14,8 @@ class GroupRepositoryImp(
         group: GroupModel,
         groupMetadata: GroupMetadataModel
     ): Result<Unit> {
-        return try {
+        return Result.runCatching {
             remoteDataSource.createGroup(group, groupMetadata)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
@@ -27,51 +23,43 @@ class GroupRepositoryImp(
         lastDoc: DocumentSnapshot?,
         id: String
     ): Result<PaginatedData<GroupModel>> {
-        return try {
-            val result = remoteDataSource.getGroupsWithUser(lastDoc, id)
-            Result.success(result)
-        } catch (e: Exception) {
-            Result.failure(e)
+        return Result.runCatching {
+            remoteDataSource.getGroupsWithUser(lastDoc, id)
         }
     }
 
-    override suspend fun getGroupById(id: String, userId: String): Result<GroupModel> {
-        return try {
-            val result = remoteDataSource.getGroupById(id, userId)
-            Result.success(result)
-        } catch (e: Exception) {
-            Result.failure(e)
+    override suspend fun getGroupById(
+        id: String,
+        userId: String
+    ): Result<GroupModel> {
+        return Result.runCatching {
+            remoteDataSource.getGroupById(id, userId)
         }
     }
 
-    override suspend fun leaveGroup(id: String, user: UserModel): Result<Unit> {
-        return try {
-            remoteDataSource.leaveGroup(id, user)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+    override suspend fun leaveGroup(
+        id: String,
+        group: GroupModel,
+        groupMetadata: GroupMetadataModel,
+    ): Result<Unit> {
+        return Result.runCatching {
+            remoteDataSource.leaveGroup(id, group, groupMetadata)
         }
     }
 
     override suspend fun deleteGroup(id: String): Result<Unit> {
-        return try {
+        return Result.runCatching {
             remoteDataSource.deleteGroup(id)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
     override suspend fun updateGroup(
         id: String,
         group: GroupModel,
-        groupMetadata: GroupMetadataModel
+        groupMetadata: GroupMetadataModel,
     ): Result<Unit> {
-        return try {
+        return Result.runCatching {
             remoteDataSource.updateGroup(id, group, groupMetadata)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 }

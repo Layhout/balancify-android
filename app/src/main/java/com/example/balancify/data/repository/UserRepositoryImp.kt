@@ -10,56 +10,38 @@ class UserRepositoryImp(
     private val localDataSource: UserLocalDataSource
 ) : UserRepository {
     override suspend fun getUser(id: String): Result<UserModel?> {
-        return try {
-            val result = remoteDataSource.getUser(id)
-            Result.success(result)
-        } catch (e: Exception) {
-            Result.failure(e)
+        return Result.runCatching {
+            remoteDataSource.getUser(id)
         }
     }
 
     override suspend fun addUser(user: UserModel): Result<Unit> {
-        return try {
+        return Result.runCatching {
             remoteDataSource.addUser(user)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
     override suspend fun getLocalUser(): Result<UserModel?> {
-        return try {
-            val result = localDataSource.getUser()
-            Result.success(result)
-        } catch (e: Exception) {
-            Result.failure(e)
+        return Result.runCatching {
+            localDataSource.getUser()
         }
     }
 
     override suspend fun addLocalUser(user: UserModel): Result<Unit> {
-        return try {
+        return Result.runCatching {
             localDataSource.addUser(user)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
     override suspend fun getUserByIds(ids: List<String>): Result<List<UserModel>> {
-        return try {
-            val result = remoteDataSource.getUserByIds(ids)
-            Result.success(result)
-        } catch (e: Exception) {
-            Result.failure(e)
+        return Result.runCatching {
+            remoteDataSource.getUserByIds(ids)
         }
     }
 
     override suspend fun getUserByEmail(email: String): Result<UserModel?> {
-        return try {
-            val result = remoteDataSource.getUserByEmail(email)
-            Result.success(result)
-        } catch (e: Exception) {
-            Result.failure(e)
+        return Result.runCatching {
+            remoteDataSource.getUserByEmail(email)
         }
     }
 }

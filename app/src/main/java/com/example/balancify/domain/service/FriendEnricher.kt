@@ -17,7 +17,7 @@ class FriendEnricher(
             )
         )
 
-        val usersById = userResult.getOrNull()?.associateBy { it.documentId } ?: emptyMap()
+        val usersById = userResult.getOrNull()?.associateBy { it.id } ?: emptyMap()
 
         return Result.success(
             friends.map { friend ->

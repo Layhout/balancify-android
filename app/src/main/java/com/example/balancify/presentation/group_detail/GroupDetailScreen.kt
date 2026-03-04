@@ -30,8 +30,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.component.AppBar
 import com.example.balancify.component.InfiniteLazyColumn
 import com.example.balancify.core.util.ObserveAsEvents
-import com.example.balancify.domain.model.GroupModel
 import com.example.balancify.presentation.group_detail.component.DetailHeader
+import com.example.balancify.presentation.group_detail.component.LeaveConfirmationBottomSheet
 import com.example.balancify.presentation.group_detail.component.MemberBottomSheet
 import org.koin.androidx.compose.koinViewModel
 
@@ -39,7 +39,7 @@ import org.koin.androidx.compose.koinViewModel
 fun GroupDetailScreen(
     viewModel: GroupDetailViewModel = koinViewModel(),
     onLeaveGroupSuccess: () -> Unit,
-    onNavigateToGroupFrom: (GroupModel) -> Unit,
+    onNavigateToGroupFrom: (String) -> Unit,
     onGroupDidUpdateFound: () -> Boolean? = { null },
     onBackClick: () -> Unit
 ) {
@@ -56,11 +56,15 @@ fun GroupDetailScreen(
 
     ObserveAsEvents(viewModel.events) { event ->
         when (event) {
-            is GroupDetailEvent.OnError -> Toast.makeText(
-                context,
-                event.message,
-                Toast.LENGTH_LONG
-            ).show()
+            is GroupDetailEvent.OnError -> {
+                Toast.makeText(
+                    context,
+                    event.message,
+                    Toast.LENGTH_LONG
+                ).show()
+
+                println("=====> ${event.message}")
+            }
 
             GroupDetailEvent.OnLeaveGroup -> onLeaveGroupSuccess()
         }
@@ -108,7 +112,7 @@ fun GroupDetailScreen(
                                 enabled = state.value.enableAllAction,
                                 onClick = {
                                     viewModel.onAction(GroupDetailAction.OnDropdownMenuToggle)
-                                    onNavigateToGroupFrom(state.value.group)
+                                    onNavigateToGroupFrom(state.value.group.id)
                                 }
                             )
                         DropdownMenuItem(
@@ -157,6 +161,8 @@ fun GroupDetailScreen(
 
             if (state.value.showMemberBottomSheet)
                 MemberBottomSheet()
+            if (state.value.isLeaveBottomSheetVisible)
+                LeaveConfirmationBottomSheet()
         }
     }
 }
