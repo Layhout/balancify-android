@@ -1,4 +1,4 @@
-package com.example.balancify.core.constant
+package com.example.balancify.domain.model
 
 enum class FriendStatus {
     PENDING,
@@ -7,5 +7,3 @@ enum class FriendStatus {
     UNFRIEND,
     REQUESTING,
 }
-
-

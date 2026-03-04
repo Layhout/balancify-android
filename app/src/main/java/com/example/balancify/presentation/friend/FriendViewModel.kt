@@ -4,8 +4,8 @@ import android.content.ClipData
 import androidx.compose.ui.platform.toClipEntry
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.balancify.core.constant.FriendStatus
-import com.example.balancify.core.constant.RepositoryResult
+import com.example.balancify.domain.model.FriendModel
+import com.example.balancify.domain.model.FriendStatus
 import com.example.balancify.domain.use_case.friend.FriendUseCases
 import com.example.balancify.domain.use_case.user.UserUseCases
 import com.google.firebase.firestore.DocumentSnapshot
@@ -37,8 +37,8 @@ class FriendViewModel(
     private val _events = Channel<FriendEvent>()
     val events = _events.receiveAsFlow()
 
-    private suspend fun alertError(message: String?) {
-        _events.send(
+    private fun alertError(message: String?) {
+        _events.trySend(
             FriendEvent.OnError(message ?: "Unknown error")
         )
     }
@@ -46,33 +46,34 @@ class FriendViewModel(
     suspend fun getInviteLink(): String {
         return viewModelScope.async {
             val result = userUseCases.getLocalUser()
-            if (result is RepositoryResult.Success) {
-                return@async "https://balancify.vercel.app/app/invite/${result.data?.referralCode}"
+            if (result.isSuccess) {
+                return@async "https://balancify.vercel.app/app/invite/${result.getOrNull()?.referralCode}"
             } else {
-                alertError((result as RepositoryResult.Error).throwable.message)
+                alertError(result.exceptionOrNull()?.message)
             }
 
             return@async ""
         }.await()
     }
 
-    private fun loadData(lastDoc: DocumentSnapshot? = null) {
+    private fun loadData(lastDoc: DocumentSnapshot? = null, isLoading: Boolean = true) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = isLoading) }
             val result = friendUseCases.getFriends(lastDoc)
 
-            if (result is RepositoryResult.Success) {
+            if (result.isSuccess) {
                 _state.update {
                     it.copy(
                         isLoading = false,
                         isRefreshing = false,
-                        friends = if (lastDoc != null) it.friends + result.data.friends else result.data.friends,
-                        canLoadMore = result.data.canLoadMore,
-                        lastDoc = it.lastDoc,
+                        friends = if (lastDoc != null) it.friends + (result.getOrNull()?.data
+                            ?: emptyList()) else (result.getOrNull()?.data ?: emptyList()),
+                        canLoadMore = result.getOrNull()?.canLoadMore ?: false,
+                        lastDoc = result.getOrNull()?.lastDoc,
                     )
                 }
             } else {
-                alertError((result as RepositoryResult.Error).throwable.message)
+                alertError(result.exceptionOrNull()?.message)
             }
         }
     }
@@ -111,7 +112,7 @@ class FriendViewModel(
                         isRefreshing = true,
                     )
                 }
-                loadData()
+                loadData(isLoading = false)
             }
 
             is FriendAction.OnAddFriendClick -> {
@@ -131,7 +132,7 @@ class FriendViewModel(
                 viewModelScope.launch {
                     _state.update { it.copy(enableAllAction = false) }
                     val result = friendUseCases.unfriend(_state.value.focusingFriendId!!)
-                    if (result is RepositoryResult.Success) {
+                    if (result.isSuccess) {
                         _state.update { friendState ->
                             friendState.copy(
                                 focusingFriendId = null,
@@ -143,7 +144,7 @@ class FriendViewModel(
                             )
                         }
                     } else {
-                        alertError((result as RepositoryResult.Error).throwable.message)
+                        alertError(result.exceptionOrNull()?.message)
                     }
                 }
             }
@@ -161,10 +162,10 @@ class FriendViewModel(
                 viewModelScope.launch {
                     _state.update { it.copy(enableAllAction = false) }
                     val result = friendUseCases.acceptFriend(action.id)
-                    if (result is RepositoryResult.Success) {
+                    if (result.isSuccess) {
                         updateFriendList(action.id, FriendStatus.ACCEPTED)
                     } else {
-                        alertError((result as RepositoryResult.Error).throwable.message)
+                        alertError(result.exceptionOrNull()?.message)
                     }
                 }
             }
@@ -173,10 +174,10 @@ class FriendViewModel(
                 viewModelScope.launch {
                     _state.update { it.copy(enableAllAction = false) }
                     val result = friendUseCases.rejectFriend(action.id)
-                    if (result is RepositoryResult.Success) {
+                    if (result.isSuccess) {
                         updateFriendList(action.id, FriendStatus.REJECTED)
                     } else {
-                        alertError((result as RepositoryResult.Error).throwable.message)
+                        alertError(result.exceptionOrNull()?.message)
                     }
                 }
             }
@@ -200,27 +201,32 @@ class FriendViewModel(
                 } else {
                     viewModelScope.launch {
                         val localUserResult = userUseCases.getLocalUser()
-                        if (localUserResult is RepositoryResult.Success && localUserResult.data?.email == _state.value.email) {
+                        if (
+                            localUserResult.isSuccess &&
+                            localUserResult.getOrNull()?.email == _state.value.email
+                        ) {
                             alertError("You cannot add yourself as a friend.")
                             return@launch
                         }
-                        if (localUserResult is RepositoryResult.Error) {
-                            alertError(localUserResult.throwable.message)
+                        if (localUserResult.isFailure) {
+                            alertError(localUserResult.exceptionOrNull()?.message)
                             return@launch
                         }
 
                         _state.update { it.copy(enableAllAction = false) }
                         val result = friendUseCases.addFriendByEmail(_state.value.email)
-                        if (result is RepositoryResult.Success) {
+                        if (result.isSuccess) {
                             _state.update {
                                 it.copy(
                                     enableAllAction = true,
                                     addFriendDialogVisible = false,
                                     email = "",
-                                    friends = listOf(result.data) + it.friends
+                                    friends = listOf(
+                                        result.getOrNull() ?: FriendModel()
+                                    ) + it.friends
                                 )
                             }
-                        } else if (result is RepositoryResult.Error && result.throwable.message == "USER404") {
+                        } else if (result.isFailure && result.exceptionOrNull()?.message == "USER404") {
                             val inviteLink = getInviteLink()
 
                             _state.update {
@@ -233,7 +239,7 @@ class FriendViewModel(
                                 )
                             }
                         } else {
-                            alertError((result as RepositoryResult.Error).throwable.message)
+                            alertError(result.exceptionOrNull()?.message)
                         }
                     }
                 }
@@ -254,6 +260,12 @@ class FriendViewModel(
                     _state.update { it.copy(isInviteLinkCopied = true) }
                     delay(3000)
                     _state.update { it.copy(isInviteLinkCopied = false) }
+                }
+            }
+
+            is FriendAction.OnShareLinkClick -> {
+                viewModelScope.launch {
+                    _events.send(FriendEvent.OnShareLinkClicked)
                 }
             }
         }

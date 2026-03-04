@@ -1,9 +1,8 @@
 package com.example.balancify.domain.use_case.friend
 
-import com.example.balancify.core.constant.FriendStatus
-import com.example.balancify.core.constant.RepositoryResult
 import com.example.balancify.core.ext.getTrigram
 import com.example.balancify.domain.model.FriendModel
+import com.example.balancify.domain.model.FriendStatus
 import com.example.balancify.domain.repository.FriendRepository
 import com.example.balancify.domain.repository.UserRepository
 
@@ -11,31 +10,37 @@ class AddFriendByEmail(
     private val repository: FriendRepository,
     private val userRepository: UserRepository,
 ) {
-    suspend operator fun invoke(email: String): RepositoryResult<FriendModel> {
+    suspend operator fun invoke(email: String): Result<FriendModel> {
         val userResult = userRepository.getUserByEmail(email)
 
-        if (userResult is RepositoryResult.Error) return userResult
+        if (userResult.isFailure) return Result.failure(
+            userResult.exceptionOrNull()!!
+        )
 
-        val foundUser = (userResult as RepositoryResult.Success).data
-            ?: return RepositoryResult.Error(Exception("USER404"))
+        val foundUser = userResult.getOrNull()
+            ?: return Result.failure(Exception("USER404"))
 
         val friendResult = repository.getFriend(foundUser.id)
 
-        if (friendResult is RepositoryResult.Error) return friendResult
+        if (friendResult.isFailure) return Result.failure(
+            friendResult.exceptionOrNull()!!
+        )
 
-        val foundFriend = (friendResult as RepositoryResult.Success).data
+        val foundFriend = friendResult.getOrNull()
 
         if (foundFriend != null && foundFriend.status == FriendStatus.ACCEPTED)
-            return RepositoryResult.Error(
+            return Result.failure(
                 Exception("Friend already exists")
             )
 
         val localUserResult = userRepository.getLocalUser()
 
-        if (localUserResult is RepositoryResult.Error) return localUserResult
+        if (localUserResult.isFailure) return Result.failure(
+            localUserResult.exceptionOrNull()!!
+        )
 
-        val localUser = (localUserResult as RepositoryResult.Success).data
-            ?: return RepositoryResult.Error(Exception("Error local user"))
+        val localUser = localUserResult.getOrNull()
+            ?: return Result.failure(Exception("Error local user"))
 
         val friend = FriendModel(
             userId = foundUser.id,
@@ -53,8 +58,10 @@ class AddFriendByEmail(
 
         val result = repository.addFriend(friend, youAsFriend)
 
-        if (result is RepositoryResult.Error) return result
+        if (result.isFailure) return Result.failure(
+            result.exceptionOrNull()!!
+        )
 
-        return RepositoryResult.Success(friend.copy(user = foundUser))
+        return Result.success(friend.copy(user = foundUser))
     }
 }

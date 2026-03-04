@@ -1,42 +1,33 @@
 package com.example.balancify.domain.use_case.friend
 
-import com.example.balancify.core.constant.RepositoryResult
-import com.example.balancify.domain.model.PaginatedFriendsModel
-import com.example.balancify.domain.model.UserModel
+import com.example.balancify.domain.model.FriendModel
 import com.example.balancify.domain.repository.FriendRepository
-import com.example.balancify.domain.repository.UserRepository
+import com.example.balancify.domain.service.FriendEnricher
+import com.example.balancify.service.PaginatedData
 import com.google.firebase.firestore.DocumentSnapshot
 
 class GetFriends(
     private val repository: FriendRepository,
-    private val userRepository: UserRepository,
+    private val friendEnricher: FriendEnricher,
 ) {
-    suspend operator fun invoke(lastDoc: DocumentSnapshot?): RepositoryResult<PaginatedFriendsModel> {
+    suspend operator fun invoke(
+        lastDoc: DocumentSnapshot?,
+    ): Result<PaginatedData<FriendModel>> {
         val result = repository.getFriends(lastDoc)
 
-        if (result is RepositoryResult.Error) return result
+        if (result.isFailure) return result
 
-        val userResult =
-            userRepository.getUserByIds(
-                (result as RepositoryResult.Success)
-                    .data.friends.map {
-                        it.userId
-                    }
-            )
+        val enrichedResult = friendEnricher(result.getOrNull()?.data ?: emptyList())
 
-        if (userResult is RepositoryResult.Error) return result
+        if (enrichedResult.isFailure) return Result.failure(
+            enrichedResult.exceptionOrNull()!!
+        )
 
-        return result.copy(
-            data = result.data.copy(
-                friends = result.data.friends.map { friend ->
-                    friend.copy(
-                        user = (userResult as RepositoryResult.Success)
-                            .data.find {
-                                it.documentId == friend.userId
-                            } ?: UserModel()
-                    )
-                }
-            )
+        return Result.success(
+            result.getOrNull()?.copy(
+                data = enrichedResult.getOrNull()
+                    ?: emptyList()
+            ) ?: PaginatedData()
         )
     }
 }

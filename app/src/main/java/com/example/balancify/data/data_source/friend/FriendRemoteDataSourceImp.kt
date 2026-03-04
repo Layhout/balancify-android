@@ -1,14 +1,17 @@
 package com.example.balancify.data.data_source.friend
 
-import com.example.balancify.core.constant.BatchDeleteItem
-import com.example.balancify.core.constant.BatchSetItem
-import com.example.balancify.core.constant.BatchUpdateItem
-import com.example.balancify.core.constant.FriendStatus
+import com.example.balancify.core.constant.ITEMS_LIMIT
+import com.example.balancify.core.ext.getTrigram
 import com.example.balancify.domain.model.FriendModel
-import com.example.balancify.domain.model.PaginatedFriendsModel
+import com.example.balancify.domain.model.FriendStatus
 import com.example.balancify.service.AuthService
+import com.example.balancify.service.BatchDeleteItem
+import com.example.balancify.service.BatchSetItem
+import com.example.balancify.service.BatchUpdateItem
 import com.example.balancify.service.DatabaseService
+import com.example.balancify.service.PaginatedData
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
 
 class FriendRemoteDataSourceImp(
@@ -19,10 +22,26 @@ class FriendRemoteDataSourceImp(
         return "friends/${id}/data"
     }
 
-    override suspend fun getFriends(lastDoc: DocumentSnapshot?): PaginatedFriendsModel {
-        val result = db.getPage(buildCollectionPath(), 20, lastDoc, build = {
-            whereNotEqualTo("status", FriendStatus.REJECTED)
-        })
+    override suspend fun getFriends(
+        lastDoc: DocumentSnapshot?,
+        search: String?
+    ): PaginatedData<FriendModel> {
+        val result = db.getPage(
+            buildCollectionPath(), ITEMS_LIMIT, lastDoc,
+            queryBuilder = {
+                var query = it
+
+                if (!search.isNullOrBlank()) {
+                    query = query.whereArrayContainsAny(
+                        "nameTrigrams",
+                        search.getTrigram()
+                    )
+                }
+
+                query.whereNotEqualTo("status", FriendStatus.REJECTED)
+                    .orderBy("createdAt", Query.Direction.DESCENDING)
+            }
+        )
 
         val friends = result.snapshot.documents.mapNotNull {
             it.toObject<FriendModel>()
@@ -30,8 +49,8 @@ class FriendRemoteDataSourceImp(
 
         val canLoadMore = result.canLoadMore
 
-        return PaginatedFriendsModel(
-            friends = friends,
+        return PaginatedData(
+            data = friends,
             canLoadMore = canLoadMore,
             lastDoc = result.snapshot.documents.lastOrNull()
         )
@@ -100,7 +119,7 @@ class FriendRemoteDataSourceImp(
                 BatchSetItem(
                     collection = buildCollectionPath(),
                     id = friend.userId,
-                    data = friend
+                    data = friend,
                 ),
                 BatchSetItem(
                     collection = buildCollectionPath(friend.userId),

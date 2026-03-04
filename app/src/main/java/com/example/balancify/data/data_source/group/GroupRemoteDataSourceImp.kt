@@ -1,0 +1,142 @@
+package com.example.balancify.data.data_source.group
+
+import com.example.balancify.core.constant.FirebaseCollectionName
+import com.example.balancify.core.constant.ITEMS_LIMIT
+import com.example.balancify.domain.model.GroupMetadataModel
+import com.example.balancify.domain.model.GroupModel
+import com.example.balancify.service.BatchDeleteItem
+import com.example.balancify.service.BatchSetItem
+import com.example.balancify.service.BatchUpdateItem
+import com.example.balancify.service.DatabaseService
+import com.example.balancify.service.PaginatedData
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldPath.documentId
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.toObject
+
+class GroupRemoteDataSourceImp(
+    private val db: DatabaseService,
+) : GroupRemoteDataSource {
+    private val collectionName: String = FirebaseCollectionName.GROUPS.value
+    private val metaDataCollectionName: String = FirebaseCollectionName.GROUP_METADATA.value
+
+    override suspend fun createGroup(group: GroupModel, groupMetadata: GroupMetadataModel) {
+        db.batchSet(
+            listOf(
+                BatchSetItem(
+                    collection = collectionName,
+                    id = group.id,
+                    data = group,
+                ),
+                BatchSetItem(
+                    collection = metaDataCollectionName,
+                    id = group.id,
+                    data = groupMetadata
+                ),
+            )
+        )
+    }
+
+    override suspend fun getGroupsWithUser(
+        lastDoc: DocumentSnapshot?,
+        id: String
+    ): PaginatedData<GroupModel> {
+        val result = db.getPage(collectionName, ITEMS_LIMIT, lastDoc, queryBuilder = {
+            it.whereArrayContains("memberIds", id)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+        })
+
+        val groups = result.snapshot.documents.mapNotNull {
+            it.toObject<GroupModel>()
+        }
+
+        val canLoadMore = result.canLoadMore
+
+        return PaginatedData(
+            data = groups,
+            canLoadMore = canLoadMore,
+            lastDoc = result.snapshot.documents.lastOrNull()
+        )
+    }
+
+    override suspend fun getGroupById(id: String, userId: String): GroupModel {
+        val result = db.getPage(collectionName, 1, null, queryBuilder = {
+            it.whereEqualTo(documentId(), id)
+                .whereArrayContains("memberIds", userId)
+        })
+
+        val group = result.snapshot.documents.firstOrNull()?.toObject<GroupModel>()
+
+        return group ?: throw Exception("Group not found")
+    }
+
+    override suspend fun leaveGroup(
+        id: String,
+        group: GroupModel,
+        groupMetadata: GroupMetadataModel,
+    ) {
+        db.batchUpdate(
+            listOf(
+                BatchUpdateItem(
+                    collection = collectionName,
+                    id = id,
+                    fields = mapOf(
+                        "members" to group.members,
+                        "memberIds" to group.memberIds,
+                    )
+                ),
+                BatchUpdateItem(
+                    collection = metaDataCollectionName,
+                    id = id,
+                    fields = mapOf(
+                        "membersFlag" to groupMetadata.membersFlag
+                    )
+                )
+            )
+        )
+    }
+
+    override suspend fun deleteGroup(id: String) {
+        db.batchDelete(
+            listOf(
+                BatchDeleteItem(
+                    collection = collectionName,
+                    id = id
+                ),
+                BatchDeleteItem(
+                    collection = metaDataCollectionName,
+                    id = id
+                )
+            )
+        )
+    }
+
+    override suspend fun updateGroup(
+        id: String,
+        group: GroupModel,
+        groupMetadata: GroupMetadataModel
+    ) {
+        db.batchUpdate(
+            listOf(
+                BatchUpdateItem(
+                    collection = collectionName,
+                    id = id,
+                    fields = mapOf(
+                        "name" to group.name,
+                        "description" to group.description,
+                        "members" to group.members,
+                        "memberIds" to group.memberIds,
+                    )
+                ),
+                BatchUpdateItem(
+                    collection = metaDataCollectionName,
+                    id = id,
+                    fields = mapOf(
+                        "nameTrigrams" to groupMetadata.nameTrigrams,
+                        "membersFlag" to groupMetadata.membersFlag,
+                    )
+                )
+            )
+        )
+    }
+}

@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,13 +39,18 @@ fun UserProFile(viewModel: AccountViewModel = koinViewModel()) {
     Spacer(modifier = Modifier.height(16.dp))
     Text(
         text = user?.name ?: "N/A",
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth(),
         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
     )
     Spacer(modifier = Modifier.height(4.dp))
     Text(
-        text = user?.email ?: "", textAlign = TextAlign.Center,
+        text = user?.email ?: "",
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth(),
         style = MaterialTheme.typography.bodySmall,
     )

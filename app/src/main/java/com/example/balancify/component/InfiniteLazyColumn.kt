@@ -26,6 +26,7 @@ fun <T> InfiniteLazyColumn(
     canLoadMore: Boolean = true,
     onLoadMore: () -> Unit,
     key: ((T) -> Any)? = null,
+    header: (@Composable () -> Unit)? = null,
     itemContent: @Composable (index: Int, item: T) -> Unit,
 ) {
     val reachedBottom: Boolean by remember { derivedStateOf { listState.reachedBottom() } }
@@ -38,6 +39,12 @@ fun <T> InfiniteLazyColumn(
         modifier = modifier,
         state = listState,
     ) {
+        header?.let {
+            item(key = "header") {
+                it()
+            }
+        }
+        
         if (key != null) {
             itemsIndexed(
                 items = items,

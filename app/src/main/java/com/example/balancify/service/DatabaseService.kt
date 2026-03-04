@@ -1,9 +1,5 @@
 package com.example.balancify.service
 
-import com.example.balancify.core.constant.BatchDeleteItem
-import com.example.balancify.core.constant.BatchSetItem
-import com.example.balancify.core.constant.BatchUpdateItem
-import com.example.balancify.core.constant.PageResult
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
@@ -78,15 +74,23 @@ class DatabaseService {
         collection: String,
         pageSize: Long,
         lastDoc: DocumentSnapshot? = null,
-        build: Query.() -> Query = { this }
+        queryBuilder: (Query) -> Query = { it }
     ): PageResult {
-        var query = collectionRef(collection).build().limit(pageSize + 1)
-        if (lastDoc != null) query = query.startAfter(lastDoc)
+        var query = queryBuilder(
+            collectionRef(collection).limit(pageSize + 1)
+        )
 
+        lastDoc?.let {
+            query = query.startAfter(it)
+        }
+
+        val snapshot = query.get().await()
+
+        val canLoadMore = snapshot.size() > pageSize
 
         return PageResult(
-            snapshot = query.get().await(),
-            canLoadMore = query.get().await().size() > pageSize + 1
+            snapshot = snapshot,
+            canLoadMore = canLoadMore
         )
     }
 

@@ -3,7 +3,6 @@ package com.example.balancify.service
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.balancify.core.constant.LocalDataStoreKey
 import kotlinx.coroutines.flow.first
 
 val Context.datastore by preferencesDataStore(name = "balancify")

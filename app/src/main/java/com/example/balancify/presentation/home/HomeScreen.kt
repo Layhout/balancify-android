@@ -1,5 +1,7 @@
 package com.example.balancify.presentation.home
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Column
@@ -10,9 +12,7 @@ import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.DataUsage
 import androidx.compose.material.icons.outlined.Groups
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
@@ -20,17 +20,22 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.balancify.component.AppBar
 import com.example.balancify.core.constant.AppScreen
+import com.example.balancify.presentation.home.component.FabMenu
 import com.example.balancify.presentation.home.component.account.AccountScreen
 import com.example.balancify.presentation.home.component.dashboard.DashboardScreen
 import com.example.balancify.presentation.home.component.expense.ExpenseScreen
@@ -48,16 +53,43 @@ enum class NavDestination(
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onLogoutComplete: () -> Unit, onNavigateToFriend: () -> Unit) {
+fun HomeScreen(
+    onLogoutComplete: () -> Unit,
+    onNavigateToFriend: () -> Unit,
+    onNavigateToGroupFrom: () -> Unit,
+    onNavigateToGroupDetail: (String) -> Unit,
+    onGroupListShouldRefreshFound: () -> Boolean?,
+) {
     val navController = rememberNavController()
     val startDestination = NavDestination.DASHBOARD
     var selectedRoute by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
-    var prevSelectedRoute = startDestination
+    var prevSelectedRoute by rememberSaveable { mutableStateOf(startDestination) }
+
+    val shouldRefreshGroupList = onGroupListShouldRefreshFound()
+    println("====> shouldRefreshGroupList $shouldRefreshGroupList")
+    LaunchedEffect(shouldRefreshGroupList) {
+        shouldRefreshGroupList?.let {
+            if (it)
+                onTabClick(
+                    index = NavDestination.GROUPS.ordinal,
+                    destination = NavDestination.GROUPS,
+                    selectedRoute = selectedRoute,
+                    prevSelectedRoute = prevSelectedRoute,
+                    navController = navController,
+                    onNavigate = { newIndex, newDest ->
+                        selectedRoute = newIndex
+                        prevSelectedRoute = newDest
+                    },
+                )
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        topBar = { AppBar(title = NavDestination.entries[selectedRoute].label) },
         bottomBar = {
             NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
                 NavDestination.entries.forEachIndexed { index, destination ->
@@ -65,18 +97,17 @@ fun HomeScreen(onLogoutComplete: () -> Unit, onNavigateToFriend: () -> Unit) {
                         selected = index == selectedRoute,
                         label = { Text(destination.label, fontWeight = FontWeight.SemiBold) },
                         onClick = {
-                            if (selectedRoute != index) {
-                                navController.navigate(route = destination.screen.route) {
-                                    popUpTo(prevSelectedRoute.screen.route) {
-                                        saveState = true
-                                        inclusive = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
+                            onTabClick(
+                                index = index,
+                                destination = destination,
+                                selectedRoute = selectedRoute,
+                                prevSelectedRoute = prevSelectedRoute,
+                                navController = navController,
+                                onNavigate = { newIndex, newDest ->
+                                    selectedRoute = newIndex
+                                    prevSelectedRoute = newDest
                                 }
-                                selectedRoute = index
-                                prevSelectedRoute = destination
-                            }
+                            )
                         },
                         icon = {
                             Icon(
@@ -88,13 +119,11 @@ fun HomeScreen(onLogoutComplete: () -> Unit, onNavigateToFriend: () -> Unit) {
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { }) {
-                Icon(
-                    Icons.Rounded.Add,
-                    "New Expense"
-                )
-            }
-        }) { innerPadding ->
+            FabMenu(
+                onCreateGroupClick = onNavigateToGroupFrom
+            )
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -114,7 +143,11 @@ fun HomeScreen(onLogoutComplete: () -> Unit, onNavigateToFriend: () -> Unit) {
                         when (destination) {
                             NavDestination.DASHBOARD -> DashboardScreen()
                             NavDestination.EXPENSES -> ExpenseScreen()
-                            NavDestination.GROUPS -> GroupScreen()
+                            NavDestination.GROUPS -> GroupScreen(
+                                shouldRefreshGroupList = shouldRefreshGroupList ?: false,
+                                onNavigateToGroupDetail = onNavigateToGroupDetail
+                            )
+
                             NavDestination.ACCOUNT -> AccountScreen(
                                 onLogoutComplete = onLogoutComplete,
                                 onNavigateToFriend = onNavigateToFriend,
@@ -124,6 +157,33 @@ fun HomeScreen(onLogoutComplete: () -> Unit, onNavigateToFriend: () -> Unit) {
                 }
             }
         }
+    }
+}
 
+private fun onTabClick(
+    index: Int,
+    destination: NavDestination,
+    selectedRoute: Int,
+    prevSelectedRoute: NavDestination,
+    navController: NavHostController,
+    onNavigate: (Int, NavDestination) -> Unit
+) {
+    if (selectedRoute != index) {
+        navController.navigateToTab(
+            route = destination.screen.route,
+            popUpToRoute = prevSelectedRoute.screen.route
+        )
+        onNavigate(index, destination)
+    }
+}
+
+private fun NavHostController.navigateToTab(route: String, popUpToRoute: String) {
+    this.navigate(route) {
+        popUpTo(popUpToRoute) {
+            saveState = true
+            inclusive = true
+        }
+        launchSingleTop = true
+        restoreState = true
     }
 }

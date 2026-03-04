@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -21,20 +19,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.balancify.core.constant.BORDER_RADIUS_MD
+import com.example.balancify.component.CardOrder
+import com.example.balancify.component.StyledCard
 
 @Composable
 fun CardItem(
     icon: ImageVector,
     label: String,
-    shape: RoundedCornerShape = RoundedCornerShape(BORDER_RADIUS_MD),
     colors: CardColors = CardDefaults.cardColors(),
+    order: CardOrder,
     onClick: () -> Unit = {},
 ) {
-    Card(
+    StyledCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = shape,
         colors = colors,
+        order = order,
     ) {
         Row(
             modifier = Modifier

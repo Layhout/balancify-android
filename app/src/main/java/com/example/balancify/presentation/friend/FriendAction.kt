@@ -16,4 +16,5 @@ sealed interface FriendAction {
     data class OnEmailUpdate(val email: String) : FriendAction
     data object OnDismissInviteLinkBottomSheet : FriendAction
     data class OnInviteLinkClick(val clipboard: Clipboard) : FriendAction
+    data object OnShareLinkClick : FriendAction
 }
