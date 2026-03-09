@@ -20,6 +20,8 @@ import com.example.balancify.domain.repository.FriendRepository
 import com.example.balancify.domain.repository.GroupRepository
 import com.example.balancify.domain.repository.UserRepository
 import com.example.balancify.domain.service.FriendEnricher
+import com.example.balancify.domain.use_case.expense.ExpenseUseCases
+import com.example.balancify.domain.use_case.expense.GetExpenses
 import com.example.balancify.domain.use_case.friend.AcceptFriend
 import com.example.balancify.domain.use_case.friend.AddFriendByEmail
 import com.example.balancify.domain.use_case.friend.FriendUseCases
@@ -45,6 +47,7 @@ import com.example.balancify.presentation.group_detail.GroupDetailViewModel
 import com.example.balancify.presentation.group_form.GroupFormViewModel
 import com.example.balancify.presentation.home.HomeViewModel
 import com.example.balancify.presentation.home.component.account.AccountViewModel
+import com.example.balancify.presentation.home.component.expense.ExpenseViewModel
 import com.example.balancify.presentation.home.component.group.GroupViewModel
 import com.example.balancify.presentation.login.LoginViewModel
 import com.example.balancify.presentation.search.SearchViewModel
@@ -109,6 +112,11 @@ val appModule = module {
             updateGroup = UpdateGroup(get(), get()),
         )
     }
+    single {
+        ExpenseUseCases(
+            getExpenses = GetExpenses(get(), get())
+        )
+    }
 
     /* View Models */
     viewModelOf(::MainViewModel)
@@ -120,4 +128,5 @@ val appModule = module {
     viewModelOf(::GroupFormViewModel)
     viewModelOf(::GroupViewModel)
     viewModelOf(::GroupDetailViewModel)
+    viewModelOf(::ExpenseViewModel)
 }

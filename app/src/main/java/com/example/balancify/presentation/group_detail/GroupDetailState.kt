@@ -1,5 +1,6 @@
 package com.example.balancify.presentation.group_detail
 
+import com.example.balancify.domain.model.ExpenseModel
 import com.example.balancify.domain.model.GroupModel
 
 data class GroupDetailState(
@@ -12,4 +13,5 @@ data class GroupDetailState(
     val isCreateByLocalUser: Boolean = false,
     val isLeaveBottomSheetVisible: Boolean = false,
     val group: GroupModel = GroupModel(),
+    val expenses: List<ExpenseModel> = emptyList(),
 )

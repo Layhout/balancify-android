@@ -1,8 +1,10 @@
-package com.example.balancify.presentation.home.component.group
+package com.example.balancify.presentation.home.component.expense
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.balancify.domain.use_case.group.GroupUseCases
+import com.example.balancify.domain.model.UserModel
+import com.example.balancify.domain.use_case.expense.ExpenseUseCases
+import com.example.balancify.domain.use_case.user.UserUseCases
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,42 +15,52 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class GroupViewModel(
-    private val groupUseCases: GroupUseCases
+class ExpenseViewModel(
+    private val expenseUseCases: ExpenseUseCases,
+    private val userUseCases: UserUseCases,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(GroupState())
-    val state = _state.onStart {
-        loadData()
-    }.stateIn(
+    private val _state = MutableStateFlow(ExpenseState())
+    val state = _state.onStart { loadData() }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000L),
-        initialValue = GroupState()
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ExpenseState()
     )
 
-    private val _events = Channel<GroupEvent>()
+    private val _events = Channel<ExpenseEvent>()
     val events = _events.receiveAsFlow()
 
     private fun alertError(message: String?) {
         _events.trySend(
-            GroupEvent.OnError(message ?: "Unknown error")
+            ExpenseEvent.OnError(message ?: "Unknown error")
         )
     }
 
-    private fun loadData(lastDoc: DocumentSnapshot? = null, isLoading: Boolean = true) {
+    fun loadData(lastDoc: DocumentSnapshot? = null, isLoading: Boolean = true) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = isLoading) }
 
-            val result = groupUseCases.getGroups(lastDoc)
+            var localUser: UserModel? = null
+
+            if (_state.value.localUser == null) {
+                val result = userUseCases.getLocalUser()
+
+                if (result.isSuccess) {
+                    localUser = result.getOrNull()
+                }
+            }
+
+            val result = expenseUseCases.getExpenses(lastDoc)
 
             if (result.isSuccess) {
                 _state.update {
                     it.copy(
                         isLoading = false,
                         isRefreshing = false,
-                        groups = if (lastDoc != null) it.groups + (result.getOrNull()?.data
+                        expenses = if (lastDoc != null) it.expenses + (result.getOrNull()?.data
                             ?: emptyList()) else (result.getOrNull()?.data ?: emptyList()),
                         canLoadMore = result.getOrNull()?.canLoadMore ?: false,
                         lastDoc = result.getOrNull()?.lastDoc,
+                        localUser = localUser,
                     )
                 }
             } else {
@@ -57,10 +69,10 @@ class GroupViewModel(
         }
     }
 
-    fun onAction(action: GroupAction) {
+    fun onAction(action: ExpenseAction) {
         when (action) {
-            GroupAction.OnLoadMore -> loadData(_state.value.lastDoc)
-            GroupAction.OnRefresh -> {
+            ExpenseAction.OnLoadMore -> loadData(_state.value.lastDoc)
+            ExpenseAction.OnRefresh -> {
                 _state.update {
                     it.copy(
                         isRefreshing = true,

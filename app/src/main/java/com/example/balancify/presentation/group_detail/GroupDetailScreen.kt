@@ -2,19 +2,27 @@ package com.example.balancify.presentation.group_detail
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.DataSaverOn
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.PeopleAlt
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -62,8 +70,6 @@ fun GroupDetailScreen(
                     event.message,
                     Toast.LENGTH_LONG
                 ).show()
-
-                println("=====> ${event.message}")
             }
 
             GroupDetailEvent.OnLeaveGroup -> onLeaveGroupSuccess()
@@ -137,26 +143,58 @@ fun GroupDetailScreen(
                 }
             },
         ) {
-            PullToRefreshBox(
-                isRefreshing = state.value.isRefreshing,
-                onRefresh = { viewModel.onAction(GroupDetailAction.OnRefresh) },
-                modifier = Modifier
-                    .padding(it)
-                    .padding(horizontal = 16.dp),
-            ) {
-                InfiniteLazyColumn(
-                    header = {
-                        DetailHeader()
-                    },
-                    items = emptyList<Any>(),
-                    isLoadingMore = state.value.isLoading,
-                    canLoadMore = state.value.canLoadMore,
-                    onLoadMore = {
-                        viewModel.onAction(GroupDetailAction.OnLoadMore)
-                    },
+            Column {
+                PullToRefreshBox(
+                    isRefreshing = state.value.isRefreshing,
+                    onRefresh = { viewModel.onAction(GroupDetailAction.OnRefresh) },
                     modifier = Modifier
-                        .fillMaxSize(),
-                ) { index, item -> }
+                        .weight(1f)
+                        .padding(it)
+                        .padding(horizontal = 16.dp),
+                ) {
+                    InfiniteLazyColumn(
+                        header = {
+                            DetailHeader()
+                        },
+                        items = state.value.expenses,
+                        isLoadingMore = state.value.isLoading,
+                        canLoadMore = state.value.canLoadMore,
+                        onLoadMore = {
+                            viewModel.onAction(GroupDetailAction.OnLoadMore)
+                        },
+                        modifier = Modifier
+                            .fillMaxSize(),
+                    ) { index, item -> }
+                }
+                Row(
+                    Modifier
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 32.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Button(
+                        onClick = {},
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Outlined.DataSaverOn, contentDescription = null)
+                        Spacer(Modifier.width(6.dp))
+                        Text("Add Expense")
+                    }
+                    FilledIconButton(
+                        enabled = state.value.enableAllAction,
+                        onClick = {
+                            viewModel.onAction(GroupDetailAction.OnMemberBottomSheetToggle)
+                        },
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                        ),
+                    ) {
+                        Icon(Icons.Outlined.PeopleAlt, contentDescription = null)
+                    }
+                }
             }
 
             if (state.value.showMemberBottomSheet)

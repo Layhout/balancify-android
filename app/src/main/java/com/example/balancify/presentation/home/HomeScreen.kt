@@ -69,7 +69,7 @@ fun HomeScreen(
     var prevSelectedRoute by rememberSaveable { mutableStateOf(startDestination) }
 
     val shouldRefreshGroupList = onGroupListShouldRefreshFound()
-    println("====> shouldRefreshGroupList $shouldRefreshGroupList")
+
     LaunchedEffect(shouldRefreshGroupList) {
         shouldRefreshGroupList?.let {
             if (it)
