@@ -28,13 +28,13 @@ import org.koin.androidx.compose.koinViewModel
 fun GroupScreen(
     viewModel: GroupViewModel = koinViewModel(),
     onNavigateToGroupDetail: (String) -> Unit,
-    shouldRefreshGroupList: Boolean = false
+    shouldRefresh: Boolean = false
 ) {
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(shouldRefreshGroupList) {
-        if (shouldRefreshGroupList) viewModel.onAction(GroupAction.OnRefresh)
+    LaunchedEffect(shouldRefresh) {
+        if (shouldRefresh) viewModel.onAction(GroupAction.OnRefresh)
     }
 
     ObserveAsEvents(viewModel.events) { event ->

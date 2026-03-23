@@ -1,4 +1,4 @@
-package com.example.balancify.presentation.home.component.expense.component
+package com.example.balancify.component
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -29,31 +29,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.balancify.component.Avatar
-import com.example.balancify.component.StackAvatar
-import com.example.balancify.component.StyledCard
 import com.example.balancify.core.constant.BG_COLORS
 import com.example.balancify.core.ext.darken
+import com.example.balancify.core.ext.format
 import com.example.balancify.core.ext.getCurrencyFormatted
 import com.example.balancify.domain.model.ExpenseIcon
 import com.example.balancify.domain.model.ExpenseModel
-import com.example.balancify.presentation.home.component.expense.ExpenseViewModel
-import org.koin.androidx.compose.koinViewModel
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ExpenseCard(
-    viewModel: ExpenseViewModel = koinViewModel(),
+    localUserId: String,
     item: ExpenseModel,
+    onClick: () -> Unit = {}
 ) {
-    val state = viewModel.state.collectAsStateWithLifecycle()
-    StyledCard(modifier = Modifier.padding(0.dp)) {
+    StyledCard(
+        modifier = Modifier
+            .clickable(
+                onClick = onClick,
+            )
+            .padding(0.dp)
+    ) {
         Column(
             modifier = Modifier
-                .clickable(onClick = {})
                 .fillMaxWidth()
         ) {
             Row(
@@ -89,7 +87,7 @@ fun ExpenseCard(
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
-                        "Paid by ${item.getPayerName(state.value.localUser?.id)}",
+                        "Paid by ${item.getPayerName(localUserId)}",
                         style = MaterialTheme.typography.labelMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -157,12 +155,7 @@ fun ExpenseCard(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
 
-                val createdDate: String? = item.createdAt
-                    ?.toInstant()
-                    ?.atZone(ZoneId.systemDefault())
-                    ?.toLocalDate()?.format(
-                        DateTimeFormatter.ofPattern("dd MMM yyyy")
-                    )
+                val createdDate: String? = item.createdAt?.format("dd MMM yyyy")
 
                 Row {
                     Text(

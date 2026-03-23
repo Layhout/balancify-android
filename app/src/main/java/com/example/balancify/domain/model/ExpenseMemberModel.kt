@@ -1,7 +1,9 @@
 package com.example.balancify.domain.model
 
+import com.google.firebase.firestore.IgnoreExtraProperties
 import kotlinx.serialization.Serializable
 
+@IgnoreExtraProperties
 @Serializable
 data class ExpenseMemberModel(
     override val id: String = "",

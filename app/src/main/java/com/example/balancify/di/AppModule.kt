@@ -20,8 +20,12 @@ import com.example.balancify.domain.repository.FriendRepository
 import com.example.balancify.domain.repository.GroupRepository
 import com.example.balancify.domain.repository.UserRepository
 import com.example.balancify.domain.service.FriendEnricher
+import com.example.balancify.domain.use_case.expense.DeleteExpense
 import com.example.balancify.domain.use_case.expense.ExpenseUseCases
+import com.example.balancify.domain.use_case.expense.GetExpenseDetail
 import com.example.balancify.domain.use_case.expense.GetExpenses
+import com.example.balancify.domain.use_case.expense.GetExpensesForGroup
+import com.example.balancify.domain.use_case.expense.SettleExpense
 import com.example.balancify.domain.use_case.friend.AcceptFriend
 import com.example.balancify.domain.use_case.friend.AddFriendByEmail
 import com.example.balancify.domain.use_case.friend.FriendUseCases
@@ -42,6 +46,7 @@ import com.example.balancify.domain.use_case.user.AddUser
 import com.example.balancify.domain.use_case.user.GetLocalUser
 import com.example.balancify.domain.use_case.user.GetUser
 import com.example.balancify.domain.use_case.user.UserUseCases
+import com.example.balancify.presentation.expense_detail.ExpenseDetailViewModel
 import com.example.balancify.presentation.friend.FriendViewModel
 import com.example.balancify.presentation.group_detail.GroupDetailViewModel
 import com.example.balancify.presentation.group_form.GroupFormViewModel
@@ -114,7 +119,11 @@ val appModule = module {
     }
     single {
         ExpenseUseCases(
-            getExpenses = GetExpenses(get(), get())
+            getExpenses = GetExpenses(get(), get()),
+            getExpenseDetail = GetExpenseDetail(get(), get()),
+            getExpensesForGroup = GetExpensesForGroup(get()),
+            deleteExpense = DeleteExpense(get()),
+            settleExpense = SettleExpense(get(), get()),
         )
     }
 
@@ -129,4 +138,5 @@ val appModule = module {
     viewModelOf(::GroupViewModel)
     viewModelOf(::GroupDetailViewModel)
     viewModelOf(::ExpenseViewModel)
+    viewModelOf(::ExpenseDetailViewModel)
 }

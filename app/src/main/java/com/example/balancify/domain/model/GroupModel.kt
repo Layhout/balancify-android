@@ -1,10 +1,12 @@
 package com.example.balancify.domain.model
 
 import com.example.balancify.core.util.DateAsLongSerializer
+import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.ServerTimestamp
 import kotlinx.serialization.Serializable
 import java.util.Date
 
+@IgnoreExtraProperties
 @Serializable
 data class GroupModel(
     val id: String = "",

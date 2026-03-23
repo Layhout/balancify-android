@@ -2,6 +2,7 @@ package com.example.balancify.presentation.group_detail
 
 import com.example.balancify.domain.model.ExpenseModel
 import com.example.balancify.domain.model.GroupModel
+import com.example.balancify.domain.model.UserModel
 
 data class GroupDetailState(
     val isLoading: Boolean = false,
@@ -12,6 +13,7 @@ data class GroupDetailState(
     val enableAllAction: Boolean = true,
     val isCreateByLocalUser: Boolean = false,
     val isLeaveBottomSheetVisible: Boolean = false,
+    val localUser: UserModel? = null,
     val group: GroupModel = GroupModel(),
     val expenses: List<ExpenseModel> = emptyList(),
 )

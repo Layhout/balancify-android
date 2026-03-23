@@ -39,9 +39,9 @@ class ExpenseViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = isLoading) }
 
-            var localUser: UserModel? = null
+            var localUser: UserModel? = _state.value.localUser
 
-            if (_state.value.localUser == null) {
+            if (localUser == null) {
                 val result = userUseCases.getLocalUser()
 
                 if (result.isSuccess) {

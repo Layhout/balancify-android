@@ -26,7 +26,8 @@ fun UserListCard(
     order: CardOrder = CardOrder.ALONE,
     colors: CardColors = CardDefaults.cardColors(),
     user: UserModel,
-    action: (@Composable () -> Unit)? = null
+    subTitleContent: (@Composable () -> Unit)? = null,
+    action: (@Composable () -> Unit)? = null,
 ) {
     StyledCard(modifier.fillMaxWidth(), order, colors) {
         Row(
@@ -51,12 +52,15 @@ fun UserListCard(
                     )
                 )
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    user.email,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.labelMedium
-                )
+                if (subTitleContent != null)
+                    subTitleContent.invoke()
+                else
+                    Text(
+                        user.email,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.labelMedium
+                    )
             }
             action?.invoke()
         }

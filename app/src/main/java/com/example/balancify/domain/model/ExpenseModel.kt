@@ -1,11 +1,13 @@
 package com.example.balancify.domain.model
 
 import com.example.balancify.core.util.DateAsLongSerializer
+import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.ServerTimestamp
 import kotlinx.serialization.Serializable
 import java.util.Date
 import kotlin.math.roundToInt
 
+@IgnoreExtraProperties
 @Serializable
 data class ExpenseModel(
     val id: String = "",
@@ -17,7 +19,7 @@ data class ExpenseModel(
     val iconBgColor: String = "",
     val memberOption: MemberOption = MemberOption.FRIEND,
     val splitOption: SplitOption = SplitOption.SPLIT_EQUALLY,
-    val group: ExpenseGroupModel = ExpenseGroupModel(),
+    val group: ExpenseGroupModel? = null,
     val member: Map<String, ExpenseMemberModel> = emptyMap(),
     val memberIds: List<String> = emptyList(),
     val createdBy: UserModel = UserModel(),
@@ -32,7 +34,8 @@ data class ExpenseModel(
     fun getSettlePercentage(): Int {
         var result: Int
 
-        val total = member.values.sumOf { it.amount }
+        val total = member.values.sumOf { it.settledAmount }
+        if (total == 0.0) return 0
         result = ((total / amount) * 100).roundToInt()
 
         return result
@@ -42,5 +45,13 @@ data class ExpenseModel(
         return if (getSettlePercentage() == 100) "Settled"
         else if (getSettlePercentage() > 100) "Overpaid"
         else "Paid"
+    }
+
+    fun getLocalUserOweAmount(id: String): Double {
+        return member[id]?.amount ?: 0.0
+    }
+
+    fun getMembers(): List<ExpenseMemberModel> {
+        return member.values.toList()
     }
 }

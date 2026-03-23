@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import com.example.balancify.core.constant.SavedStateKey
 import com.example.balancify.core.constant.SearchResult
 import com.example.balancify.core.constant.SearchType
+import com.example.balancify.presentation.expense_detail.ExpenseDetailScreen
 import com.example.balancify.presentation.friend.FriendScreen
 import com.example.balancify.presentation.group_detail.GroupDetailScreen
 import com.example.balancify.presentation.group_form.GroupFormScreen
@@ -74,6 +75,14 @@ fun NavigationRoot(
                         SavedStateKey.GROUP_LIST_SHOULD_REFRESH.value
                     )
                 },
+                onNavigateToExpenseDetail = {
+                    navController.navigate(Routes.ExpenseDetail(it))
+                },
+                onExpenseListShouldRefreshFound = {
+                    entry.savedStateHandle.remove<Boolean>(
+                        SavedStateKey.EXPENSE_LIST_SHOULD_REFRESH.value
+                    )
+                }
             )
         }
         composable<Routes.Friend> {
@@ -131,7 +140,7 @@ fun NavigationRoot(
                 navController.popBackStack()
             }
         }
-        composable<Routes.GroupDetail> {
+        composable<Routes.GroupDetail> { entry ->
             GroupDetailScreen(
                 onLeaveGroupSuccess = {
                     navController.setPrevStackState(
@@ -142,6 +151,29 @@ fun NavigationRoot(
                 },
                 onNavigateToGroupFrom = {
                     navController.navigate(Routes.GroupFrom(it))
+                },
+                onNavigateToExpenseDetail = {
+                    navController.navigate(Routes.ExpenseDetail(it))
+                },
+                onGroupDetailShouldUpdateFound = {
+                    (entry.savedStateHandle.remove(
+                        SavedStateKey.GROUP_DID_UPDATE.value
+                    ) ?: false) || (entry.savedStateHandle.remove<Boolean>(
+                        SavedStateKey.EXPENSE_LIST_SHOULD_REFRESH.value
+                    ) ?: false)
+                }
+            ) {
+                navController.popBackStack()
+            }
+        }
+        composable<Routes.ExpenseDetail> {
+            ExpenseDetailScreen(
+                onDeleteSuccess = {
+                    navController.setPrevStackState(
+                        SavedStateKey.EXPENSE_LIST_SHOULD_REFRESH.value,
+                        true
+                    )
+                    navController.popBackStack()
                 }
             ) {
                 navController.popBackStack()

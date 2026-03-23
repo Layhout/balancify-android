@@ -5,4 +5,5 @@ enum class SavedStateKey(val value: String) {
     GROUP_SEARCH_RESULT("group_search_result"),
     GROUP_LIST_SHOULD_REFRESH("group_list_should_refresh"),
     GROUP_DID_UPDATE("group_did_update"),
+    EXPENSE_LIST_SHOULD_REFRESH("expense_list_should_refresh"),
 }

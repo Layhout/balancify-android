@@ -30,11 +30,10 @@ import com.example.balancify.component.Avatar
 import com.example.balancify.component.CardOrder
 import com.example.balancify.component.StackAvatar
 import com.example.balancify.component.StyledCard
+import com.example.balancify.core.ext.format
 import com.example.balancify.domain.model.GroupModel
 import com.example.balancify.presentation.home.component.group.GroupViewModel
 import org.koin.androidx.compose.koinViewModel
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -61,12 +60,7 @@ fun GroupCard(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val createdDate: String? = item.createdAt
-                ?.toInstant()
-                ?.atZone(ZoneId.systemDefault())
-                ?.toLocalDate()?.format(
-                    DateTimeFormatter.ofPattern("dd MMM yyyy")
-                )
+            val createdDate: String? = item.createdAt?.format("dd MMM yyyy")
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(

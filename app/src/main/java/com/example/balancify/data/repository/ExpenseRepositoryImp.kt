@@ -3,6 +3,7 @@ package com.example.balancify.data.repository
 import com.example.balancify.data.data_source.expense.ExpenseRemoteDataSource
 import com.example.balancify.domain.model.ExpenseMetadataModel
 import com.example.balancify.domain.model.ExpenseModel
+import com.example.balancify.domain.model.UserModel
 import com.example.balancify.domain.repository.ExpenseRepository
 import com.example.balancify.service.PaginatedData
 import com.google.firebase.firestore.DocumentSnapshot
@@ -29,5 +30,34 @@ class ExpenseRepositoryImp(
         userId: String
     ): Result<ExpenseModel> {
         return Result.runCatching { remoteDataSource.getExpenseById(id, userId) }
+    }
+
+    override suspend fun getExpensesForGroup(
+        lastDoc: DocumentSnapshot?,
+        groupId: String
+    ): Result<PaginatedData<ExpenseModel>> {
+        return Result.runCatching { remoteDataSource.getExpensesForGroup(lastDoc, groupId) }
+    }
+
+    override suspend fun deleteExpense(id: String): Result<Unit> {
+        return Result.runCatching { remoteDataSource.deleteExpense(id) }
+    }
+
+    override suspend fun settleExpense(
+        id: String,
+        amount: Double,
+        settledAmount: Double,
+        localUser: UserModel,
+        receiverName: String,
+    ): Result<Unit> {
+        return Result.runCatching {
+            remoteDataSource.settleExpense(
+                id,
+                amount,
+                settledAmount,
+                localUser,
+                receiverName
+            )
+        }
     }
 }

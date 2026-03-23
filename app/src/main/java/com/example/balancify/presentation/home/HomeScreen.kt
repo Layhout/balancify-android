@@ -61,7 +61,9 @@ fun HomeScreen(
     onNavigateToFriend: () -> Unit,
     onNavigateToGroupFrom: () -> Unit,
     onNavigateToGroupDetail: (String) -> Unit,
+    onNavigateToExpenseDetail: (String) -> Unit,
     onGroupListShouldRefreshFound: () -> Boolean?,
+    onExpenseListShouldRefreshFound: () -> Boolean?,
 ) {
     val navController = rememberNavController()
     val startDestination = NavDestination.DASHBOARD
@@ -69,6 +71,7 @@ fun HomeScreen(
     var prevSelectedRoute by rememberSaveable { mutableStateOf(startDestination) }
 
     val shouldRefreshGroupList = onGroupListShouldRefreshFound()
+    val shouldRefreshExpenseList = onExpenseListShouldRefreshFound()
 
     LaunchedEffect(shouldRefreshGroupList) {
         shouldRefreshGroupList?.let {
@@ -84,6 +87,22 @@ fun HomeScreen(
                         prevSelectedRoute = newDest
                     },
                 )
+        }
+    }
+
+    LaunchedEffect(shouldRefreshExpenseList) {
+        shouldRefreshExpenseList?.let {
+            if (it) onTabClick(
+                index = NavDestination.EXPENSES.ordinal,
+                destination = NavDestination.EXPENSES,
+                selectedRoute = selectedRoute,
+                prevSelectedRoute = prevSelectedRoute,
+                navController = navController,
+                onNavigate = { newIndex, newDest ->
+                    selectedRoute = newIndex
+                    prevSelectedRoute = newDest
+                },
+            )
         }
     }
 
@@ -142,9 +161,14 @@ fun HomeScreen(
                     composable(destination.screen.route) {
                         when (destination) {
                             NavDestination.DASHBOARD -> DashboardScreen()
-                            NavDestination.EXPENSES -> ExpenseScreen()
+
+                            NavDestination.EXPENSES -> ExpenseScreen(
+                                shouldRefresh = shouldRefreshExpenseList ?: false,
+                                onNavigateToExpenseDetail = onNavigateToExpenseDetail
+                            )
+
                             NavDestination.GROUPS -> GroupScreen(
-                                shouldRefreshGroupList = shouldRefreshGroupList ?: false,
+                                shouldRefresh = shouldRefreshGroupList ?: false,
                                 onNavigateToGroupDetail = onNavigateToGroupDetail
                             )
 

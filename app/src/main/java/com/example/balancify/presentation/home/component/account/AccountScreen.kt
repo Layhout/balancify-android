@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.BuildConfig
+import com.example.balancify.component.ConfirmationBottomSheet
 import com.example.balancify.core.util.ObserveAsEvents
-import com.example.balancify.presentation.home.component.account.component.LogoutBottomSheet
 import com.example.balancify.presentation.home.component.account.component.LogoutCard
 import com.example.balancify.presentation.home.component.account.component.OptionCard
 import com.example.balancify.presentation.home.component.account.component.UserProFile
@@ -79,7 +79,12 @@ fun AccountScreen(
             )
 
             if (state.value.isLogoutBottomSheetVisible) {
-                LogoutBottomSheet()
+                ConfirmationBottomSheet(
+                    message = "Are you sure you want to logout?",
+                    confirmText = "Logout",
+                    onConfirmClick = { viewModel.onAction(AccountAction.OnLogoutConfirmClick(context)) },
+                    onDismissRequest = { viewModel.onAction(AccountAction.OnLogoutDismiss) },
+                )
             }
         }
     }

@@ -1,9 +1,11 @@
 package com.example.balancify.domain.model
 
 import android.os.Parcelable
+import com.google.firebase.firestore.IgnoreExtraProperties
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
+@IgnoreExtraProperties
 @Serializable
 @Parcelize
 data class UserModel(

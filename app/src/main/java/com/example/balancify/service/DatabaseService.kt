@@ -57,17 +57,17 @@ class DatabaseService {
 
     suspend fun getDataWithQuery(
         collection: String,
-        build: Query.() -> Query
+        queryBuilder: (Query) -> Query = { it }
     ): QuerySnapshot {
-        val query = collectionRef(collection).build()
+        val query = queryBuilder(collectionRef(collection))
         return query.get().await()
     }
 
     suspend fun getDocumentsWithQuery(
         collection: String,
-        build: Query.() -> Query
+        queryBuilder: (Query) -> Query = { it }
     ): List<DocumentSnapshot> {
-        return getDataWithQuery(collection, build).documents
+        return getDataWithQuery(collection, queryBuilder).documents
     }
 
     suspend fun getPage(

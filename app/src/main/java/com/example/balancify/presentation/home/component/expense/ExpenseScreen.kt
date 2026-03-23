@@ -11,20 +11,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.component.Empty
+import com.example.balancify.component.ExpenseCard
 import com.example.balancify.component.InfiniteLazyColumn
-import com.example.balancify.presentation.home.component.expense.component.ExpenseCard
 import org.koin.androidx.compose.koinViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ExpenseScreen(
     viewModel: ExpenseViewModel = koinViewModel(),
+    shouldRefresh: Boolean = false,
+    onNavigateToExpenseDetail: (String) -> Unit,
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(shouldRefresh) {
+        if (shouldRefresh) viewModel.onAction(ExpenseAction.OnRefresh)
+    }
 
     Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         PullToRefreshBox(
@@ -49,7 +56,13 @@ fun ExpenseScreen(
             ) { index, item ->
                 if (index != 0) Spacer(modifier = Modifier.height(8.dp))
 
-                ExpenseCard(item = item)
+                ExpenseCard(
+                    item = item,
+                    localUserId = state.value.localUser?.id ?: "",
+                    onClick = {
+                        onNavigateToExpenseDetail(item.id)
+                    }
+                )
             }
         }
     }

@@ -16,7 +16,7 @@ import com.example.balancify.presentation.group_detail.GroupDetailViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun DetailHeader(
+fun GroupDetailHeader(
     viewModel: GroupDetailViewModel = koinViewModel()
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()

@@ -23,7 +23,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MemberBottomSheet(
+fun GroupMemberBottomSheet(
     viewModel: GroupDetailViewModel = koinViewModel()
 ) {
     val sheetState = rememberModalBottomSheetState()
@@ -56,7 +56,7 @@ fun MemberBottomSheet(
                 UserListCard(
                     order = CardOrder.getOrderFrom(index, state.value.group.members.size),
                     user = item.copy(
-                        name = "${item.name} ${if (item.id == state.value.group.createdBy) "(Owner)" else ""}"
+                        name = "${item.name} ${if (item.id == state.value.group.createdBy) "(Owner)" else ""} ${if (item.id == state.value.localUser?.id) "(You)" else ""}"
                     )
                 )
             }

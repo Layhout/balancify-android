@@ -114,7 +114,6 @@ fun InviteLinkBottomSheet(
                     viewModel.onAction(FriendAction.OnShareLinkClick)
                 }
             ) { Text("Share") }
-
         }
     }
 }

@@ -1,60 +1,48 @@
 package com.example.balancify.presentation.group_detail
 
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.outlined.DataSaverOn
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.PeopleAlt
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.balancify.component.AppBar
+import com.example.balancify.component.ConfirmationBottomSheet
+import com.example.balancify.component.ExpenseCard
 import com.example.balancify.component.InfiniteLazyColumn
 import com.example.balancify.core.util.ObserveAsEvents
-import com.example.balancify.presentation.group_detail.component.DetailHeader
-import com.example.balancify.presentation.group_detail.component.LeaveConfirmationBottomSheet
-import com.example.balancify.presentation.group_detail.component.MemberBottomSheet
+import com.example.balancify.presentation.group_detail.component.GroupDetailAppBar
+import com.example.balancify.presentation.group_detail.component.GroupDetailFooter
+import com.example.balancify.presentation.group_detail.component.GroupDetailHeader
+import com.example.balancify.presentation.group_detail.component.GroupMemberBottomSheet
 import org.koin.androidx.compose.koinViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun GroupDetailScreen(
     viewModel: GroupDetailViewModel = koinViewModel(),
     onLeaveGroupSuccess: () -> Unit,
     onNavigateToGroupFrom: (String) -> Unit,
-    onGroupDidUpdateFound: () -> Boolean? = { null },
+    onGroupDetailShouldUpdateFound: () -> Boolean? = { null },
+    onNavigateToExpenseDetail: (String) -> Unit,
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    val shouldUpdateGroupDetail = onGroupDidUpdateFound()
+    val shouldUpdateGroupDetail = onGroupDetailShouldUpdateFound()
 
     LaunchedEffect(shouldUpdateGroupDetail) {
         shouldUpdateGroupDetail?.let {
@@ -83,78 +71,23 @@ fun GroupDetailScreen(
     ) {
         Scaffold(
             topBar = {
-                AppBar("Group Detail", onBackClick) {
-                    IconButton(
-                        enabled = state.value.enableAllAction,
-                        onClick = {
-                            viewModel.onAction(GroupDetailAction.OnDropdownMenuToggle)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.MoreVert,
-                            contentDescription = "More options"
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = state.value.showDropdown,
-                        onDismissRequest = {
-                            viewModel.onAction(GroupDetailAction.OnDropdownMenuToggle)
-                        },
-                    ) {
-                        if (state.value.isCreateByLocalUser)
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            Icons.Outlined.Edit,
-                                            contentDescription = null
-                                        )
-                                        Spacer(Modifier.width(12.dp))
-                                        Text("Edit")
-                                    }
-                                },
-                                enabled = state.value.enableAllAction,
-                                onClick = {
-                                    viewModel.onAction(GroupDetailAction.OnDropdownMenuToggle)
-                                    onNavigateToGroupFrom(state.value.group.id)
-                                }
-                            )
-                        DropdownMenuItem(
-                            text = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        Icons.AutoMirrored.Outlined.Logout,
-                                        contentDescription = null
-                                    )
-                                    Spacer(Modifier.width(12.dp))
-                                    Text("Leave")
-                                }
-                            },
-                            enabled = state.value.enableAllAction,
-                            onClick = {
-                                viewModel.onAction(GroupDetailAction.OnLeaveGroupClick)
-                            }
-                        )
-                    }
-                }
+                GroupDetailAppBar(
+                    onNavigateToGroupFrom = onNavigateToGroupFrom,
+                    onBackClick = onBackClick
+                )
             },
         ) {
-            Column {
+            Column(modifier = Modifier.padding(it)) {
                 PullToRefreshBox(
                     isRefreshing = state.value.isRefreshing,
                     onRefresh = { viewModel.onAction(GroupDetailAction.OnRefresh) },
                     modifier = Modifier
                         .weight(1f)
-                        .padding(it)
                         .padding(horizontal = 16.dp),
                 ) {
                     InfiniteLazyColumn(
                         header = {
-                            DetailHeader()
+                            GroupDetailHeader()
                         },
                         items = state.value.expenses,
                         isLoadingMore = state.value.isLoading,
@@ -164,43 +97,30 @@ fun GroupDetailScreen(
                         },
                         modifier = Modifier
                             .fillMaxSize(),
-                    ) { index, item -> }
-                }
-                Row(
-                    Modifier
-                        .background(MaterialTheme.colorScheme.background)
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 32.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Button(
-                        onClick = {},
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Outlined.DataSaverOn, contentDescription = null)
-                        Spacer(Modifier.width(6.dp))
-                        Text("Add Expense")
-                    }
-                    FilledIconButton(
-                        enabled = state.value.enableAllAction,
-                        onClick = {
-                            viewModel.onAction(GroupDetailAction.OnMemberBottomSheetToggle)
-                        },
-                        colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer
-                        ),
-                    ) {
-                        Icon(Icons.Outlined.PeopleAlt, contentDescription = null)
+                    ) { index, item ->
+                        if (index != 0) Spacer(modifier = Modifier.height(8.dp))
+
+                        ExpenseCard(
+                            item = item,
+                            localUserId = state.value.localUser?.id ?: "",
+                            onClick = {
+                                onNavigateToExpenseDetail(item.id)
+                            }
+                        )
                     }
                 }
+                GroupDetailFooter()
             }
 
             if (state.value.showMemberBottomSheet)
-                MemberBottomSheet()
+                GroupMemberBottomSheet()
             if (state.value.isLeaveBottomSheetVisible)
-                LeaveConfirmationBottomSheet()
+                ConfirmationBottomSheet(
+                    message = "Are you sure you want to leave this group?",
+                    confirmText = "Leave",
+                    onConfirmClick = { viewModel.onAction(GroupDetailAction.OnLeaveDismiss) },
+                    onDismissRequest = { viewModel.onAction(GroupDetailAction.OnLeaveDismiss) },
+                )
         }
     }
 }
