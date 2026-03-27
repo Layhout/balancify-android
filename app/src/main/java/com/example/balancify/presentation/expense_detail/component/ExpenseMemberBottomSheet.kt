@@ -54,7 +54,10 @@ fun ExpenseMemberBottomSheet(
 
                 ExpenseUserListCard(
                     data = item,
-                    order = CardOrder.getOrderFrom(index, state.value.expense.getMembers().size),
+                    order = CardOrder.fromIndexAndSize(
+                        index,
+                        state.value.expense.getMembers().size
+                    ),
                     localUserId = state.value.localUser?.id ?: "",
                     payerId = state.value.expense.paidBy.id,
                 )

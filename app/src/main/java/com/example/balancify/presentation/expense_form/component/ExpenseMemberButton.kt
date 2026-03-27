@@ -1,4 +1,4 @@
-package com.example.balancify.presentation.group_form.component
+package com.example.balancify.presentation.expense_form.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,15 +17,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.balancify.presentation.group_form.GroupFormAction
-import com.example.balancify.presentation.group_form.GroupFormViewModel
+import com.example.balancify.domain.model.MemberOption
+import com.example.balancify.presentation.expense_form.ExpenseFormAction
+import com.example.balancify.presentation.expense_form.ExpenseFormViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun AddMemberButton(
-    viewModel: GroupFormViewModel = koinViewModel()
+fun ExpenseMemberButton(
+    viewModel: ExpenseFormViewModel = koinViewModel(),
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
+
+    val btnLabelVerb = if (state.value.memberOption == MemberOption.GROUP) "Change" else "Add"
+    val btnLabelNoun = if (state.value.memberOption == MemberOption.FRIEND) "Members" else "Group"
 
     Column(Modifier.fillMaxWidth()) {
         Row(
@@ -44,21 +48,31 @@ fun AddMemberButton(
             )
             TextButton(
                 onClick = {
-                    viewModel.onAction(GroupFormAction.OnAddMemberClick)
+
                 },
                 enabled = state.value.isEnableAllAction && state.value.members.size < 10
             ) {
                 Icon((Icons.Outlined.PersonAdd), contentDescription = null)
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Add Members")
+                Text("$btnLabelVerb $btnLabelNoun")
             }
         }
-        if (state.value.isMemberInvalid)
+        if (state.value.isMemberInvalid) {
             Text(
                 "Member cannot be greater than 10",
                 style = MaterialTheme.typography.labelMedium.copy(
                     color = MaterialTheme.colorScheme.error
                 )
             )
+        }
+        if (state.value.showIconBottomSheet) {
+            ExpenseIconFormBottomSheet(
+                onDismissRequest = {
+                    viewModel.onAction(
+                        ExpenseFormAction.OnIconFormBottomSheetToggle
+                    )
+                }
+            )
+        }
     }
 }

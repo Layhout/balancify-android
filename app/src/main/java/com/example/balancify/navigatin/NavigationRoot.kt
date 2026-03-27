@@ -11,6 +11,7 @@ import com.example.balancify.core.constant.SavedStateKey
 import com.example.balancify.core.constant.SearchResult
 import com.example.balancify.core.constant.SearchType
 import com.example.balancify.presentation.expense_detail.ExpenseDetailScreen
+import com.example.balancify.presentation.expense_form.ExpenseFormScreen
 import com.example.balancify.presentation.friend.FriendScreen
 import com.example.balancify.presentation.group_detail.GroupDetailScreen
 import com.example.balancify.presentation.group_form.GroupFormScreen
@@ -69,6 +70,9 @@ fun NavigationRoot(
                 },
                 onNavigateToGroupDetail = {
                     navController.navigate(Routes.GroupDetail(it))
+                },
+                onNavigateToExpenseForm = {
+                    navController.navigate(Routes.ExpenseForm())
                 },
                 onGroupListShouldRefreshFound = {
                     entry.savedStateHandle.remove<Boolean>(
@@ -174,6 +178,30 @@ fun NavigationRoot(
                         true
                     )
                     navController.popBackStack()
+                }
+            ) {
+                navController.popBackStack()
+            }
+        }
+        composable<Routes.ExpenseForm> { entry ->
+            ExpenseFormScreen(
+                onNavigateToSearch = {
+                    navController.navigate(
+                        Routes.Search(
+                            type = it
+                        )
+                    )
+                },
+                onSearchResultFound = {
+                    val searchFriendResult = entry.savedStateHandle.remove<SearchResult>(
+                        SavedStateKey.FRIEND_SEARCH_RESULT.value
+                    )
+                    val searchGroupResult = entry.savedStateHandle.remove<SearchResult>(
+                        SavedStateKey.GROUP_SEARCH_RESULT.value
+                    )
+
+                    searchFriendResult as? SearchResult.Friend
+                        ?: searchGroupResult as? SearchResult.Group
                 }
             ) {
                 navController.popBackStack()

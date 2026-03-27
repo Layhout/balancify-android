@@ -3,8 +3,10 @@ package com.example.balancify.data.data_source.expense
 import com.example.balancify.core.constant.FirebaseCollectionName
 import com.example.balancify.core.constant.ITEMS_LIMIT
 import com.example.balancify.core.ext.getCurrencyFormatted
+import com.example.balancify.domain.model.ExpenseMemberModel
 import com.example.balancify.domain.model.ExpenseMetadataModel
 import com.example.balancify.domain.model.ExpenseModel
+import com.example.balancify.domain.model.TimelineModel
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.service.BatchDeleteItem
 import com.example.balancify.service.BatchSetItem
@@ -126,7 +128,11 @@ class ExpenseRemoteDataSourceImp(
         settledAmount: Double,
         localUser: UserModel,
         receiverName: String
-    ) {
+    ): ExpenseModel {
+        val createdAt = System.currentTimeMillis()
+        val events =
+            "${localUser.name} pays $receiverName with amount ${settledAmount.getCurrencyFormatted()}"
+
         db.updateData(
             collection = collectionName,
             id = id,
@@ -134,10 +140,25 @@ class ExpenseRemoteDataSourceImp(
                 "member.${localUser.id}.settledAmount" to amount,
                 "timelines" to arrayUnion(
                     mapOf(
-                        "createdAt" to System.currentTimeMillis(),
+                        "createdAt" to createdAt,
                         "createdBy" to localUser,
-                        "events" to "${localUser.name} pays $receiverName with amount ${settledAmount.getCurrencyFormatted()}"
+                        "events" to events
                     )
+                )
+            )
+        )
+
+        return ExpenseModel(
+            member = mapOf(
+                localUser.id to ExpenseMemberModel(
+                    settledAmount = amount
+                ),
+            ),
+            timelines = listOf(
+                TimelineModel(
+                    createdAt = createdAt,
+                    createdBy = localUser,
+                    events = events
                 )
             )
         )

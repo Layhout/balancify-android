@@ -31,5 +31,5 @@ interface ExpenseRepository {
         settledAmount: Double,
         localUser: UserModel,
         receiverName: String,
-    ): Result<Unit>
+    ): Result<ExpenseModel>
 }

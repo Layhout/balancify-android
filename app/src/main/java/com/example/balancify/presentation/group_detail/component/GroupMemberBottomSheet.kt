@@ -54,7 +54,7 @@ fun GroupMemberBottomSheet(
                 if (index != 0) Spacer(modifier = Modifier.height(2.dp))
 
                 UserListCard(
-                    order = CardOrder.getOrderFrom(index, state.value.group.members.size),
+                    order = CardOrder.fromIndexAndSize(index, state.value.group.members.size),
                     user = item.copy(
                         name = "${item.name} ${if (item.id == state.value.group.createdBy) "(Owner)" else ""} ${if (item.id == state.value.localUser?.id) "(You)" else ""}"
                     )

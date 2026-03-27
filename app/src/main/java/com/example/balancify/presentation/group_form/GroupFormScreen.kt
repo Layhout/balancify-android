@@ -112,7 +112,7 @@ fun GroupFormScreen(
                         if (index != 0) Spacer(modifier = Modifier.height(2.dp))
                         MemberCard(
                             item = item,
-                            order = CardOrder.getOrderFrom(index, state.value.members.size),
+                            order = CardOrder.fromIndexAndSize(index, state.value.members.size),
                         )
                     }
                 }

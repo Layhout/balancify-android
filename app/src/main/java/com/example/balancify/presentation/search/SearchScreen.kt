@@ -98,7 +98,10 @@ fun SearchScreen(
                                         )
                                     }
                                 ),
-                                order = CardOrder.getOrderFrom(index, state.value.foundItems.size),
+                                order = CardOrder.fromIndexAndSize(
+                                    index,
+                                    state.value.foundItems.size
+                                ),
                                 user = (item.data as FoundItemData.Friend).data.user ?: UserModel()
                             )
                         }

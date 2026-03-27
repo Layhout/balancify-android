@@ -32,4 +32,9 @@ sealed interface Routes {
     data class ExpenseDetail(
         val id: String,
     ) : Routes
+
+    @Serializable
+    data class ExpenseForm(
+        val id: String? = null,
+    ) : Routes
 }

@@ -5,7 +5,7 @@ package com.example.balancify.domain.model
  *   FRIEND
  */
 
-enum class MemberOption {
-    FRIEND,
-    GROUP,
+enum class MemberOption(val label: String) {
+    FRIEND("Friend"),
+    GROUP("Group");
 }

@@ -16,4 +16,22 @@ data class ExpenseMemberModel(
     override val subNoti: Boolean = false,
     val amount: Double = 0.0,
     val settledAmount: Double = 0.0,
-) : User
+) : User {
+    companion object {
+        fun fromUserModel(user: User, amount: Double, settledAmount: Double): ExpenseMemberModel {
+            return ExpenseMemberModel(
+                id = user.id,
+                email = user.email,
+                imageUrl = user.imageUrl,
+                name = user.name,
+                notiToken = user.notiToken,
+                profileBgColor = user.profileBgColor,
+                referralCode = user.referralCode,
+                subNoti = user.subNoti,
+                amount = amount,
+                settledAmount = settledAmount
+            )
+        }
+    }
+
+}

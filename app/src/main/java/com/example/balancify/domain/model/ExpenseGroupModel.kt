@@ -8,4 +8,13 @@ import kotlinx.serialization.Serializable
 data class ExpenseGroupModel(
     val id: String = "",
     val name: String = "",
-)
+) {
+    companion object {
+        fun fromGroupModel(group: GroupModel): ExpenseGroupModel {
+            return ExpenseGroupModel(
+                id = group.id,
+                name = group.name,
+            )
+        }
+    }
+}

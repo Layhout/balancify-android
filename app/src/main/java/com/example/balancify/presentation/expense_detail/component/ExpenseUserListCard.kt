@@ -12,6 +12,7 @@ import com.example.balancify.domain.model.ExpenseMemberModel
 import com.example.balancify.domain.model.UserModel
 import kotlin.math.abs
 
+@JvmOverloads
 @Composable
 fun ExpenseUserListCard(
     data: ExpenseMemberModel,

@@ -48,7 +48,7 @@ fun GroupCard(
     StyledCard(
         modifier = Modifier
             .fillMaxWidth(),
-        order = CardOrder.getOrderFrom(index, state.value.groups.size),
+        order = CardOrder.fromIndexAndSize(index, state.value.groups.size),
     ) {
         Row(
             modifier = Modifier

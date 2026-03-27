@@ -49,7 +49,7 @@ class ExpenseRepositoryImp(
         settledAmount: Double,
         localUser: UserModel,
         receiverName: String,
-    ): Result<Unit> {
+    ): Result<ExpenseModel> {
         return Result.runCatching {
             remoteDataSource.settleExpense(
                 id,

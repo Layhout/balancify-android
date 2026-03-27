@@ -4,6 +4,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -32,13 +33,17 @@ import kotlinx.coroutines.delay
 fun AmountInputField(
     amount: String,
     onAmountChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    autoFocus: Boolean = true,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
-        delay(300)
-        focusRequester.requestFocus()
+        if (autoFocus) {
+            delay(300)
+            focusRequester.requestFocus()
+        }
     }
 
     val textFieldValue = if (amount.isEmpty()) {
@@ -52,7 +57,9 @@ fun AmountInputField(
     }
 
     BasicTextField(
-        modifier = Modifier.focusRequester(focusRequester),
+        modifier = modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester),
         value = textFieldValue,
         onValueChange = { newValue ->
             val stripped = newValue.text.removePrefix("$")
@@ -63,26 +70,33 @@ fun AmountInputField(
         },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Decimal,
-            imeAction = ImeAction.Done
+            imeAction = ImeAction.Done,
+            autoCorrectEnabled = false,
         ),
         textStyle = TextStyle(
             fontSize = 48.sp,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onBackground
         ),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
         interactionSource = interactionSource,
         decorationBox = { innerTextField ->
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth(),
             ) {
-                Box(contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
                     if (amount.isEmpty()) {
                         Text(
                             text = "$0.00",
                             fontSize = 48.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.outline
+                            color = MaterialTheme.colorScheme.outline,
+                            textAlign = TextAlign.Center
                         )
                     }
                     innerTextField()

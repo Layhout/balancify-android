@@ -192,11 +192,25 @@ class ExpenseDetailViewModel(
                         return@launch
                     }
 
+                    val expense = result.getOrNull()!!
+                    val memberMap = _state.value.expense.member.toMutableMap()
+                    memberMap.compute(_state.value.localUser?.id ?: "") { _, value ->
+                        value?.copy(
+                            settledAmount = expense.member[_state.value.localUser?.id]
+                                ?.settledAmount
+                                ?: 0.0
+                        )
+                    }
+
                     _state.update {
                         it.copy(
                             showSettlementBottomSheet = !it.showSettlementBottomSheet,
                             enableAllAction = true,
                             isSettling = false,
+                            expense = it.expense.copy(
+                                member = memberMap,
+                                timelines = expense.timelines + it.expense.timelines
+                            )
                         )
                     }
                 }

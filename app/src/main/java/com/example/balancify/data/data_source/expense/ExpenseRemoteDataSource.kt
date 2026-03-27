@@ -31,5 +31,5 @@ interface ExpenseRemoteDataSource {
         settledAmount: Double,
         localUser: UserModel,
         receiverName: String,
-    )
+    ): ExpenseModel
 }

@@ -99,7 +99,7 @@ fun FriendScreen(
 
                     FriendCard(
                         data = item,
-                        order = CardOrder.getOrderFrom(index, state.value.friends.size),
+                        order = CardOrder.fromIndexAndSize(index, state.value.friends.size),
                     )
                 }
             }

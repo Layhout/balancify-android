@@ -47,6 +47,7 @@ import com.example.balancify.domain.use_case.user.GetLocalUser
 import com.example.balancify.domain.use_case.user.GetUser
 import com.example.balancify.domain.use_case.user.UserUseCases
 import com.example.balancify.presentation.expense_detail.ExpenseDetailViewModel
+import com.example.balancify.presentation.expense_form.ExpenseFormViewModel
 import com.example.balancify.presentation.friend.FriendViewModel
 import com.example.balancify.presentation.group_detail.GroupDetailViewModel
 import com.example.balancify.presentation.group_form.GroupFormViewModel
@@ -139,4 +140,5 @@ val appModule = module {
     viewModelOf(::GroupDetailViewModel)
     viewModelOf(::ExpenseViewModel)
     viewModelOf(::ExpenseDetailViewModel)
+    viewModelOf(::ExpenseFormViewModel)
 }

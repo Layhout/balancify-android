@@ -17,7 +17,7 @@ enum class CardOrder {
     ALONE;
 
     companion object {
-        fun getOrderFrom(index: Int, size: Int): CardOrder {
+        fun fromIndexAndSize(index: Int, size: Int): CardOrder {
             if (size == 1) return ALONE
             return when (index) {
                 0 -> FIRST
@@ -35,7 +35,6 @@ fun StyledCard(
     colors: CardColors = CardDefaults.cardColors(),
     content: @Composable ColumnScope.() -> Unit,
 ) {
-
     val shape: RoundedCornerShape = when (order) {
         CardOrder.FIRST -> RoundedCornerShape(
             topStart = BORDER_RADIUS_MD,
@@ -44,14 +43,12 @@ fun StyledCard(
             bottomEnd = BORDER_RADIUS_SM,
         )
 
-
         CardOrder.LAST -> RoundedCornerShape(
             topStart = BORDER_RADIUS_SM,
             topEnd = BORDER_RADIUS_SM,
             bottomStart = BORDER_RADIUS_MD,
             bottomEnd = BORDER_RADIUS_MD,
         )
-
 
         CardOrder.MIDDLE -> RoundedCornerShape(BORDER_RADIUS_SM)
         CardOrder.ALONE -> RoundedCornerShape(BORDER_RADIUS_MD)

@@ -60,6 +60,7 @@ fun HomeScreen(
     onLogoutComplete: () -> Unit,
     onNavigateToFriend: () -> Unit,
     onNavigateToGroupFrom: () -> Unit,
+    onNavigateToExpenseForm: () -> Unit,
     onNavigateToGroupDetail: (String) -> Unit,
     onNavigateToExpenseDetail: (String) -> Unit,
     onGroupListShouldRefreshFound: () -> Boolean?,
@@ -133,13 +134,15 @@ fun HomeScreen(
                                 destination.icon,
                                 contentDescription = destination.label
                             )
-                        })
+                        }
+                    )
                 }
             }
         },
         floatingActionButton = {
             FabMenu(
-                onCreateGroupClick = onNavigateToGroupFrom
+                onCreateGroupClick = onNavigateToGroupFrom,
+                onCreateExpenseClick = onNavigateToExpenseForm,
             )
         }
     ) { innerPadding ->
