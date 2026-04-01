@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.example.balancify.core.constant.GlobalAppStateFlag
+import com.example.balancify.core.manager.GlobalAppStateManager
 import com.example.balancify.domain.use_case.group.GroupUseCases
 import com.example.balancify.domain.use_case.user.UserUseCases
 import com.example.balancify.navigatin.Routes
@@ -19,6 +21,7 @@ import kotlinx.coroutines.launch
 class GroupDetailViewModel(
     private val groupUseCases: GroupUseCases,
     private val userUseCases: UserUseCases,
+    private val globalAppStateManager: GlobalAppStateManager,
     private val handle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(GroupDetailState())
@@ -128,7 +131,10 @@ class GroupDetailViewModel(
                             isLeaveBottomSheetVisible = false
                         )
                     }
-
+                    globalAppStateManager.setFlag(
+                        GlobalAppStateFlag.GROUP_LIST_SHOULD_REFRESH,
+                        true
+                    )
                     _events.trySend(GroupDetailEvent.OnLeaveGroup)
                 }
             }
@@ -139,6 +145,14 @@ class GroupDetailViewModel(
                         isLeaveBottomSheetVisible = false
                     )
                 }
+            }
+
+            is GroupDetailAction.OnCollectFlag -> {
+                val refreshFlag =
+                    globalAppStateManager.pullFlag(GlobalAppStateFlag.GROUP_LIST_SHOULD_REFRESH)
+
+                if (refreshFlag)
+                    onAction(GroupDetailAction.OnRefresh)
             }
         }
     }

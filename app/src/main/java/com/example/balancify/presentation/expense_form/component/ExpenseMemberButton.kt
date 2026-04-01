@@ -28,7 +28,11 @@ fun ExpenseMemberButton(
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    val btnLabelVerb = if (state.value.memberOption == MemberOption.GROUP) "Change" else "Add"
+    val btnLabelVerb = if (state.value.memberOption == MemberOption.GROUP) {
+        if (state.value.members.isNotEmpty())
+            "Change"
+        else "Add"
+    } else "Add"
     val btnLabelNoun = if (state.value.memberOption == MemberOption.FRIEND) "Members" else "Group"
 
     Column(Modifier.fillMaxWidth()) {
@@ -48,7 +52,7 @@ fun ExpenseMemberButton(
             )
             TextButton(
                 onClick = {
-
+                    viewModel.onAction(ExpenseFormAction.OnAddMemberClicked)
                 },
                 enabled = state.value.isEnableAllAction && state.value.members.size < 10
             ) {

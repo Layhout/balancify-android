@@ -27,6 +27,7 @@ fun UserListCard(
     colors: CardColors = CardDefaults.cardColors(),
     user: UserModel,
     subTitleContent: (@Composable () -> Unit)? = null,
+    hideAvatar: Boolean = false,
     action: (@Composable () -> Unit)? = null,
 ) {
     StyledCard(modifier.fillMaxWidth(), order, colors) {
@@ -37,11 +38,12 @@ fun UserListCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Avatar(
-                imageUrl = user.imageUrl,
-                modifier = Modifier.size(42.dp),
-                fallbackText = user.name,
-            )
+            if (!hideAvatar)
+                Avatar(
+                    imageUrl = user.imageUrl,
+                    modifier = Modifier.size(42.dp),
+                    fallbackText = user.name,
+                )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     user.name,

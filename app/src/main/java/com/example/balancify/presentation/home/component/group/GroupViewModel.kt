@@ -2,6 +2,8 @@ package com.example.balancify.presentation.home.component.group
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.balancify.core.constant.GlobalAppStateFlag
+import com.example.balancify.core.manager.GlobalAppStateManager
 import com.example.balancify.domain.use_case.group.GroupUseCases
 import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.channels.Channel
@@ -14,7 +16,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class GroupViewModel(
-    private val groupUseCases: GroupUseCases
+    private val groupUseCases: GroupUseCases,
+    private val globalAppStateManager: GlobalAppStateManager,
 ) : ViewModel() {
     private val _state = MutableStateFlow(GroupState())
     val state = _state.onStart {
@@ -67,6 +70,16 @@ class GroupViewModel(
                     )
                 }
                 loadData(isLoading = false)
+            }
+
+            is GroupAction.OnCollectFlag -> {
+                val refreshFlag = globalAppStateManager.pullFlag(
+                    GlobalAppStateFlag.GROUP_LIST_SHOULD_REFRESH
+                )
+
+                if (refreshFlag) {
+                    onAction(GroupAction.OnRefresh)
+                }
             }
         }
     }

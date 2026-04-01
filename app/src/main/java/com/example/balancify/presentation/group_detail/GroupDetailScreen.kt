@@ -33,21 +33,16 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun GroupDetailScreen(
     viewModel: GroupDetailViewModel = koinViewModel(),
-    onLeaveGroupSuccess: () -> Unit,
     onNavigateToGroupFrom: (String) -> Unit,
-    onGroupDetailShouldUpdateFound: () -> Boolean? = { null },
     onNavigateToExpenseDetail: (String) -> Unit,
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    val shouldUpdateGroupDetail = onGroupDetailShouldUpdateFound()
+    LaunchedEffect(Unit) {
+        viewModel.onAction(GroupDetailAction.OnCollectFlag)
 
-    LaunchedEffect(shouldUpdateGroupDetail) {
-        shouldUpdateGroupDetail?.let {
-            if (it) viewModel.onAction(GroupDetailAction.OnRefresh)
-        }
     }
 
     ObserveAsEvents(viewModel.events) { event ->
@@ -60,7 +55,7 @@ fun GroupDetailScreen(
                 ).show()
             }
 
-            GroupDetailEvent.OnLeaveGroup -> onLeaveGroupSuccess()
+            GroupDetailEvent.OnLeaveGroup -> onBackClick()
         }
     }
 

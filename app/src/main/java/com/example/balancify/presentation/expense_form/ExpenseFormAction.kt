@@ -16,4 +16,6 @@ sealed interface ExpenseFormAction {
     data class OnMemberAmountChanged(val index: Int, val amount: String) : ExpenseFormAction
     data class OnMemberRemoved(val index: Int) : ExpenseFormAction
     data class OnAddMember(val members: List<ExpenseMemberModel>) : ExpenseFormAction
+    data object OnCollectFlag : ExpenseFormAction
+    data object OnAddMemberClicked : ExpenseFormAction
 }

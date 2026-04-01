@@ -17,6 +17,6 @@ class GetGroups(
             userResult.exceptionOrNull()!!
         )
 
-        return repository.getGroupsWithUser(lastDoc, userResult.getOrNull()!!.id)
+        return repository.getGroupsWithUser(lastDoc, userResult.getOrNull()!!.id, null)
     }
 }

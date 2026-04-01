@@ -2,6 +2,8 @@ package com.example.balancify.presentation.home.component.expense
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.balancify.core.constant.GlobalAppStateFlag
+import com.example.balancify.core.manager.GlobalAppStateManager
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.domain.use_case.expense.ExpenseUseCases
 import com.example.balancify.domain.use_case.user.UserUseCases
@@ -18,6 +20,7 @@ import kotlinx.coroutines.launch
 class ExpenseViewModel(
     private val expenseUseCases: ExpenseUseCases,
     private val userUseCases: UserUseCases,
+    private val globalAppStateManager: GlobalAppStateManager,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ExpenseState())
     val state = _state.onStart { loadData() }.stateIn(
@@ -79,6 +82,16 @@ class ExpenseViewModel(
                     )
                 }
                 loadData(isLoading = false)
+            }
+
+            is ExpenseAction.OnCollectFlag -> {
+                val refreshFlag = globalAppStateManager.pullFlag(
+                    GlobalAppStateFlag.EXPENSE_LIST_SHOULD_REFRESH
+                )
+
+                if (refreshFlag) {
+                    onAction(ExpenseAction.OnRefresh)
+                }
             }
         }
     }

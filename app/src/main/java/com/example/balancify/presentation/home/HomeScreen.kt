@@ -35,11 +35,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.balancify.component.AppBar
 import com.example.balancify.core.constant.AppScreen
+import com.example.balancify.core.util.ObserveAsEvents
 import com.example.balancify.presentation.home.component.FabMenu
 import com.example.balancify.presentation.home.component.account.AccountScreen
 import com.example.balancify.presentation.home.component.dashboard.DashboardScreen
 import com.example.balancify.presentation.home.component.expense.ExpenseScreen
 import com.example.balancify.presentation.home.component.group.GroupScreen
+import org.koin.androidx.compose.koinViewModel
 
 enum class NavDestination(
     val screen: AppScreen,
@@ -57,26 +59,26 @@ enum class NavDestination(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    viewModel: HomeViewModel = koinViewModel(),
     onLogoutComplete: () -> Unit,
     onNavigateToFriend: () -> Unit,
     onNavigateToGroupFrom: () -> Unit,
     onNavigateToExpenseForm: () -> Unit,
     onNavigateToGroupDetail: (String) -> Unit,
     onNavigateToExpenseDetail: (String) -> Unit,
-    onGroupListShouldRefreshFound: () -> Boolean?,
-    onExpenseListShouldRefreshFound: () -> Boolean?,
 ) {
     val navController = rememberNavController()
     val startDestination = NavDestination.DASHBOARD
     var selectedRoute by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
     var prevSelectedRoute by rememberSaveable { mutableStateOf(startDestination) }
 
-    val shouldRefreshGroupList = onGroupListShouldRefreshFound()
-    val shouldRefreshExpenseList = onExpenseListShouldRefreshFound()
+    LaunchedEffect(Unit) {
+        viewModel.onAction(HomeAction.OnCollectFlag)
+    }
 
-    LaunchedEffect(shouldRefreshGroupList) {
-        shouldRefreshGroupList?.let {
-            if (it)
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is HomeEvent.OnRefreshGroup -> {
                 onTabClick(
                     index = NavDestination.GROUPS.ordinal,
                     destination = NavDestination.GROUPS,
@@ -88,22 +90,21 @@ fun HomeScreen(
                         prevSelectedRoute = newDest
                     },
                 )
-        }
-    }
+            }
 
-    LaunchedEffect(shouldRefreshExpenseList) {
-        shouldRefreshExpenseList?.let {
-            if (it) onTabClick(
-                index = NavDestination.EXPENSES.ordinal,
-                destination = NavDestination.EXPENSES,
-                selectedRoute = selectedRoute,
-                prevSelectedRoute = prevSelectedRoute,
-                navController = navController,
-                onNavigate = { newIndex, newDest ->
-                    selectedRoute = newIndex
-                    prevSelectedRoute = newDest
-                },
-            )
+            is HomeEvent.OnRefreshExpense -> {
+                onTabClick(
+                    index = NavDestination.EXPENSES.ordinal,
+                    destination = NavDestination.EXPENSES,
+                    selectedRoute = selectedRoute,
+                    prevSelectedRoute = prevSelectedRoute,
+                    navController = navController,
+                    onNavigate = { newIndex, newDest ->
+                        selectedRoute = newIndex
+                        prevSelectedRoute = newDest
+                    },
+                )
+            }
         }
     }
 
@@ -166,12 +167,10 @@ fun HomeScreen(
                             NavDestination.DASHBOARD -> DashboardScreen()
 
                             NavDestination.EXPENSES -> ExpenseScreen(
-                                shouldRefresh = shouldRefreshExpenseList ?: false,
                                 onNavigateToExpenseDetail = onNavigateToExpenseDetail
                             )
 
                             NavDestination.GROUPS -> GroupScreen(
-                                shouldRefresh = shouldRefreshGroupList ?: false,
                                 onNavigateToGroupDetail = onNavigateToGroupDetail
                             )
 

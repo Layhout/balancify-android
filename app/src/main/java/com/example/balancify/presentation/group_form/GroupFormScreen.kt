@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.component.AppBar
 import com.example.balancify.component.CardOrder
-import com.example.balancify.core.constant.SearchResult
 import com.example.balancify.core.util.ObserveAsEvents
 import com.example.balancify.presentation.group_form.component.AddMemberButton
 import com.example.balancify.presentation.group_form.component.FormInputs
@@ -41,22 +40,15 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun GroupFormScreen(
     viewModel: GroupFormViewModel = koinViewModel(),
-    onSearchResultFound: () -> SearchResult.Friend?,
     onNavigateToSearchFriend: () -> Unit,
-    onCreateSuccess: () -> Unit,
-    onEditSuccess: () -> Unit,
     onBackClick: () -> Unit,
 ) {
     val localFocusManager = LocalFocusManager.current
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    val searchResult = onSearchResultFound()
-
-    LaunchedEffect(searchResult?.data) {
-        searchResult?.data?.let {
-            viewModel.onAction(GroupFormAction.OnAddMember(it))
-        }
+    LaunchedEffect(Unit) {
+        viewModel.onAction(GroupFormAction.OnCheckForSearchResult)
     }
 
     ObserveAsEvents(viewModel.events) {
@@ -70,10 +62,7 @@ fun GroupFormScreen(
             }
 
             is GroupFormEvent.OnSaveSuccess -> {
-                if (state.value.isEditing)
-                    onEditSuccess()
-                else
-                    onCreateSuccess()
+                onBackClick()
             }
         }
     }

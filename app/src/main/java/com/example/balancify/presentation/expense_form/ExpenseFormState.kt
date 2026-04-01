@@ -5,6 +5,7 @@ import com.example.balancify.domain.model.ExpenseIcon
 import com.example.balancify.domain.model.ExpenseMemberModel
 import com.example.balancify.domain.model.MemberOption
 import com.example.balancify.domain.model.SplitOption
+import com.example.balancify.domain.model.UserModel
 
 data class ExpenseFormState(
     val isLoading: Boolean = false,
@@ -20,4 +21,5 @@ data class ExpenseFormState(
     val memberOption: MemberOption = MemberOption.FRIEND,
     val splitOption: SplitOption = SplitOption.SPLIT_EQUALLY,
     val members: List<ExpenseMemberModel> = emptyList(),
+    val localUser: UserModel? = null,
 )

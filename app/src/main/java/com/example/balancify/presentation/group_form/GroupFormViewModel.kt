@@ -4,6 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.example.balancify.core.constant.GlobalAppStateFlag
+import com.example.balancify.core.constant.SearchResult
+import com.example.balancify.core.manager.GlobalAppStateManager
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.domain.use_case.group.GroupUseCases
 import com.example.balancify.domain.use_case.user.UserUseCases
@@ -20,6 +23,7 @@ import kotlinx.coroutines.launch
 class GroupFormViewModel(
     private val groupUseCases: GroupUseCases,
     private val userUseCases: UserUseCases,
+    private val globalAppStateManager: GlobalAppStateManager,
     private val handle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(GroupFormState())
@@ -169,6 +173,14 @@ class GroupFormViewModel(
                     if (result.isFailure) {
                         alertError(result.exceptionOrNull()?.message)
                     } else {
+                        if (_state.value.isEditing) {
+                            globalAppStateManager.setFlag(GlobalAppStateFlag.GROUP_DID_UPDATE, true)
+                        } else {
+                            globalAppStateManager.setFlag(
+                                GlobalAppStateFlag.GROUP_LIST_SHOULD_REFRESH,
+                                true
+                            )
+                        }
                         _events.trySend(GroupFormEvent.OnSaveSuccess)
                     }
 
@@ -177,6 +189,13 @@ class GroupFormViewModel(
                             isLoading = false
                         )
                     }
+                }
+            }
+
+            is GroupFormAction.OnCheckForSearchResult -> {
+                val searchResult = globalAppStateManager.getSearchResult() as SearchResult.Friend?
+                searchResult?.data?.let {
+                    onAction(GroupFormAction.OnAddMember(it))
                 }
             }
         }

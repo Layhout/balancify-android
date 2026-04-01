@@ -1,4 +1,4 @@
-package com.example.balancify.presentation.home.component.group.component
+package com.example.balancify.component
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -25,30 +25,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.balancify.component.Avatar
-import com.example.balancify.component.CardOrder
-import com.example.balancify.component.StackAvatar
-import com.example.balancify.component.StyledCard
 import com.example.balancify.core.ext.format
 import com.example.balancify.domain.model.GroupModel
-import com.example.balancify.presentation.home.component.group.GroupViewModel
-import org.koin.androidx.compose.koinViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun GroupCard(
-    viewModel: GroupViewModel = koinViewModel(),
-    index: Int,
     item: GroupModel,
+    order: CardOrder,
     onClick: () -> Unit
 ) {
-    val state = viewModel.state.collectAsStateWithLifecycle()
-
     StyledCard(
         modifier = Modifier
             .fillMaxWidth(),
-        order = CardOrder.fromIndexAndSize(index, state.value.groups.size),
+        order = order,
     ) {
         Row(
             modifier = Modifier

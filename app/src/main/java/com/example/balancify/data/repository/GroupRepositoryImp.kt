@@ -21,10 +21,11 @@ class GroupRepositoryImp(
 
     override suspend fun getGroupsWithUser(
         lastDoc: DocumentSnapshot?,
-        id: String
+        id: String,
+        search: String?
     ): Result<PaginatedData<GroupModel>> {
         return Result.runCatching {
-            remoteDataSource.getGroupsWithUser(lastDoc, id)
+            remoteDataSource.getGroupsWithUser(lastDoc, id, search)
         }
     }
 

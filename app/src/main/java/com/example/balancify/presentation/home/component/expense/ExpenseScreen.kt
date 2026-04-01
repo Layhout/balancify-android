@@ -24,13 +24,11 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ExpenseScreen(
     viewModel: ExpenseViewModel = koinViewModel(),
-    shouldRefresh: Boolean = false,
     onNavigateToExpenseDetail: (String) -> Unit,
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(shouldRefresh) {
-        if (shouldRefresh) viewModel.onAction(ExpenseAction.OnRefresh)
+    LaunchedEffect(Unit) {
     }
 
     Surface(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {

@@ -17,10 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.balancify.component.CardOrder
 import com.example.balancify.component.Empty
+import com.example.balancify.component.GroupCard
 import com.example.balancify.component.InfiniteLazyColumn
 import com.example.balancify.core.util.ObserveAsEvents
-import com.example.balancify.presentation.home.component.group.component.GroupCard
 import org.koin.androidx.compose.koinViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -28,13 +29,12 @@ import org.koin.androidx.compose.koinViewModel
 fun GroupScreen(
     viewModel: GroupViewModel = koinViewModel(),
     onNavigateToGroupDetail: (String) -> Unit,
-    shouldRefresh: Boolean = false
 ) {
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(shouldRefresh) {
-        if (shouldRefresh) viewModel.onAction(GroupAction.OnRefresh)
+    LaunchedEffect(Unit) {
+        viewModel.onAction(GroupAction.OnCollectFlag)
     }
 
     ObserveAsEvents(viewModel.events) { event ->
@@ -77,7 +77,7 @@ fun GroupScreen(
                 if (index != 0) Spacer(modifier = Modifier.height(2.dp))
 
                 GroupCard(
-                    index = index,
+                    order = CardOrder.fromIndexAndSize(index, state.value.groups.size),
                     item = item,
                     onClick = {
                         onNavigateToGroupDetail(item.id)

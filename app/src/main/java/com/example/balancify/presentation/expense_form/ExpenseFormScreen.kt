@@ -27,10 +27,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.component.AmountInputField
 import com.example.balancify.component.AppBar
 import com.example.balancify.component.CardOrder
-import com.example.balancify.core.constant.SearchResult
 import com.example.balancify.core.constant.SearchType
 import com.example.balancify.core.util.ObserveAsEvents
-import com.example.balancify.domain.model.ExpenseMemberModel
 import com.example.balancify.domain.model.MemberOption
 import com.example.balancify.presentation.expense_form.component.ExpenseFormFooter
 import com.example.balancify.presentation.expense_form.component.ExpenseMemberButton
@@ -44,34 +42,14 @@ import org.koin.androidx.compose.koinViewModel
 fun ExpenseFormScreen(
     viewModel: ExpenseFormViewModel = koinViewModel(),
     onNavigateToSearch: (SearchType) -> Unit,
-    onSearchResultFound: () -> SearchResult?,
     onBackClick: () -> Unit,
 ) {
     val localFocusManager = LocalFocusManager.current
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    val searchResult = onSearchResultFound()
-
-    LaunchedEffect(searchResult) {
-        searchResult?.let {
-            if (it is SearchResult.Friend) {
-                viewModel.onAction(
-                    ExpenseFormAction.OnAddMember(
-                        listOf(
-                            ExpenseMemberModel.fromUserModel(
-                                it.data.user!!,
-                                amount = 0.0,
-                                settledAmount = 0.0,
-                            )
-                        )
-                    )
-                )
-            } else {
-
-            }
-//            viewModel.onAction(GroupFormAction.OnAddMember(it))
-        }
+    LaunchedEffect(Unit) {
+        viewModel.onAction(ExpenseFormAction.OnCollectFlag)
     }
 
     ObserveAsEvents(viewModel.events) {

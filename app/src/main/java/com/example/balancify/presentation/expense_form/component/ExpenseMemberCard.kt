@@ -28,6 +28,7 @@ import com.example.balancify.component.CardOrder
 import com.example.balancify.component.UserListCard
 import com.example.balancify.domain.model.ExpenseMemberModel
 import com.example.balancify.domain.model.MemberOption
+import com.example.balancify.domain.model.SplitOption
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.presentation.expense_form.ExpenseFormAction
 import com.example.balancify.presentation.expense_form.ExpenseFormViewModel
@@ -51,6 +52,7 @@ fun ExpenseMemberCard(
         subTitleContent = {},
         action = {
             BasicTextField(
+                enabled = state.value.splitOption == SplitOption.CUSTOM,
                 value = data.amount.toString(),
                 onValueChange = { amount ->
                     viewModel.onAction(ExpenseFormAction.OnMemberAmountChanged(index, amount))

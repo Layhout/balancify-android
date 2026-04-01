@@ -1,6 +1,7 @@
 package com.example.balancify.di
 
 import com.example.balancify.MainViewModel
+import com.example.balancify.core.manager.GlobalAppStateManager
 import com.example.balancify.data.data_source.expense.ExpenseRemoteDataSource
 import com.example.balancify.data.data_source.expense.ExpenseRemoteDataSourceImp
 import com.example.balancify.data.data_source.friend.FriendRemoteDataSource
@@ -40,6 +41,7 @@ import com.example.balancify.domain.use_case.group.GroupUseCases
 import com.example.balancify.domain.use_case.group.LeaveGroup
 import com.example.balancify.domain.use_case.group.UpdateGroup
 import com.example.balancify.domain.use_case.search.FindFriends
+import com.example.balancify.domain.use_case.search.FindGroups
 import com.example.balancify.domain.use_case.search.SearchUseCases
 import com.example.balancify.domain.use_case.user.AddLocalUser
 import com.example.balancify.domain.use_case.user.AddUser
@@ -66,6 +68,9 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val appModule = module {
+    /* Managers */
+    singleOf(::GlobalAppStateManager)
+
     /* Services */
     singleOf(::AuthService)
     singleOf(::DatabaseService)
@@ -105,7 +110,8 @@ val appModule = module {
     }
     single {
         SearchUseCases(
-            findFriends = FindFriends(get(), get())
+            findFriends = FindFriends(get(), get()),
+            findGroups = FindGroups(get(), get()),
         )
     }
     single {

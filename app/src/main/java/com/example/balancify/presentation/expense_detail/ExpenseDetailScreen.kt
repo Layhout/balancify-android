@@ -35,7 +35,6 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ExpenseDetailScreen(
     viewModel: ExpenseDetailViewModel = koinViewModel(),
-    onDeleteSuccess: () -> Unit,
     onBackClick: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -52,7 +51,7 @@ fun ExpenseDetailScreen(
             }
 
             ExpenseDetailEvent.OnDeletionSuccess -> {
-                onDeleteSuccess()
+                onBackClick()
             }
         }
     }

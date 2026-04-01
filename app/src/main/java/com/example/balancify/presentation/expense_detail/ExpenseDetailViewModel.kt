@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.example.balancify.core.constant.GlobalAppStateFlag
+import com.example.balancify.core.manager.GlobalAppStateManager
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.domain.use_case.expense.ExpenseUseCases
 import com.example.balancify.domain.use_case.user.UserUseCases
@@ -20,6 +22,7 @@ import kotlinx.coroutines.launch
 class ExpenseDetailViewModel(
     private val useCases: ExpenseUseCases,
     private val userUseCases: UserUseCases,
+    private val globalAppStateManager: GlobalAppStateManager,
     private val handle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ExpenseDetailState())
@@ -131,7 +134,10 @@ class ExpenseDetailViewModel(
                         }
                         return@launch
                     }
-
+                    globalAppStateManager.setFlag(
+                        GlobalAppStateFlag.EXPENSE_LIST_SHOULD_REFRESH,
+                        true
+                    )
                     _events.trySend(ExpenseDetailEvent.OnDeletionSuccess)
                 }
             }
@@ -165,7 +171,7 @@ class ExpenseDetailViewModel(
 
                 val settledAmount =
                     state.value.expense.member[state.value.localUser?.id]?.settledAmount ?: 0.0
-                val amount = _state.value.settlementAmount.toDouble() + settledAmount
+                val amount = (_state.value.settlementAmount.toDoubleOrNull() ?: 0.0) + settledAmount
 
                 viewModelScope.launch {
                     _state.update {
@@ -178,7 +184,7 @@ class ExpenseDetailViewModel(
                     val result = useCases.settleExpense(
                         id = _state.value.expense.id,
                         amount = amount,
-                        settledAmount = _state.value.settlementAmount.toDouble(),
+                        settledAmount = _state.value.settlementAmount.toDoubleOrNull() ?: 0.0,
                         receiverName = _state.value.expense.paidBy.name,
                     )
                     if (result.isFailure) {
