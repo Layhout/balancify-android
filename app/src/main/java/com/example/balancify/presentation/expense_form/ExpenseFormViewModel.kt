@@ -11,6 +11,7 @@ import com.example.balancify.domain.model.MemberOption
 import com.example.balancify.domain.model.SplitOption
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.domain.use_case.user.UserUseCases
+import com.example.balancify.presentation.expense_form.ExpenseFormAction.OnAddMember
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -54,34 +55,37 @@ class ExpenseFormViewModel(
                 if (result.isSuccess) {
                     localUser = result.getOrNull()
                 }
-            }
 
-            _state.update {
-                it.copy(
-                    icon = ExpenseIcon.entries[(1..ExpenseIcon.entries.lastIndex).random()],
-                    iconBgColor = BG_COLORS[(0..BG_COLORS.lastIndex).random()],
-                    localUser = localUser,
-                    members = listOf(
-                        ExpenseMemberModel.fromUserModel(
-                            user = localUser!!,
-                            amount = 0.0,
-                            settledAmount = 0.0
-                        )
-                    ),
-                )
+                _state.update {
+                    it.copy(
+                        icon = ExpenseIcon.entries[(1..ExpenseIcon.entries.lastIndex).random()],
+                        iconBgColor = BG_COLORS[(0..BG_COLORS.lastIndex).random()],
+                        localUser = localUser,
+                        paidBy = localUser,
+                        members = listOf(
+                            ExpenseMemberModel.fromUserModel(
+                                user = localUser!!,
+                                amount = 0.0,
+                                settledAmount = 0.0
+                            )
+                        ),
+                    )
+                }
             }
         }
     }
 
-    private fun normalizeMemberAmount(amount: Double) {
+    private fun normalizeMemberAmount(amountString: String) {
         if (_state.value.members.isEmpty()) {
             _state.update {
                 it.copy(
-                    amount = amount.toString()
+                    amount = amountString
                 )
             }
             return
         }
+
+        val amount = amountString.toDoubleOrNull() ?: 0.0
 
         if (_state.value.splitOption == SplitOption.SPLIT_EQUALLY) {
             val df = DecimalFormat("#.00", DecimalFormatSymbols(Locale.US))
@@ -105,7 +109,7 @@ class ExpenseFormViewModel(
 
             _state.update {
                 it.copy(
-                    amount = amount.toString(),
+                    amount = amountString,
                     members = newMemberList
                 )
             }
@@ -113,7 +117,7 @@ class ExpenseFormViewModel(
         } else {
             _state.update {
                 it.copy(
-                    amount = amount.toString(),
+                    amount = amountString,
                 )
             }
         }
@@ -121,9 +125,10 @@ class ExpenseFormViewModel(
 
     fun onAction(action: ExpenseFormAction) {
         when (action) {
-            is ExpenseFormAction.OnMemberOptionChanged -> {
+            is ExpenseFormAction.OnMemberOptionChange -> {
                 _state.update {
                     it.copy(
+                        paidBy = it.localUser,
                         memberOption = action.option,
                         members = if (action.option == MemberOption.FRIEND) listOf(
                             ExpenseMemberModel.fromUserModel(
@@ -134,10 +139,10 @@ class ExpenseFormViewModel(
                         ) else emptyList(),
                     )
                 }
-                normalizeMemberAmount(_state.value.amount.toDoubleOrNull() ?: 0.0)
+                normalizeMemberAmount(_state.value.amount)
             }
 
-            is ExpenseFormAction.OnSplitOptionChanged -> {
+            is ExpenseFormAction.OnSplitOptionChange -> {
                 _state.update {
                     it.copy(
                         splitOption = action.option
@@ -153,7 +158,7 @@ class ExpenseFormViewModel(
                 }
             }
 
-            is ExpenseFormAction.OnIconChanged -> {
+            is ExpenseFormAction.OnIconChange -> {
                 _state.update {
                     it.copy(
                         icon = action.icon
@@ -161,7 +166,7 @@ class ExpenseFormViewModel(
                 }
             }
 
-            is ExpenseFormAction.OnIconBgColorChanged -> {
+            is ExpenseFormAction.OnIconBgColorChange -> {
                 _state.update {
                     it.copy(
                         iconBgColor = action.bgColor
@@ -169,7 +174,7 @@ class ExpenseFormViewModel(
                 }
             }
 
-            is ExpenseFormAction.OnNameChanged -> {
+            is ExpenseFormAction.OnNameChange -> {
                 _state.update {
                     it.copy(
                         name = action.name
@@ -177,14 +182,11 @@ class ExpenseFormViewModel(
                 }
             }
 
-            is ExpenseFormAction.OnAmountChanged -> {
-                normalizeMemberAmount(action.amount.toDoubleOrNull() ?: 0.0)
+            is ExpenseFormAction.OnAmountChange -> {
+                normalizeMemberAmount(action.amount)
             }
 
-            is ExpenseFormAction.OnMemberAmountChanged -> {
-                val isValidAmount = action.amount.matches(Regex("^-?\\d*(\\.\\d{0,2})?$"))
-                if (!isValidAmount) return
-
+            is ExpenseFormAction.OnMemberAmountChange -> {
                 val memberToUpdate = _state.value.members[action.index]
                 val newMemberList = _state.value.members.toMutableList()
                 newMemberList[action.index] = memberToUpdate.copy(
@@ -199,7 +201,7 @@ class ExpenseFormViewModel(
                 }
             }
 
-            is ExpenseFormAction.OnMemberRemoved -> {
+            is ExpenseFormAction.OnMemberRemove -> {
                 _state.update {
                     it.copy(
                         members = it.members.filterIndexed { index, _ ->
@@ -209,25 +211,26 @@ class ExpenseFormViewModel(
                 }
             }
 
-            is ExpenseFormAction.OnAddMember -> {
+            is OnAddMember -> {
                 _state.update {
                     it.copy(
-                        members = action.members + it.members
+                        members = if (_state.value.memberOption == MemberOption.FRIEND)
+                            action.members + it.members
+                        else action.members
                     )
                 }
 
                 normalizeMemberAmount(
-                    _state.value.amount.toDoubleOrNull() ?: 0.0,
+                    _state.value.amount,
                 )
             }
 
             is ExpenseFormAction.OnCollectFlag -> {
                 val searchResult = globalAppStateManager.getSearchResult()
-
                 searchResult?.let {
                     if (it is SearchResult.Friend) {
                         onAction(
-                            ExpenseFormAction.OnAddMember(
+                            OnAddMember(
                                 listOf(
                                     ExpenseMemberModel.fromUserModel(
                                         it.data.user!!,
@@ -239,7 +242,7 @@ class ExpenseFormViewModel(
                         )
                     } else {
                         onAction(
-                            ExpenseFormAction.OnAddMember(
+                            OnAddMember(
                                 (it as SearchResult.Group).data.members.map { member ->
                                     ExpenseMemberModel.fromUserModel(
                                         member,
@@ -253,8 +256,52 @@ class ExpenseFormViewModel(
                 }
             }
 
-            is ExpenseFormAction.OnAddMemberClicked -> {
+            is ExpenseFormAction.OnAddMemberClick -> {
                 _events.trySend(ExpenseFormEvent.OnAddMemberClicked)
+            }
+
+            is ExpenseFormAction.OnSaveClick -> {
+                _state.update {
+                    it.copy(
+                        isNameInvalid = false,
+                        isMemberInvalid = false,
+                    )
+                }
+
+                var isValid = true
+
+                if (_state.value.name.isBlank()) {
+                    _state.update { it.copy(isNameInvalid = true) }
+                    isValid = false
+                }
+
+                if (_state.value.members.size > 10) {
+                    _state.update { it.copy(isMemberInvalid = true) }
+                    isValid = false
+                }
+
+                val amount = _state.value.amount.toDoubleOrNull() ?: 0.0
+
+                if (amount <= 0) {
+                    _state.update { it.copy(isAmountInvalid = true) }
+                    isValid = false
+                }
+
+                if (!isValid) return
+
+
+            }
+
+            is ExpenseFormAction.OnPaidByChange -> {
+                _state.update {
+                    val found = it.members.find { member ->
+                        member.id == action.id
+                    }
+
+                    it.copy(
+                        paidBy = UserModel.fromExpenseMemberModel(found!!)
+                    )
+                }
             }
         }
     }

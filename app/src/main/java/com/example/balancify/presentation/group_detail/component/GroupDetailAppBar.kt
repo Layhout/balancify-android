@@ -39,7 +39,7 @@ fun GroupDetailAppBar(
         ) {
             Icon(
                 imageVector = Icons.Outlined.MoreVert,
-                contentDescription = "More options"
+                contentDescription = "More options",
             )
         }
         DropdownMenu(

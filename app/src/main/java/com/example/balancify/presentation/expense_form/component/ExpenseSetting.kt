@@ -42,7 +42,7 @@ fun ExpenseSetting(
                 selectedIndex = state.value.memberOption.ordinal,
                 onSelectedIndexChange = { index ->
                     viewModel.onAction(
-                        ExpenseFormAction.OnMemberOptionChanged(
+                        ExpenseFormAction.OnMemberOptionChange(
                             MemberOption.entries[index]
                         )
                     )
@@ -63,7 +63,7 @@ fun ExpenseSetting(
                 selectedIndex = state.value.splitOption.ordinal,
                 onSelectedIndexChange = { index ->
                     viewModel.onAction(
-                        ExpenseFormAction.OnSplitOptionChanged(
+                        ExpenseFormAction.OnSplitOptionChange(
                             SplitOption.entries[index]
                         )
                     )

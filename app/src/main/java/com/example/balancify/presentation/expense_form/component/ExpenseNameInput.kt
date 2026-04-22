@@ -71,7 +71,7 @@ fun ExpenseNameInput(
         OutlinedTextField(
             value = state.value.name,
             onValueChange = { value ->
-                viewModel.onAction(ExpenseFormAction.OnNameChanged(value))
+                viewModel.onAction(ExpenseFormAction.OnNameChange(value))
             },
             label = { Text("Name *") },
             maxLines = 1,

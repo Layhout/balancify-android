@@ -67,10 +67,7 @@ fun ExpenseFormScreen(
             }
 
             is ExpenseFormEvent.OnSaveSuccess -> {
-//                if (state.value.isEditing)
-//                    onEditSuccess()
-//                else
-//                    onCreateSuccess()
+                onBackClick()
             }
         }
     }
@@ -106,16 +103,21 @@ fun ExpenseFormScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     item {
-                        AmountInputField(
-                            amount = state.value.amount,
-                            onAmountChange = { amount ->
-                                viewModel.onAction(
-                                    ExpenseFormAction.OnAmountChanged(
-                                        amount
+                        Column(
+                            modifier = Modifier.height(150.dp),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            AmountInputField(
+                                amount = state.value.amount,
+                                onAmountChange = { amount ->
+                                    viewModel.onAction(
+                                        ExpenseFormAction.OnAmountChange(
+                                            amount
+                                        )
                                     )
-                                )
-                            }
-                        )
+                                }
+                            )
+                        }
                     }
                     item {
                         ExpenseNameInput()

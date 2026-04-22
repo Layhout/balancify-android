@@ -95,7 +95,7 @@ fun ExpenseIconFormBottomSheet(
                             modifier = Modifier
                                 .clickable(
                                     onClick = {
-                                        viewModel.onAction(ExpenseFormAction.OnIconChanged(icon))
+                                        viewModel.onAction(ExpenseFormAction.OnIconChange(icon))
                                     }
                                 )
                                 .size(44.dp)
@@ -137,7 +137,7 @@ fun ExpenseIconFormBottomSheet(
                                 .clickable(
                                     onClick = {
                                         viewModel.onAction(
-                                            ExpenseFormAction.OnIconBgColorChanged(
+                                            ExpenseFormAction.OnIconBgColorChange(
                                                 colorString
                                             )
                                         )

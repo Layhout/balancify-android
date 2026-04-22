@@ -17,4 +17,19 @@ data class UserModel(
     override val profileBgColor: String = "",
     override val referralCode: String = "",
     override val subNoti: Boolean = false,
-) : User, Parcelable
+) : User, Parcelable {
+    companion object {
+        fun fromExpenseMemberModel(model: ExpenseMemberModel): UserModel {
+            return UserModel(
+                id = model.id,
+                email = model.email,
+                imageUrl = model.imageUrl,
+                name = model.name,
+                notiToken = model.notiToken,
+                profileBgColor = model.profileBgColor,
+                referralCode = model.referralCode,
+                subNoti = model.subNoti
+            )
+        }
+    }
+}

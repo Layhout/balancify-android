@@ -18,15 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.balancify.core.ext.formatAmountTextFieldValue
+import com.example.balancify.core.ext.formatAmountValueChange
 import kotlinx.coroutines.delay
 
 @Composable
@@ -46,27 +46,14 @@ fun AmountInputField(
         }
     }
 
-    val textFieldValue = if (amount.isEmpty()) {
-        TextFieldValue("")
-    } else {
-        val display = "$$amount"
-        TextFieldValue(
-            text = display,
-            selection = TextRange(display.length)
-        )
-    }
-
     BasicTextField(
         modifier = modifier
             .fillMaxWidth()
             .focusRequester(focusRequester),
-        value = textFieldValue,
+        value = formatAmountTextFieldValue(amount),
         onValueChange = { newValue ->
-            val stripped = newValue.text.removePrefix("$")
-            if (stripped.matches(Regex("^-?\\d*(\\.\\d{0,2})?$"))) {
-                if (stripped == ".") onAmountChange("0.")
-                else onAmountChange(stripped)
-            }
+            val newValueString = newValue.formatAmountValueChange() ?: return@BasicTextField
+            onAmountChange(newValueString)
         },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Decimal,
@@ -87,7 +74,9 @@ fun AmountInputField(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Box(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     if (amount.isEmpty()) {

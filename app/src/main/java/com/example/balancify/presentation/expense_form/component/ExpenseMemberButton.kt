@@ -52,7 +52,7 @@ fun ExpenseMemberButton(
             )
             TextButton(
                 onClick = {
-                    viewModel.onAction(ExpenseFormAction.OnAddMemberClicked)
+                    viewModel.onAction(ExpenseFormAction.OnAddMemberClick)
                 },
                 enabled = state.value.isEnableAllAction && state.value.members.size < 10
             ) {

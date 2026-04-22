@@ -3,20 +3,26 @@ package com.example.balancify.presentation.expense_form.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AttachMoney
+import androidx.compose.material.icons.outlined.FrontHand
 import androidx.compose.material.icons.outlined.PersonRemove
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -25,7 +31,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.component.CardOrder
+import com.example.balancify.component.DropdownOption
 import com.example.balancify.component.UserListCard
+import com.example.balancify.core.ext.formatAmountTextFieldValue
+import com.example.balancify.core.ext.formatAmountValueChange
+import com.example.balancify.core.ext.toCleanString
 import com.example.balancify.domain.model.ExpenseMemberModel
 import com.example.balancify.domain.model.MemberOption
 import com.example.balancify.domain.model.SplitOption
@@ -41,7 +51,16 @@ fun ExpenseMemberCard(
     order: CardOrder,
     index: Int,
 ) {
+    var displayAmount by remember { mutableStateOf("") }
     val state = viewModel.state.collectAsStateWithLifecycle()
+
+    val isCustomAmount = state.value.splitOption == SplitOption.CUSTOM
+
+    LaunchedEffect(state.value.splitOption) {
+        if (state.value.splitOption == SplitOption.CUSTOM) {
+            displayAmount = data.amount.toCleanString()
+        }
+    }
 
     UserListCard(
         order = order,
@@ -49,13 +68,29 @@ fun ExpenseMemberCard(
             name = data.name,
             imageUrl = data.imageUrl,
         ),
-        subTitleContent = {},
+        subTitleContent = {
+            if (data.id == state.value.paidBy?.id)
+                Text(
+                    "pays for this expense",
+                    style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.primary)
+                )
+        },
         action = {
             BasicTextField(
-                enabled = state.value.splitOption == SplitOption.CUSTOM,
-                value = data.amount.toString(),
-                onValueChange = { amount ->
-                    viewModel.onAction(ExpenseFormAction.OnMemberAmountChanged(index, amount))
+                enabled = isCustomAmount,
+                value = formatAmountTextFieldValue(
+                    if (isCustomAmount) displayAmount
+                    else data.amount.toCleanString()
+                ),
+                onValueChange = { newValue ->
+                    val newValueString = newValue.formatAmountValueChange() ?: return@BasicTextField
+                    displayAmount = newValueString
+                    viewModel.onAction(
+                        ExpenseFormAction.OnMemberAmountChange(
+                            index,
+                            newValueString
+                        )
+                    )
                 },
                 textStyle = MaterialTheme.typography.labelMedium.copy(
                     textAlign = TextAlign.End,
@@ -77,38 +112,62 @@ fun ExpenseMemberCard(
                 ),
                 singleLine = true,
                 decorationBox = { innerTextField ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
+                    Box(
+                        contentAlignment = Alignment.CenterEnd,
+                        modifier = Modifier
+                            .fillMaxSize()
                     ) {
-                        Icon(
-                            Icons.Outlined.AttachMoney,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Box(
-                            contentAlignment = Alignment.CenterEnd,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .weight(1f),
-                        ) {
-                            innerTextField()
+                        if (data.amount.toCleanString().isEmpty()) {
+                            Text(
+                                text = "$0.00",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    textAlign = TextAlign.End,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            )
                         }
+                        innerTextField()
                     }
-                }
+                },
             )
-            if (state.value.memberOption == MemberOption.FRIEND)
-                IconButton(
-                    modifier = Modifier.size(38.dp),
-                    onClick = {
-                        viewModel.onAction(ExpenseFormAction.OnMemberRemoved(index))
-                    }
-                ) {
-                    Icon(
-                        Icons.Outlined.PersonRemove,
-                        tint = MaterialTheme.colorScheme.error,
-                        contentDescription = null
+
+            DropdownOption {
+                DropdownMenuItem(
+                    enabled = state.value.paidBy?.id != data.id,
+                    text = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Outlined.FrontHand,
+                                contentDescription = null
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            Text("Assign payer")
+                        }
+                    },
+                    onClick = {},
+                )
+                if (state.value.memberOption == MemberOption.FRIEND)
+                    DropdownMenuItem(
+                        text = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Outlined.PersonRemove,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    contentDescription = null
+                                )
+                                Spacer(Modifier.width(12.dp))
+                                Text("Remove")
+                            }
+                        },
+                        onClick = {
+                            viewModel.onAction(ExpenseFormAction.OnMemberRemove(index))
+                        },
                     )
-                }
+            }
         }
     )
 }
