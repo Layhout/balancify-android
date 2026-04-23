@@ -12,7 +12,7 @@ data class ExpenseFormState(
     val isLoading: Boolean = false,
     val isNameInvalid: Boolean = false,
     val isMemberInvalid: Boolean = false,
-    val isAmountInvalid: Boolean = false,
+    val amountErrorMessage: String? = null,
     val isEditing: Boolean = false,
     val showIconBottomSheet: Boolean = false,
     val isEnableAllAction: Boolean = true,

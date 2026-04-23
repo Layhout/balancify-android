@@ -3,13 +3,17 @@ package com.example.balancify.presentation.expense_form
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.balancify.core.constant.BG_COLORS
+import com.example.balancify.core.constant.GlobalAppStateFlag
 import com.example.balancify.core.constant.SearchResult
 import com.example.balancify.core.manager.GlobalAppStateManager
+import com.example.balancify.domain.model.ExpenseGroupModel
 import com.example.balancify.domain.model.ExpenseIcon
 import com.example.balancify.domain.model.ExpenseMemberModel
+import com.example.balancify.domain.model.ExpenseModel
 import com.example.balancify.domain.model.MemberOption
 import com.example.balancify.domain.model.SplitOption
 import com.example.balancify.domain.model.UserModel
+import com.example.balancify.domain.use_case.expense.ExpenseUseCases
 import com.example.balancify.domain.use_case.user.UserUseCases
 import com.example.balancify.presentation.expense_form.ExpenseFormAction.OnAddMember
 import kotlinx.coroutines.channels.Channel
@@ -26,6 +30,7 @@ import java.text.DecimalFormatSymbols
 import java.util.Locale
 
 class ExpenseFormViewModel(
+    private val expenseUseCases: ExpenseUseCases,
     private val userUseCases: UserUseCases,
     private val globalAppStateManager: GlobalAppStateManager,
 ) : ViewModel() {
@@ -127,16 +132,27 @@ class ExpenseFormViewModel(
         when (action) {
             is ExpenseFormAction.OnMemberOptionChange -> {
                 _state.update {
-                    it.copy(
-                        paidBy = it.localUser,
-                        memberOption = action.option,
-                        members = if (action.option == MemberOption.FRIEND) listOf(
-                            ExpenseMemberModel.fromUserModel(
-                                user = _state.value.localUser!!,
-                                amount = 0.0,
-                                settledAmount = 0.0
+                    var newState = it
+                    if (action.option == MemberOption.FRIEND) {
+                        newState = newState.copy(
+                            group = null,
+                            members = listOf(
+                                ExpenseMemberModel.fromUserModel(
+                                    user = _state.value.localUser!!,
+                                    amount = 0.0,
+                                    settledAmount = 0.0
+                                )
                             )
-                        ) else emptyList(),
+                        )
+                    } else {
+                        newState = newState.copy(
+                            members = emptyList(),
+                        )
+                    }
+
+                    newState.copy(
+                        paidBy = newState.localUser,
+                        memberOption = action.option,
                     )
                 }
                 normalizeMemberAmount(_state.value.amount)
@@ -216,7 +232,8 @@ class ExpenseFormViewModel(
                     it.copy(
                         members = if (_state.value.memberOption == MemberOption.FRIEND)
                             action.members + it.members
-                        else action.members
+                        else action.members,
+                        group = action.group,
                     )
                 }
 
@@ -241,15 +258,20 @@ class ExpenseFormViewModel(
                             )
                         )
                     } else {
+                        val data = (it as SearchResult.Group).data
                         onAction(
                             OnAddMember(
-                                (it as SearchResult.Group).data.members.map { member ->
+                                data.members.map { member ->
                                     ExpenseMemberModel.fromUserModel(
                                         member,
                                         amount = 0.0,
                                         settledAmount = 0.0,
                                     )
-                                }
+                                },
+                                ExpenseGroupModel(
+                                    id = data.id,
+                                    name = data.name,
+                                )
                             )
                         )
                     }
@@ -265,6 +287,7 @@ class ExpenseFormViewModel(
                     it.copy(
                         isNameInvalid = false,
                         isMemberInvalid = false,
+                        amountErrorMessage = null,
                     )
                 }
 
@@ -275,21 +298,75 @@ class ExpenseFormViewModel(
                     isValid = false
                 }
 
-                if (_state.value.members.size > 10) {
+                if (_state.value.members.isEmpty() || _state.value.members.size > 10) {
                     _state.update { it.copy(isMemberInvalid = true) }
                     isValid = false
                 }
 
                 val amount = _state.value.amount.toDoubleOrNull() ?: 0.0
 
-                if (amount <= 0) {
-                    _state.update { it.copy(isAmountInvalid = true) }
+                if (amount <= 0.0) {
+                    _state.update { it.copy(amountErrorMessage = "Amount is required") }
+                    isValid = false
+                }
+
+                if (amount != _state.value.members.sumOf { it.amount }) {
+                    _state.update {
+                        it.copy(
+                            amountErrorMessage = "Amount and members expense amount does not match"
+                        )
+                    }
                     isValid = false
                 }
 
                 if (!isValid) return
 
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            isLoading = true,
+                            isEnableAllAction = false,
+                        )
+                    }
 
+                    val result = expenseUseCases.createExpense(
+                        ExpenseModel(
+                            name = _state.value.name,
+                            amount = _state.value.amount.toDouble(),
+                            icon = _state.value.icon.value,
+                            iconBgColor = _state.value.iconBgColor,
+                            memberOption = _state.value.memberOption,
+                            splitOption = _state.value.splitOption,
+                            group = _state.value.group,
+                            paidBy = _state.value.paidBy!!,
+                        ),
+                        _state.value.members,
+                    )
+
+                    if (result.isFailure) {
+                        alertError(result.exceptionOrNull()?.message)
+                    } else {
+                        if (_state.value.isEditing) {
+                            globalAppStateManager.setFlag(
+                                GlobalAppStateFlag.EXPENSE_LIST_SHOULD_REFRESH,
+                                true
+                            )
+                        } else {
+                            globalAppStateManager.setFlag(
+                                GlobalAppStateFlag.EXPENSE_LIST_SHOULD_REFRESH,
+                                true
+                            )
+                        }
+                        _events.trySend(ExpenseFormEvent.OnSaveSuccess)
+                    }
+
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            isEnableAllAction = true,
+                        )
+                    }
+                }
             }
 
             is ExpenseFormAction.OnPaidByChange -> {

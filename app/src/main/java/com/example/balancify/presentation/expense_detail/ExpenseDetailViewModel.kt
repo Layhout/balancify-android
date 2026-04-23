@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ExpenseDetailViewModel(
-    private val useCases: ExpenseUseCases,
+    private val expenseUseCases: ExpenseUseCases,
     private val userUseCases: UserUseCases,
     private val globalAppStateManager: GlobalAppStateManager,
     private val handle: SavedStateHandle,
@@ -51,7 +51,7 @@ class ExpenseDetailViewModel(
             }
 
             val id = handle.toRoute<Routes.ExpenseDetail>().id
-            val result = useCases.getExpenseDetail(id)
+            val result = expenseUseCases.getExpenseDetail(id)
             if (result.isFailure) {
                 alertError(result.exceptionOrNull()?.message)
                 return@launch
@@ -124,7 +124,7 @@ class ExpenseDetailViewModel(
                         )
                     }
 
-                    val result = useCases.deleteExpense(state.value.expense.id)
+                    val result = expenseUseCases.deleteExpense(state.value.expense.id)
                     if (result.isFailure) {
                         alertError(result.exceptionOrNull()?.message)
                         _state.update {
@@ -181,7 +181,7 @@ class ExpenseDetailViewModel(
                         )
                     }
 
-                    val result = useCases.settleExpense(
+                    val result = expenseUseCases.settleExpense(
                         id = _state.value.expense.id,
                         amount = amount,
                         settledAmount = _state.value.settlementAmount.toDoubleOrNull() ?: 0.0,

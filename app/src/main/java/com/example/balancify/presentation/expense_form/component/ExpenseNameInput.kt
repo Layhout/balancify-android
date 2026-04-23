@@ -43,6 +43,7 @@ fun ExpenseNameInput(
             Box(
                 modifier = Modifier
                     .clickable(
+                        enabled = state.value.isEnableAllAction,
                         onClick = {
                             viewModel.onAction(
                                 ExpenseFormAction.OnIconFormBottomSheetToggle
@@ -69,6 +70,7 @@ fun ExpenseNameInput(
             }
         }
         OutlinedTextField(
+            enabled = state.value.isEnableAllAction,
             value = state.value.name,
             onValueChange = { value ->
                 viewModel.onAction(ExpenseFormAction.OnNameChange(value))

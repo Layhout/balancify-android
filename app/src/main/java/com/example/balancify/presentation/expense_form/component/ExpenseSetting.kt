@@ -38,6 +38,7 @@ fun ExpenseSetting(
                 style = MaterialTheme.typography.labelLarge
             )
             ToggleButtonGroup(
+                enabled = state.value.isEnableAllAction,
                 options = MemberOption.entries.map { option -> option.label },
                 selectedIndex = state.value.memberOption.ordinal,
                 onSelectedIndexChange = { index ->
@@ -59,6 +60,7 @@ fun ExpenseSetting(
                 style = MaterialTheme.typography.labelLarge
             )
             ToggleButtonGroup(
+                enabled = state.value.isEnableAllAction,
                 options = SplitOption.entries.map { option -> option.label },
                 selectedIndex = state.value.splitOption.ordinal,
                 onSelectedIndexChange = { index ->

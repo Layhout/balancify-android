@@ -35,6 +35,8 @@ fun AmountInputField(
     onAmountChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     autoFocus: Boolean = true,
+    errorMessage: String? = null,
+    enabled: Boolean = true,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focusRequester = remember { FocusRequester() }
@@ -47,6 +49,7 @@ fun AmountInputField(
     }
 
     BasicTextField(
+        enabled = enabled,
         modifier = modifier
             .fillMaxWidth()
             .focusRequester(focusRequester),
@@ -92,9 +95,10 @@ fun AmountInputField(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Enter Amount",
+                    text = errorMessage ?: "Enter Amount",
                     fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.outline
+                    color = if (errorMessage != null) MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.outline
                 )
             }
         }

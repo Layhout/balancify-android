@@ -51,10 +51,10 @@ fun ExpenseMemberButton(
                 )
             )
             TextButton(
+                enabled = state.value.isEnableAllAction && state.value.members.size < 10,
                 onClick = {
                     viewModel.onAction(ExpenseFormAction.OnAddMemberClick)
                 },
-                enabled = state.value.isEnableAllAction && state.value.members.size < 10
             ) {
                 Icon((Icons.Outlined.PersonAdd), contentDescription = null)
                 Spacer(modifier = Modifier.width(6.dp))
@@ -63,7 +63,10 @@ fun ExpenseMemberButton(
         }
         if (state.value.isMemberInvalid) {
             Text(
-                "Member cannot be greater than 10",
+                if (state.value.members.isEmpty())
+                    "You need to add at least one member."
+                else
+                    "Oops! You’ve reached the limit — only 10 members allowed.",
                 style = MaterialTheme.typography.labelMedium.copy(
                     color = MaterialTheme.colorScheme.error
                 )

@@ -155,7 +155,7 @@ class GroupFormViewModel(
                     _state.update {
                         it.copy(
                             isLoading = true,
-                            isNameInvalid = false,
+                            isEnableAllAction = false,
                         )
                     }
 
@@ -186,7 +186,8 @@ class GroupFormViewModel(
 
                     _state.update {
                         it.copy(
-                            isLoading = false
+                            isLoading = false,
+                            isEnableAllAction = true,
                         )
                     }
                 }

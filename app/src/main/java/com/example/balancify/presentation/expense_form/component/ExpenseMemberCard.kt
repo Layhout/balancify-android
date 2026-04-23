@@ -133,7 +133,7 @@ fun ExpenseMemberCard(
 
             DropdownOption {
                 DropdownMenuItem(
-                    enabled = state.value.paidBy?.id != data.id,
+                    enabled = state.value.isEnableAllAction || state.value.paidBy?.id != data.id,
                     text = {
                         Row(
                             verticalAlignment = Alignment.CenterVertically
@@ -146,10 +146,13 @@ fun ExpenseMemberCard(
                             Text("Assign payer")
                         }
                     },
-                    onClick = {},
+                    onClick = {
+                        viewModel.onAction(ExpenseFormAction.OnPaidByChange(data.id))
+                    },
                 )
                 if (state.value.memberOption == MemberOption.FRIEND)
                     DropdownMenuItem(
+                        enabled = state.value.isEnableAllAction,
                         text = {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically

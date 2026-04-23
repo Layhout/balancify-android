@@ -108,7 +108,9 @@ fun ExpenseFormScreen(
                             verticalArrangement = Arrangement.Center
                         ) {
                             AmountInputField(
+                                enabled = state.value.isEnableAllAction,
                                 amount = state.value.amount,
+                                errorMessage = state.value.amountErrorMessage,
                                 onAmountChange = { amount ->
                                     viewModel.onAction(
                                         ExpenseFormAction.OnAmountChange(

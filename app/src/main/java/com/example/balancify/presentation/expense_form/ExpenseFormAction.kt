@@ -1,5 +1,6 @@
 package com.example.balancify.presentation.expense_form
 
+import com.example.balancify.domain.model.ExpenseGroupModel
 import com.example.balancify.domain.model.ExpenseIcon
 import com.example.balancify.domain.model.ExpenseMemberModel
 import com.example.balancify.domain.model.MemberOption
@@ -15,7 +16,11 @@ sealed interface ExpenseFormAction {
     data class OnAmountChange(val amount: String) : ExpenseFormAction
     data class OnMemberAmountChange(val index: Int, val amount: String) : ExpenseFormAction
     data class OnMemberRemove(val index: Int) : ExpenseFormAction
-    data class OnAddMember(val members: List<ExpenseMemberModel>) : ExpenseFormAction
+    data class OnAddMember(
+        val members: List<ExpenseMemberModel>,
+        val group: ExpenseGroupModel? = null
+    ) : ExpenseFormAction
+
     data object OnCollectFlag : ExpenseFormAction
     data object OnAddMemberClick : ExpenseFormAction
     data object OnSaveClick : ExpenseFormAction
