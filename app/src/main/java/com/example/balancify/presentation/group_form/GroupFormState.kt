@@ -11,4 +11,5 @@ data class GroupFormState(
     val name: String = "",
     val description: String = "",
     val members: List<UserModel> = emptyList(),
+    val localUser: UserModel? = null,
 )

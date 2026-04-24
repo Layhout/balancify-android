@@ -25,6 +25,7 @@ interface ExpenseRemoteDataSource {
     ): PaginatedData<ExpenseModel>
 
     suspend fun deleteExpense(id: String)
+
     suspend fun settleExpense(
         id: String,
         amount: Double,
@@ -32,4 +33,10 @@ interface ExpenseRemoteDataSource {
         localUser: UserModel,
         receiverName: String,
     ): ExpenseModel
+
+    suspend fun updateExpense(
+        id: String,
+        expense: ExpenseModel,
+        expenseMetadata: ExpenseMetadataModel,
+    )
 }

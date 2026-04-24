@@ -32,4 +32,10 @@ interface ExpenseRepository {
         localUser: UserModel,
         receiverName: String,
     ): Result<ExpenseModel>
+
+    suspend fun updateExpense(
+        id: String,
+        expense: ExpenseModel,
+        expenseMetadata: ExpenseMetadataModel,
+    ): Result<Unit>
 }

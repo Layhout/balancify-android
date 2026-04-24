@@ -60,4 +60,14 @@ class ExpenseRepositoryImp(
             )
         }
     }
+
+    override suspend fun updateExpense(
+        id: String,
+        expense: ExpenseModel,
+        expenseMetadata: ExpenseMetadataModel
+    ): Result<Unit> {
+        return Result.runCatching {
+            remoteDataSource.updateExpense(id, expense, expenseMetadata)
+        }
+    }
 }

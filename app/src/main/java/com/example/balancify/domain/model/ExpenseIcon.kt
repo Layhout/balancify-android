@@ -18,5 +18,9 @@ enum class ExpenseIcon(
         fun getIconIdFromValue(value: String): Int {
             return entries.find { it.value == value }?.id ?: STAR.id
         }
+
+        fun fromValue(value: String): ExpenseIcon {
+            return entries.find { it.value == value } ?: STAR
+        }
     }
 }

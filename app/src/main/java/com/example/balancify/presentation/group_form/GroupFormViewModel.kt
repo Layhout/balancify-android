@@ -27,7 +27,7 @@ class GroupFormViewModel(
     private val handle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(GroupFormState())
-    val state = _state.onStart { isEditGroupCheck() }.stateIn(
+    val state = _state.onStart { loadData() }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000L),
         initialValue = GroupFormState()
@@ -42,33 +42,38 @@ class GroupFormViewModel(
         )
     }
 
-    private fun isEditGroupCheck() {
-        val groupId = handle.toRoute<Routes.GroupFrom>().id
+    private fun loadData() {
+        val localUser: UserModel? = _state.value.localUser
 
-        groupId?.let {
-            viewModelScope.launch {
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        isEditing = true,
-                        isEnableAllAction = false,
-                    )
-                }
+        if (localUser != null) return
 
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    isEditing = true,
+                    isEnableAllAction = false,
+                )
+            }
+
+            val userResult = userUseCases.getLocalUser()
+            if (userResult.isFailure) {
+                alertError(userResult.exceptionOrNull()?.message)
+                return@launch
+            }
+
+            val groupId = handle.toRoute<Routes.GroupFrom>().id
+
+            if (groupId != null) {
                 val result = groupUseCases.getGroupDetail(groupId)
                 if (result.isFailure) {
                     alertError(result.exceptionOrNull()?.message)
                     return@launch
                 }
 
-                val userResult = userUseCases.getLocalUser()
-                if (userResult.isFailure) {
-                    alertError(userResult.exceptionOrNull()?.message)
-                    return@launch
-                }
-
                 _state.update {
                     it.copy(
+                        localUser = userResult.getOrNull(),
                         isLoading = false,
                         isEnableAllAction = true,
                         name = result.getOrNull()?.name ?: "",
@@ -79,6 +84,14 @@ class GroupFormViewModel(
                             result.getOrNull()!!.members.filter { member ->
                                 member.id != userResult.getOrNull()?.id
                             },
+                    )
+                }
+            } else {
+                _state.update {
+                    it.copy(
+                        localUser = userResult.getOrNull(),
+                        isLoading = false,
+                        isEnableAllAction = true,
                     )
                 }
             }

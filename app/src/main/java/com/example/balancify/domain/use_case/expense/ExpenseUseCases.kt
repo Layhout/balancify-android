@@ -7,4 +7,5 @@ data class ExpenseUseCases(
     val deleteExpense: DeleteExpense,
     val settleExpense: SettleExpense,
     val createExpense: CreateExpense,
+    val updateExpense: UpdateExpense,
 )

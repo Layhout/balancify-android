@@ -28,6 +28,7 @@ import com.example.balancify.domain.use_case.expense.GetExpenseDetail
 import com.example.balancify.domain.use_case.expense.GetExpenses
 import com.example.balancify.domain.use_case.expense.GetExpensesForGroup
 import com.example.balancify.domain.use_case.expense.SettleExpense
+import com.example.balancify.domain.use_case.expense.UpdateExpense
 import com.example.balancify.domain.use_case.friend.AcceptFriend
 import com.example.balancify.domain.use_case.friend.AddFriendByEmail
 import com.example.balancify.domain.use_case.friend.FriendUseCases
@@ -132,7 +133,8 @@ val appModule = module {
             getExpensesForGroup = GetExpensesForGroup(get()),
             deleteExpense = DeleteExpense(get()),
             settleExpense = SettleExpense(get(), get()),
-            createExpense = CreateExpense(get(), get())
+            createExpense = CreateExpense(get(), get()),
+            updateExpense = UpdateExpense(get(), get()),
         )
     }
 

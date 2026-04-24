@@ -25,5 +25,6 @@ data class ExpenseFormState(
     val members: List<ExpenseMemberModel> = emptyList(),
     val localUser: UserModel? = null,
     val paidBy: UserModel? = null,
+    val previousPayer: UserModel? = null,
     val group: ExpenseGroupModel? = null
 )

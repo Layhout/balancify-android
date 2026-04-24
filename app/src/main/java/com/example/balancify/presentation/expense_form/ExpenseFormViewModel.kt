@@ -1,10 +1,13 @@
 package com.example.balancify.presentation.expense_form
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.example.balancify.core.constant.BG_COLORS
 import com.example.balancify.core.constant.GlobalAppStateFlag
 import com.example.balancify.core.constant.SearchResult
+import com.example.balancify.core.ext.toCleanString
 import com.example.balancify.core.manager.GlobalAppStateManager
 import com.example.balancify.domain.model.ExpenseGroupModel
 import com.example.balancify.domain.model.ExpenseIcon
@@ -15,6 +18,7 @@ import com.example.balancify.domain.model.SplitOption
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.domain.use_case.expense.ExpenseUseCases
 import com.example.balancify.domain.use_case.user.UserUseCases
+import com.example.balancify.navigatin.Routes
 import com.example.balancify.presentation.expense_form.ExpenseFormAction.OnAddMember
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +37,7 @@ class ExpenseFormViewModel(
     private val expenseUseCases: ExpenseUseCases,
     private val userUseCases: UserUseCases,
     private val globalAppStateManager: GlobalAppStateManager,
+    private val handle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ExpenseFormState())
     val state = _state.onStart { loadData() }.stateIn(
@@ -44,6 +49,18 @@ class ExpenseFormViewModel(
     private val _events = Channel<ExpenseFormEvent>()
     val events = _events.receiveAsFlow()
 
+    private val formPayload: ExpenseModel
+        get() = ExpenseModel(
+            name = _state.value.name,
+            amount = _state.value.amount.toDouble(),
+            icon = _state.value.icon.value,
+            iconBgColor = _state.value.iconBgColor,
+            memberOption = _state.value.memberOption,
+            splitOption = _state.value.splitOption,
+            group = _state.value.group,
+            paidBy = _state.value.paidBy!!,
+        )
+
     private fun alertError(message: String?) {
         _events.trySend(
             ExpenseFormEvent.OnError(message ?: "Unknown error")
@@ -51,25 +68,63 @@ class ExpenseFormViewModel(
     }
 
     private fun loadData() {
+        val localUser: UserModel? = _state.value.localUser
+
+        if (localUser != null) return
+
         viewModelScope.launch {
-            var localUser: UserModel? = _state.value.localUser
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    isEditing = true,
+                    isEnableAllAction = false,
+                )
+            }
 
-            if (localUser == null) {
-                val result = userUseCases.getLocalUser()
+            val userResult = userUseCases.getLocalUser()
+            if (userResult.isFailure) {
+                alertError(userResult.exceptionOrNull()?.message)
+                return@launch
+            }
 
-                if (result.isSuccess) {
-                    localUser = result.getOrNull()
+            val expenseId = handle.toRoute<Routes.ExpenseForm>().id
+
+            if (expenseId != null) {
+                val result = expenseUseCases.getExpenseDetail(expenseId)
+                if (result.isFailure) {
+                    alertError(result.exceptionOrNull()?.message)
+                    return@launch
                 }
 
+                val detail = result.getOrNull()!!
+
+                _state.update {
+                    it.copy(
+                        icon = ExpenseIcon.fromValue(detail.icon),
+                        iconBgColor = detail.iconBgColor,
+                        localUser = userResult.getOrNull(),
+                        paidBy = detail.paidBy,
+                        members = detail.member.values.toList(),
+                        name = detail.name,
+                        amount = detail.amount.toCleanString(),
+                        memberOption = detail.memberOption,
+                        splitOption = detail.splitOption,
+                        group = detail.group,
+                        previousPayer = detail.paidBy,
+
+                        )
+                }
+
+            } else {
                 _state.update {
                     it.copy(
                         icon = ExpenseIcon.entries[(1..ExpenseIcon.entries.lastIndex).random()],
                         iconBgColor = BG_COLORS[(0..BG_COLORS.lastIndex).random()],
-                        localUser = localUser,
-                        paidBy = localUser,
+                        localUser = userResult.getOrNull(),
+                        paidBy = userResult.getOrNull(),
                         members = listOf(
                             ExpenseMemberModel.fromUserModel(
-                                user = localUser!!,
+                                user = userResult.getOrNull() ?: UserModel(),
                                 amount = 0.0,
                                 settledAmount = 0.0
                             )
@@ -329,18 +384,14 @@ class ExpenseFormViewModel(
                         )
                     }
 
-                    val result = expenseUseCases.createExpense(
-                        ExpenseModel(
-                            name = _state.value.name,
-                            amount = _state.value.amount.toDouble(),
-                            icon = _state.value.icon.value,
-                            iconBgColor = _state.value.iconBgColor,
-                            memberOption = _state.value.memberOption,
-                            splitOption = _state.value.splitOption,
-                            group = _state.value.group,
-                            paidBy = _state.value.paidBy!!,
-                        ),
+                    val result = if (_state.value.isEditing) expenseUseCases.createExpense(
+                        formPayload,
                         _state.value.members,
+                    ) else expenseUseCases.updateExpense(
+                        id = handle.toRoute<Routes.GroupFrom>().id!!,
+                        formPayload,
+                        _state.value.members,
+                        _state.value.previousPayer,
                     )
 
                     if (result.isFailure) {

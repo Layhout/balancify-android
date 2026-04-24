@@ -10,11 +10,13 @@ import com.example.balancify.domain.model.TimelineModel
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.service.BatchDeleteItem
 import com.example.balancify.service.BatchSetItem
+import com.example.balancify.service.BatchUpdateItem
 import com.example.balancify.service.DatabaseService
 import com.example.balancify.service.PaginatedData
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldPath.documentId
 import com.google.firebase.firestore.FieldValue.arrayUnion
+import com.google.firebase.firestore.FieldValue.serverTimestamp
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
 
@@ -160,6 +162,43 @@ class ExpenseRemoteDataSourceImp(
                     createdBy = localUser,
                     events = events
                 )
+            )
+        )
+    }
+
+    override suspend fun updateExpense(
+        id: String,
+        expense: ExpenseModel,
+        expenseMetadata: ExpenseMetadataModel
+    ) {
+        db.batchUpdate(
+            listOf(
+                BatchUpdateItem(
+                    collection = collectionName,
+                    id = id,
+                    fields = mapOf(
+                        "name" to expense.name,
+                        "createdAt" to serverTimestamp(),
+                        "amount" to expense.amount,
+                        "icon" to expense.icon,
+                        "iconBgColor" to expense.iconBgColor,
+                        "memberOption" to expense.memberOption,
+                        "splitOption" to expense.splitOption,
+                        "group" to expense.group,
+                        "member" to expense.member,
+                        "memberIds" to expense.memberIds,
+                        "paidBy" to expense.paidBy,
+                        "timelines" to expense.timelines,
+                    )
+                ),
+                BatchUpdateItem(
+                    collection = metaDataCollectionName,
+                    id = id,
+                    fields = mapOf(
+                        "nameTrigrams" to expenseMetadata.nameTrigrams,
+                        "membersFlag" to expenseMetadata.membersFlag,
+                    )
+                ),
             )
         )
     }
