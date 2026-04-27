@@ -25,6 +25,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ExpenseDetailAppBar(
     viewModel: ExpenseDetailViewModel = koinViewModel(),
+    onNavigateToExpenseFrom: (id: String) -> Unit,
     onBackClick: () -> Unit,
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
@@ -66,7 +67,7 @@ fun ExpenseDetailAppBar(
                 enabled = state.value.enableAllAction,
                 onClick = {
                     viewModel.onAction(ExpenseDetailAction.OnDropdownMenuToggle)
-//                                    onNavigateToGroupFrom(state.value.group.id)
+                    onNavigateToExpenseFrom(state.value.expense.id)
                 }
             )
             DropdownMenuItem(

@@ -6,6 +6,7 @@ import com.example.balancify.domain.model.ExpenseIcon
 import com.example.balancify.domain.model.ExpenseMemberModel
 import com.example.balancify.domain.model.MemberOption
 import com.example.balancify.domain.model.SplitOption
+import com.example.balancify.domain.model.TimelineModel
 import com.example.balancify.domain.model.UserModel
 
 data class ExpenseFormState(
@@ -27,4 +28,5 @@ data class ExpenseFormState(
     val paidBy: UserModel? = null,
     val previousPayer: UserModel? = null,
     val group: ExpenseGroupModel? = null,
+    val timelines: List<TimelineModel>? = null,
 )

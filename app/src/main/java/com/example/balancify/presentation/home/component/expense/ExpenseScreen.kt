@@ -63,7 +63,8 @@ fun ExpenseScreen(
                     viewModel.onAction(ExpenseAction.OnLoadMore)
                 },
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .padding(bottom = 16.dp),
             ) { index, item ->
                 if (index != 0) Spacer(modifier = Modifier.height(8.dp))
 

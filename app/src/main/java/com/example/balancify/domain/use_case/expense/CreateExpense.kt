@@ -37,10 +37,14 @@ class CreateExpense(
                 events = "Created expense"
             )
         )
+        val newMemberMap = members.associateBy { it.id }.toMutableMap()
+        newMemberMap[expenseParam.paidBy.id] = newMemberMap[expenseParam.paidBy.id]!!.copy(
+            settledAmount = newMemberMap[expenseParam.paidBy.id]!!.amount
+        )
 
         val expense = expenseParam.copy(
             id = expenseId,
-            member = members.associateBy { it.id },
+            member = newMemberMap,
             memberIds = members.map { it.id },
             createdBy = userResult.getOrNull()!!,
             timelines = timelines,

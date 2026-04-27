@@ -45,7 +45,7 @@ fun ExpenseDetailFooter(
                 viewModel.onAction(ExpenseDetailAction.OnSettlementBottomSheetToggle)
             },
             modifier = Modifier.weight(1f),
-            enabled = state.value.enableAllAction && !state.value.isPaidByLocalUser && !state.value.isAlreadySettled,
+            enabled = state.value.enableAllAction && !state.value.isAlreadySettled,
         ) {
             Icon(Icons.Outlined.DataSaverOn, contentDescription = null)
             Spacer(Modifier.width(6.dp))

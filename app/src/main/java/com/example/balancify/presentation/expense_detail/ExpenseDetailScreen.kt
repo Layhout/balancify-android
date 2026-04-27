@@ -39,6 +39,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ExpenseDetailScreen(
     viewModel: ExpenseDetailViewModel = koinViewModel(),
+    onNavigateToExpenseFrom: (id: String) -> Unit,
     onBackClick: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -80,7 +81,10 @@ fun ExpenseDetailScreen(
     ) {
         Scaffold(
             topBar = {
-                ExpenseDetailAppBar(onBackClick = onBackClick)
+                ExpenseDetailAppBar(
+                    onNavigateToExpenseFrom = onNavigateToExpenseFrom,
+                    onBackClick = onBackClick
+                )
             },
         ) {
             Column(modifier = Modifier.padding(it)) {

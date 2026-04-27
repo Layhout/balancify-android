@@ -113,7 +113,11 @@ fun NavigationRoot(
             }
         }
         composable<Routes.ExpenseDetail> {
-            ExpenseDetailScreen {
+            ExpenseDetailScreen(
+                onNavigateToExpenseFrom = {
+                    navController.navigate(Routes.ExpenseForm(it))
+                }
+            ) {
                 navController.popBackStack()
             }
         }

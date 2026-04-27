@@ -36,22 +36,21 @@ class HomeViewModel(
             }
 
             is HomeAction.OnCollectFlag -> {
-                val groupRefreshFlag = globalAppStateManager.pullFlag(
+                /// Do not pull flag because sub screen need the flag
+                val groupRefreshFlag = globalAppStateManager.getFlag(
                     GlobalAppStateFlag.GROUP_LIST_SHOULD_REFRESH
                 )
-                println("=====> groupRefreshFlag $groupRefreshFlag")
 
-                val expenseRefreshFlag = globalAppStateManager.pullFlag(
+                /// Do not pull flag because sub screen need the flag
+                val expenseRefreshFlag = globalAppStateManager.getFlag(
                     GlobalAppStateFlag.EXPENSE_LIST_SHOULD_REFRESH
                 )
-                println("=====> expenseRefreshFlag $expenseRefreshFlag")
 
                 if (groupRefreshFlag) {
                     _events.trySend(HomeEvent.OnRefreshGroup)
                 }
 
                 if (expenseRefreshFlag) {
-                    println("====> 54")
                     _events.trySend(HomeEvent.OnRefreshExpense)
                 }
             }

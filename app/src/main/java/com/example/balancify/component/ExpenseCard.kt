@@ -45,13 +45,13 @@ fun ExpenseCard(
 ) {
     StyledCard(
         modifier = Modifier
-            .clickable(
-                onClick = onClick,
-            )
             .padding(0.dp)
     ) {
         Column(
             modifier = Modifier
+                .clickable(
+                    onClick = onClick,
+                )
                 .fillMaxWidth()
         ) {
             Row(

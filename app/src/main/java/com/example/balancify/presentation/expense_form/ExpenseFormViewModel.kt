@@ -59,6 +59,7 @@ class ExpenseFormViewModel(
             splitOption = _state.value.splitOption,
             group = _state.value.group,
             paidBy = _state.value.paidBy!!,
+            timelines = _state.value.timelines ?: emptyList(),
         )
 
     private fun alertError(message: String?) {
@@ -118,6 +119,7 @@ class ExpenseFormViewModel(
                         previousPayer = detail.paidBy,
                         isLoading = false,
                         isEnableAllAction = true,
+                        timelines = detail.timelines,
                     )
                 }
 
@@ -411,7 +413,6 @@ class ExpenseFormViewModel(
                                 true
                             )
                         } else {
-                            println("=====> 414")
                             globalAppStateManager.setFlag(
                                 GlobalAppStateFlag.EXPENSE_LIST_SHOULD_REFRESH,
                                 true

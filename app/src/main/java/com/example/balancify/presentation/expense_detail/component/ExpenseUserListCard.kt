@@ -3,10 +3,8 @@ package com.example.balancify.presentation.expense_detail.component
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import com.example.balancify.component.CardOrder
 import com.example.balancify.component.UserListCard
-import com.example.balancify.core.ext.darken
 import com.example.balancify.core.ext.getCurrencyFormatted
 import com.example.balancify.domain.model.ExpenseMemberModel
 import com.example.balancify.domain.model.UserModel
@@ -36,35 +34,16 @@ fun ExpenseUserListCard(
         ),
         order = order,
         subTitleContent = {
-            if (payerId == data.id)
-                Text("Payer", style = MaterialTheme.typography.labelMedium)
-            else
-                when (settlementStatus) {
-                    "Overpaid" -> {
-                        Text(
-                            "$settlementStatus ${abs(balance).getCurrencyFormatted()}",
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                color = Color.Red.darken(0.5f)
-                            )
-                        )
+            Text(
+                "${if (payerId == data.id) "Payer ·" else ""} ${
+                    when (settlementStatus) {
+                        "Overpaid" -> "$settlementStatus ${abs(balance).getCurrencyFormatted()}"
+                        "Settled" -> settlementStatus
+                        else -> "$settlementStatus ${balance.getCurrencyFormatted()}"
                     }
-
-                    "Settled" -> {
-                        Text(
-                            settlementStatus,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                color = Color.Green.darken(0.5f)
-                            )
-                        )
-                    }
-
-                    "Owns" -> {
-                        Text(
-                            "$settlementStatus ${balance.getCurrencyFormatted()}",
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                }
+                }",
+                style = MaterialTheme.typography.labelMedium
+            )
         }
     )
 }

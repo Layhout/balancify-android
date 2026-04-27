@@ -28,10 +28,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -105,7 +105,6 @@ fun HomeScreen(
             }
 
             is HomeEvent.OnRefreshExpense -> {
-                println("======> HomeEvent.OnRefreshExpense")
                 onTabClick(
                     index = NavDestination.EXPENSES.ordinal,
                     destination = NavDestination.EXPENSES,
