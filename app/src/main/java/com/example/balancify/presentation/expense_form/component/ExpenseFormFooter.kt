@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.balancify.presentation.expense_form.ExpenseFormAction
 import com.example.balancify.presentation.expense_form.ExpenseFormViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -22,7 +23,7 @@ fun ExpenseFormFooter(
 
     Button(
         onClick = {
-
+            viewModel.onAction(ExpenseFormAction.OnSaveClick)
         },
         modifier = Modifier.fillMaxWidth(),
         enabled = !state.value.isLoading,

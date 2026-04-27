@@ -9,4 +9,5 @@ sealed interface ExpenseDetailAction {
     data object OnSettlementBottomSheetToggle : ExpenseDetailAction
     data class OnSettlementAmountChange(val amount: String) : ExpenseDetailAction
     data object OnSettlementSubmit : ExpenseDetailAction
+    data object OnCollectFlag : ExpenseDetailAction
 }

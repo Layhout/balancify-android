@@ -75,8 +75,7 @@ class ExpenseFormViewModel(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    isLoading = false,
-                    isEditing = true,
+                    isLoading = true,
                     isEnableAllAction = false,
                 )
             }
@@ -90,6 +89,12 @@ class ExpenseFormViewModel(
             val expenseId = handle.toRoute<Routes.ExpenseForm>().id
 
             if (expenseId != null) {
+                _state.update {
+                    it.copy(
+                        isEditing = true
+                    )
+                }
+
                 val result = expenseUseCases.getExpenseDetail(expenseId)
                 if (result.isFailure) {
                     alertError(result.exceptionOrNull()?.message)
@@ -111,8 +116,9 @@ class ExpenseFormViewModel(
                         splitOption = detail.splitOption,
                         group = detail.group,
                         previousPayer = detail.paidBy,
-
-                        )
+                        isLoading = false,
+                        isEnableAllAction = true,
+                    )
                 }
 
             } else {
@@ -129,6 +135,8 @@ class ExpenseFormViewModel(
                                 settledAmount = 0.0
                             )
                         ),
+                        isLoading = false,
+                        isEnableAllAction = true,
                     )
                 }
             }
@@ -384,14 +392,14 @@ class ExpenseFormViewModel(
                         )
                     }
 
-                    val result = if (_state.value.isEditing) expenseUseCases.createExpense(
-                        formPayload,
-                        _state.value.members,
-                    ) else expenseUseCases.updateExpense(
-                        id = handle.toRoute<Routes.GroupFrom>().id!!,
-                        formPayload,
-                        _state.value.members,
-                        _state.value.previousPayer,
+                    val result = if (_state.value.isEditing) expenseUseCases.updateExpense(
+                        id = handle.toRoute<Routes.ExpenseForm>().id!!,
+                        expenseParam = formPayload,
+                        members = _state.value.members,
+                        previousPayer = _state.value.previousPayer,
+                    ) else expenseUseCases.createExpense(
+                        expenseParam = formPayload,
+                        members = _state.value.members,
                     )
 
                     if (result.isFailure) {
@@ -399,10 +407,11 @@ class ExpenseFormViewModel(
                     } else {
                         if (_state.value.isEditing) {
                             globalAppStateManager.setFlag(
-                                GlobalAppStateFlag.EXPENSE_LIST_SHOULD_REFRESH,
+                                GlobalAppStateFlag.EXPENSE_DID_UPDATE,
                                 true
                             )
                         } else {
+                            println("=====> 414")
                             globalAppStateManager.setFlag(
                                 GlobalAppStateFlag.EXPENSE_LIST_SHOULD_REFRESH,
                                 true

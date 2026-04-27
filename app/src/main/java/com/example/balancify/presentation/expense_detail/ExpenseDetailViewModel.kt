@@ -221,6 +221,14 @@ class ExpenseDetailViewModel(
                     }
                 }
             }
+
+            ExpenseDetailAction.OnCollectFlag -> {
+                val refreshFlag =
+                    globalAppStateManager.pullFlag(GlobalAppStateFlag.EXPENSE_DID_UPDATE)
+
+                if (refreshFlag)
+                    onAction(ExpenseDetailAction.OnRefresh)
+            }
         }
     }
 }

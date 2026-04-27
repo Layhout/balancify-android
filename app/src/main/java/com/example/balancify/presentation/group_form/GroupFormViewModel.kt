@@ -50,8 +50,7 @@ class GroupFormViewModel(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    isLoading = false,
-                    isEditing = true,
+                    isLoading = true,
                     isEnableAllAction = false,
                 )
             }
@@ -65,6 +64,12 @@ class GroupFormViewModel(
             val groupId = handle.toRoute<Routes.GroupFrom>().id
 
             if (groupId != null) {
+                _state.update {
+                    it.copy(
+                        isEditing = true,
+                    )
+                }
+
                 val result = groupUseCases.getGroupDetail(groupId)
                 if (result.isFailure) {
                     alertError(result.exceptionOrNull()?.message)

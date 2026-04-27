@@ -72,6 +72,7 @@ fun ExpenseNameInput(
         OutlinedTextField(
             enabled = state.value.isEnableAllAction,
             value = state.value.name,
+            singleLine = true,
             onValueChange = { value ->
                 viewModel.onAction(ExpenseFormAction.OnNameChange(value))
             },

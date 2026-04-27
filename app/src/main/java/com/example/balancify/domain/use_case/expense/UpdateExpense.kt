@@ -30,7 +30,7 @@ class UpdateExpense(
             TimelineModel(
                 createdAt = timelineCreateTime,
                 createdBy = expenseParam.paidBy,
-                events = "Paid for this expense"
+                events = "Edited the expense"
             )
         ) + expenseParam.timelines
 

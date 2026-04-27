@@ -149,7 +149,7 @@ class GroupDetailViewModel(
 
             is GroupDetailAction.OnCollectFlag -> {
                 val refreshFlag =
-                    globalAppStateManager.pullFlag(GlobalAppStateFlag.GROUP_LIST_SHOULD_REFRESH)
+                    globalAppStateManager.pullFlag(GlobalAppStateFlag.GROUP_DID_UPDATE)
 
                 if (refreshFlag)
                     onAction(GroupDetailAction.OnRefresh)

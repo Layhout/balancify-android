@@ -26,5 +26,5 @@ data class ExpenseFormState(
     val localUser: UserModel? = null,
     val paidBy: UserModel? = null,
     val previousPayer: UserModel? = null,
-    val group: ExpenseGroupModel? = null
+    val group: ExpenseGroupModel? = null,
 )
