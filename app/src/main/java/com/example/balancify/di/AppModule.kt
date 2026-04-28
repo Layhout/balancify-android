@@ -98,7 +98,7 @@ val appModule = module {
             getUser = GetUser(get()),
             addUser = AddUser(get()),
             getLocalUser = GetLocalUser(get()),
-            addLocalUser = AddLocalUser(get())
+            addLocalUser = AddLocalUser(get()),
         )
     }
     single {
@@ -107,7 +107,7 @@ val appModule = module {
             unfriend = Unfriend(get()),
             acceptFriend = AcceptFriend(get()),
             rejectFriend = RejectFriend(get()),
-            addFriendByEmail = AddFriendByEmail(get(), get())
+            addFriendByEmail = AddFriendByEmail(get(), get()),
         )
     }
     single {

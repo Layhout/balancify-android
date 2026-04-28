@@ -27,9 +27,11 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun GroupDetailFooter(
-    viewModel: GroupDetailViewModel = koinViewModel()
+    viewModel: GroupDetailViewModel = koinViewModel(),
+    onNavigateToExpenseForm: () -> Unit,
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
+//    val globalAppStateManager: GlobalAppStateManager = koinInject()
 
     Row(
         Modifier
@@ -41,7 +43,10 @@ fun GroupDetailFooter(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Button(
-            onClick = {},
+            onClick = {
+//                globalAppStateManager.setSearchResult(SearchResult.Group(state.value.group))
+                onNavigateToExpenseForm()
+            },
             modifier = Modifier.weight(1f)
         ) {
             Icon(Icons.Outlined.DataSaverOn, contentDescription = null)

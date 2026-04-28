@@ -108,6 +108,9 @@ fun NavigationRoot(
                 onNavigateToExpenseDetail = {
                     navController.navigate(Routes.ExpenseDetail(it))
                 },
+                onNavigateToExpenseForm = {
+                    navController.navigate(Routes.ExpenseForm())
+                }
             ) {
                 navController.popBackStack()
             }

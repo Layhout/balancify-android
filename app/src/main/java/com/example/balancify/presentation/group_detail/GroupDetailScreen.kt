@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -38,6 +39,7 @@ fun GroupDetailScreen(
     viewModel: GroupDetailViewModel = koinViewModel(),
     onNavigateToGroupFrom: (String) -> Unit,
     onNavigateToExpenseDetail: (String) -> Unit,
+    onNavigateToExpenseForm: () -> Unit,
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -98,6 +100,7 @@ fun GroupDetailScreen(
                         items = state.value.expenses,
                         isLoadingMore = state.value.isLoading,
                         canLoadMore = state.value.canLoadMore,
+                        contentPadding = PaddingValues(bottom = 16.dp),
                         onLoadMore = {
                             viewModel.onAction(GroupDetailAction.OnLoadMore)
                         },
@@ -115,7 +118,7 @@ fun GroupDetailScreen(
                         )
                     }
                 }
-                GroupDetailFooter()
+                GroupDetailFooter(onNavigateToExpenseForm = onNavigateToExpenseForm)
             }
 
             if (state.value.showMemberBottomSheet)

@@ -68,7 +68,6 @@ class ExpenseDetailViewModel(
             }
 
             val localUserMember = result.getOrNull()!!.member[localUser?.id]
-
             val amountToSettle =
                 (localUserMember?.amount ?: 0.0) - (localUserMember?.settledAmount ?: 0.0)
             val isAlreadySettled = amountToSettle == 0.0
@@ -208,11 +207,17 @@ class ExpenseDetailViewModel(
                         )
                     }
 
+                    val localUserMember = result.getOrNull()!!.member[_state.value.localUser?.id]
+                    val amountToSettle =
+                        (localUserMember?.amount ?: 0.0) - (localUserMember?.settledAmount ?: 0.0)
+                    val isAlreadySettled = amountToSettle == 0.0
+
                     _state.update {
                         it.copy(
                             showSettlementBottomSheet = !it.showSettlementBottomSheet,
                             enableAllAction = true,
                             isSettling = false,
+                            isAlreadySettled = isAlreadySettled,
                             expense = it.expense.copy(
                                 member = memberMap,
                                 timelines = expense.timelines + it.expense.timelines

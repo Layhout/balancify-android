@@ -3,6 +3,7 @@ package com.example.balancify.presentation.home.component.expense
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -59,12 +60,12 @@ fun ExpenseScreen(
                 items = state.value.expenses,
                 isLoadingMore = state.value.isLoading,
                 canLoadMore = state.value.canLoadMore,
+                contentPadding = PaddingValues(bottom = 16.dp),
                 onLoadMore = {
                     viewModel.onAction(ExpenseAction.OnLoadMore)
                 },
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 16.dp),
+                    .fillMaxSize(),
             ) { index, item ->
                 if (index != 0) Spacer(modifier = Modifier.height(8.dp))
 

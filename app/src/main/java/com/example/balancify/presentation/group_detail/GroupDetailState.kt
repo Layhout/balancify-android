@@ -3,6 +3,7 @@ package com.example.balancify.presentation.group_detail
 import com.example.balancify.domain.model.ExpenseModel
 import com.example.balancify.domain.model.GroupModel
 import com.example.balancify.domain.model.UserModel
+import com.google.firebase.firestore.DocumentSnapshot
 
 data class GroupDetailState(
     val isLoading: Boolean = false,
@@ -16,4 +17,5 @@ data class GroupDetailState(
     val localUser: UserModel? = null,
     val group: GroupModel = GroupModel(),
     val expenses: List<ExpenseModel> = emptyList(),
+    val lastExpenseDoc: DocumentSnapshot? = null,
 )

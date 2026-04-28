@@ -51,7 +51,7 @@ fun GroupDetailHeader(
         )
         Spacer(Modifier.height(16.dp))
         Text("Expenses", style = MaterialTheme.typography.labelMedium)
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(8.dp))
         if (!state.value.isLoading && state.value.expenses.isEmpty()) {
             Empty()
         }
