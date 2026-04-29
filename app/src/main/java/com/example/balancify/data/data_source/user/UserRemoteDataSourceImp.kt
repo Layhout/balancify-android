@@ -18,14 +18,14 @@ class UserRemoteDataSourceImp(private val db: DatabaseService) : UserRemoteDataS
     }
 
     override suspend fun getUserByIds(ids: List<String>): List<UserModel> {
-        return db.getDocumentsWithQuery(collectionName, build = {
-            whereIn(documentId(), ids)
+        return db.getDocumentsWithQuery(collectionName, queryBuilder = {
+            it.whereIn(documentId(), ids)
         }).mapNotNull { it.toObject<UserModel>() }
     }
 
     override suspend fun getUserByEmail(id: String): UserModel? {
-        return db.getDataWithQuery(collectionName, build = {
-            whereEqualTo("email", id)
+        return db.getDataWithQuery(collectionName, queryBuilder = {
+            it.whereEqualTo("email", id)
         }).documents.firstOrNull()?.toObject<UserModel>()
     }
 }

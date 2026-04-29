@@ -27,4 +27,14 @@ sealed interface Routes {
     data class GroupDetail(
         val id: String,
     ) : Routes
+
+    @Serializable
+    data class ExpenseDetail(
+        val id: String,
+    ) : Routes
+
+    @Serializable
+    data class ExpenseForm(
+        val id: String? = null,
+    ) : Routes
 }

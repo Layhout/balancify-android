@@ -4,9 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.example.balancify.core.constant.GlobalAppStateFlag
+import com.example.balancify.core.manager.GlobalAppStateManager
+import com.example.balancify.domain.use_case.expense.ExpenseUseCases
 import com.example.balancify.domain.use_case.group.GroupUseCases
 import com.example.balancify.domain.use_case.user.UserUseCases
 import com.example.balancify.navigatin.Routes
+import com.google.firebase.firestore.DocumentSnapshot
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,6 +23,8 @@ import kotlinx.coroutines.launch
 class GroupDetailViewModel(
     private val groupUseCases: GroupUseCases,
     private val userUseCases: UserUseCases,
+    private val expenseUseCases: ExpenseUseCases,
+    private val globalAppStateManager: GlobalAppStateManager,
     private val handle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(GroupDetailState())
@@ -59,14 +65,54 @@ class GroupDetailViewModel(
                 return@launch
             }
 
+            val expensesResult =
+                expenseUseCases.getExpensesForGroup(_state.value.lastExpenseDoc, groupId = id)
+            if (expensesResult.isFailure) {
+                alertError(expensesResult.exceptionOrNull()?.message)
+                return@launch
+            }
+
             _state.update {
                 it.copy(
+                    localUser = userResult.getOrNull()!!,
                     isLoading = false,
                     enableAllAction = true,
                     group = result.getOrNull()!!,
                     isCreateByLocalUser =
                         result.getOrNull()!!.createdBy
-                                == userResult.getOrNull()!!.id
+                                == userResult.getOrNull()!!.id,
+                    expenses = expensesResult.getOrNull()?.data ?: emptyList(),
+                    canLoadMore = expensesResult.getOrNull()?.canLoadMore ?: false,
+                )
+            }
+        }
+    }
+
+    private fun loadMoreExpense(lastDoc: DocumentSnapshot? = null) {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isLoading = true,
+                )
+            }
+
+            val expensesResult =
+                expenseUseCases.getExpensesForGroup(
+                    lastDoc,
+                    groupId = _state.value.group.id
+                )
+            if (expensesResult.isFailure) {
+                alertError(expensesResult.exceptionOrNull()?.message)
+                return@launch
+            }
+
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    lastExpenseDoc = expensesResult.getOrNull()?.lastDoc,
+                    canLoadMore = expensesResult.getOrNull()?.canLoadMore ?: false,
+                    expenses = if (it.lastExpenseDoc != null) it.expenses + (expensesResult.getOrNull()?.data
+                        ?: emptyList()) else (expensesResult.getOrNull()?.data ?: emptyList()),
                 )
             }
         }
@@ -75,7 +121,7 @@ class GroupDetailViewModel(
     fun onAction(action: GroupDetailAction) {
         when (action) {
             GroupDetailAction.OnRefresh -> loadData()
-            GroupDetailAction.OnLoadMore -> TODO()
+            GroupDetailAction.OnLoadMore -> loadMoreExpense(_state.value.lastExpenseDoc)
             GroupDetailAction.OnDropdownMenuToggle -> {
                 _state.update {
                     it.copy(
@@ -128,7 +174,10 @@ class GroupDetailViewModel(
                             isLeaveBottomSheetVisible = false
                         )
                     }
-
+                    globalAppStateManager.setFlag(
+                        GlobalAppStateFlag.GROUP_LIST_SHOULD_REFRESH,
+                        true
+                    )
                     _events.trySend(GroupDetailEvent.OnLeaveGroup)
                 }
             }
@@ -139,6 +188,18 @@ class GroupDetailViewModel(
                         isLeaveBottomSheetVisible = false
                     )
                 }
+            }
+
+            is GroupDetailAction.OnCollectFlag -> {
+                val refreshFlag =
+                    globalAppStateManager.pullFlag(GlobalAppStateFlag.GROUP_DID_UPDATE)
+                            || globalAppStateManager.pullFlag(GlobalAppStateFlag.EXPENSE_DID_UPDATE)
+                            || globalAppStateManager.pullFlag(
+                        GlobalAppStateFlag.EXPENSE_LIST_SHOULD_REFRESH
+                    )
+
+                if (refreshFlag)
+                    onAction(GroupDetailAction.OnRefresh)
             }
         }
     }

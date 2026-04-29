@@ -3,9 +3,7 @@ package com.example.balancify.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CardColors
@@ -26,7 +24,9 @@ fun UserListCard(
     order: CardOrder = CardOrder.ALONE,
     colors: CardColors = CardDefaults.cardColors(),
     user: UserModel,
-    action: (@Composable () -> Unit)? = null
+    subTitleContent: (@Composable () -> Unit)? = null,
+    hideAvatar: Boolean = false,
+    action: (@Composable () -> Unit)? = null,
 ) {
     StyledCard(modifier.fillMaxWidth(), order, colors) {
         Row(
@@ -36,12 +36,16 @@ fun UserListCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Avatar(
-                imageUrl = user.imageUrl,
-                modifier = Modifier.size(42.dp),
-                fallbackText = user.name,
-            )
-            Column(modifier = Modifier.weight(1f)) {
+            if (!hideAvatar)
+                Avatar(
+                    imageUrl = user.imageUrl,
+                    modifier = Modifier.size(42.dp),
+                    fallbackText = user.name,
+                )
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
                 Text(
                     user.name,
                     maxLines = 1,
@@ -50,13 +54,16 @@ fun UserListCard(
                         fontWeight = FontWeight.SemiBold
                     )
                 )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    user.email,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.labelMedium
-                )
+//                Spacer(modifier = Modifier.height(2.dp))
+                if (subTitleContent != null)
+                    subTitleContent.invoke()
+                else
+                    Text(
+                        user.email,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.labelMedium
+                    )
             }
             action?.invoke()
         }

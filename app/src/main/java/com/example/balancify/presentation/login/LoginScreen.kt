@@ -10,9 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.balancify.presentation.login.component.AppLogo
 import com.example.balancify.presentation.login.component.BackgroundGradient
-import com.example.balancify.presentation.login.component.Footer
+import com.example.balancify.presentation.login.component.LoginAppLogo
+import com.example.balancify.presentation.login.component.LoginFooter
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -34,8 +34,8 @@ fun LoginScreen(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
         ) {
-            AppLogo()
-            Footer(onLoginComplete = onLoginComplete)
+            LoginAppLogo()
+            LoginFooter(onLoginComplete = onLoginComplete)
         }
     }
 }

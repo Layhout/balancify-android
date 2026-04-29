@@ -1,27 +1,13 @@
 package com.example.balancify.domain.model
 
 import com.example.balancify.core.util.DateAsLongSerializer
+import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.ServerTimestamp
 import kotlinx.serialization.Serializable
 import java.util.Date
+import kotlin.math.roundToInt
 
-/**
- * id: string
- *   name: string
- *   createdAt: FieldValue
- *   amount: number
- *   icon: string
- *   iconBgColor: string
- *   memberOption: MemberOption
- *   splitOption: SplitOption
- *   group: { id: string; name: string } | null
- *   member: Record<string, ExpenseMember>
- *   memberIds: string[]
- *   createdBy: User
- *   paidBy: User
- *   timelines: Timeline[]
- */
-
+@IgnoreExtraProperties
 @Serializable
 data class ExpenseModel(
     val id: String = "",
@@ -33,10 +19,39 @@ data class ExpenseModel(
     val iconBgColor: String = "",
     val memberOption: MemberOption = MemberOption.FRIEND,
     val splitOption: SplitOption = SplitOption.SPLIT_EQUALLY,
-    val group: ExpenseGroupModel = ExpenseGroupModel(),
+    val group: ExpenseGroupModel? = null,
     val member: Map<String, ExpenseMemberModel> = emptyMap(),
     val memberIds: List<String> = emptyList(),
     val createdBy: UserModel = UserModel(),
     val paidBy: UserModel = UserModel(),
     val timelines: List<TimelineModel> = emptyList(),
-)
+) {
+    fun getPayerName(localUserId: String? = ""): String {
+        return if (paidBy.id == localUserId) "You"
+        else paidBy.name
+    }
+
+    fun getSettlePercentage(): Int {
+        var result: Int
+
+        val total = member.values.sumOf { it.settledAmount }
+        if (total == 0.0) return 0
+        result = ((total / amount) * 100).roundToInt()
+
+        return result
+    }
+
+    fun getSettlementStatus(): String {
+        return if (getSettlePercentage() == 100) "Settled"
+        else if (getSettlePercentage() > 100) "Overpaid"
+        else "Paid"
+    }
+
+    fun getLocalUserOweAmount(id: String): Double {
+        return member[id]?.amount ?: 0.0
+    }
+
+    fun getMembers(): List<ExpenseMemberModel> {
+        return member.values.toList()
+    }
+}

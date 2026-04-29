@@ -1,4 +1,4 @@
-package com.example.balancify.presentation.group_detail.component
+package com.example.balancify.presentation.expense_detail.component
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,15 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.component.CardOrder
-import com.example.balancify.component.UserListCard
-import com.example.balancify.presentation.group_detail.GroupDetailAction
-import com.example.balancify.presentation.group_detail.GroupDetailViewModel
+import com.example.balancify.presentation.expense_detail.ExpenseDetailAction
+import com.example.balancify.presentation.expense_detail.ExpenseDetailViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MemberBottomSheet(
-    viewModel: GroupDetailViewModel = koinViewModel()
+fun ExpenseMemberBottomSheet(
+    viewModel: ExpenseDetailViewModel = koinViewModel()
 ) {
     val sheetState = rememberModalBottomSheetState()
 
@@ -32,7 +31,7 @@ fun MemberBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = {
-            viewModel.onAction(GroupDetailAction.OnMemberBottomSheetToggle)
+            viewModel.onAction(ExpenseDetailAction.OnMemberBottomSheetToggle)
         },
         sheetState = sheetState
     ) {
@@ -43,21 +42,24 @@ fun MemberBottomSheet(
         ) {
             item {
                 Text(
-                    "Member (${state.value.group.members.size})",
+                    "Member (${state.value.expense.getMembers().size})",
                     style = MaterialTheme.typography.labelMedium
                 )
                 Spacer(Modifier.height(6.dp))
             }
             itemsIndexed(
-                items = state.value.group.members
+                items = state.value.expense.getMembers()
             ) { index, item ->
                 if (index != 0) Spacer(modifier = Modifier.height(2.dp))
 
-                UserListCard(
-                    order = CardOrder.getOrderFrom(index, state.value.group.members.size),
-                    user = item.copy(
-                        name = "${item.name} ${if (item.id == state.value.group.createdBy) "(Owner)" else ""}"
-                    )
+                ExpenseUserListCard(
+                    data = item,
+                    order = CardOrder.fromIndexAndSize(
+                        index,
+                        state.value.expense.getMembers().size
+                    ),
+                    localUserId = state.value.localUser?.id ?: "",
+                    payerId = state.value.expense.paidBy.id,
                 )
             }
         }

@@ -21,16 +21,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.component.AppBar
 import com.example.balancify.component.CardOrder
-import com.example.balancify.core.constant.SearchResult
 import com.example.balancify.core.util.ObserveAsEvents
 import com.example.balancify.presentation.group_form.component.AddMemberButton
 import com.example.balancify.presentation.group_form.component.FormInputs
@@ -41,21 +43,23 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun GroupFormScreen(
     viewModel: GroupFormViewModel = koinViewModel(),
-    onSearchResultFound: () -> SearchResult.Friend?,
     onNavigateToSearchFriend: () -> Unit,
-    onCreateSuccess: () -> Unit,
-    onEditSuccess: () -> Unit,
     onBackClick: () -> Unit,
 ) {
     val localFocusManager = LocalFocusManager.current
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    val searchResult = onSearchResultFound()
-
-    LaunchedEffect(searchResult?.data) {
-        searchResult?.data?.let {
-            viewModel.onAction(GroupFormAction.OnAddMember(it))
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.onAction(GroupFormAction.OnCheckForSearchResult)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
@@ -70,10 +74,7 @@ fun GroupFormScreen(
             }
 
             is GroupFormEvent.OnSaveSuccess -> {
-                if (state.value.isEditing)
-                    onEditSuccess()
-                else
-                    onCreateSuccess()
+                onBackClick()
             }
         }
     }
@@ -112,7 +113,7 @@ fun GroupFormScreen(
                         if (index != 0) Spacer(modifier = Modifier.height(2.dp))
                         MemberCard(
                             item = item,
-                            order = CardOrder.getOrderFrom(index, state.value.members.size),
+                            order = CardOrder.fromIndexAndSize(index, state.value.members.size),
                         )
                     }
                 }

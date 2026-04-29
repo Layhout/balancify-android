@@ -3,6 +3,7 @@ package com.example.balancify.presentation.friend
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -89,6 +90,7 @@ fun FriendScreen(
                     items = state.value.friends,
                     isLoadingMore = state.value.isLoading,
                     canLoadMore = state.value.canLoadMore,
+                    contentPadding = PaddingValues(bottom = 16.dp),
                     onLoadMore = {
                         viewModel.onAction(FriendAction.OnLoadMore)
                     },
@@ -99,7 +101,7 @@ fun FriendScreen(
 
                     FriendCard(
                         data = item,
-                        order = CardOrder.getOrderFrom(index, state.value.friends.size),
+                        order = CardOrder.fromIndexAndSize(index, state.value.friends.size),
                     )
                 }
             }

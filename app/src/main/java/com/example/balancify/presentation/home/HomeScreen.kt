@@ -20,7 +20,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -29,17 +29,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.balancify.component.AppBar
 import com.example.balancify.core.constant.AppScreen
+import com.example.balancify.core.util.ObserveAsEvents
 import com.example.balancify.presentation.home.component.FabMenu
 import com.example.balancify.presentation.home.component.account.AccountScreen
 import com.example.balancify.presentation.home.component.dashboard.DashboardScreen
 import com.example.balancify.presentation.home.component.expense.ExpenseScreen
 import com.example.balancify.presentation.home.component.group.GroupScreen
+import org.koin.androidx.compose.koinViewModel
 
 enum class NavDestination(
     val screen: AppScreen,
@@ -57,22 +62,35 @@ enum class NavDestination(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    viewModel: HomeViewModel = koinViewModel(),
     onLogoutComplete: () -> Unit,
     onNavigateToFriend: () -> Unit,
     onNavigateToGroupFrom: () -> Unit,
+    onNavigateToExpenseForm: () -> Unit,
     onNavigateToGroupDetail: (String) -> Unit,
-    onGroupListShouldRefreshFound: () -> Boolean?,
+    onNavigateToExpenseDetail: (String) -> Unit,
 ) {
     val navController = rememberNavController()
     val startDestination = NavDestination.DASHBOARD
     var selectedRoute by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
     var prevSelectedRoute by rememberSaveable { mutableStateOf(startDestination) }
 
-    val shouldRefreshGroupList = onGroupListShouldRefreshFound()
-    println("====> shouldRefreshGroupList $shouldRefreshGroupList")
-    LaunchedEffect(shouldRefreshGroupList) {
-        shouldRefreshGroupList?.let {
-            if (it)
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.onAction(HomeAction.OnCollectFlag)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is HomeEvent.OnRefreshGroup -> {
                 onTabClick(
                     index = NavDestination.GROUPS.ordinal,
                     destination = NavDestination.GROUPS,
@@ -84,6 +102,21 @@ fun HomeScreen(
                         prevSelectedRoute = newDest
                     },
                 )
+            }
+
+            is HomeEvent.OnRefreshExpense -> {
+                onTabClick(
+                    index = NavDestination.EXPENSES.ordinal,
+                    destination = NavDestination.EXPENSES,
+                    selectedRoute = selectedRoute,
+                    prevSelectedRoute = prevSelectedRoute,
+                    navController = navController,
+                    onNavigate = { newIndex, newDest ->
+                        selectedRoute = newIndex
+                        prevSelectedRoute = newDest
+                    },
+                )
+            }
         }
     }
 
@@ -114,13 +147,15 @@ fun HomeScreen(
                                 destination.icon,
                                 contentDescription = destination.label
                             )
-                        })
+                        }
+                    )
                 }
             }
         },
         floatingActionButton = {
             FabMenu(
-                onCreateGroupClick = onNavigateToGroupFrom
+                onCreateGroupClick = onNavigateToGroupFrom,
+                onCreateExpenseClick = onNavigateToExpenseForm,
             )
         }
     ) { innerPadding ->
@@ -142,9 +177,12 @@ fun HomeScreen(
                     composable(destination.screen.route) {
                         when (destination) {
                             NavDestination.DASHBOARD -> DashboardScreen()
-                            NavDestination.EXPENSES -> ExpenseScreen()
+
+                            NavDestination.EXPENSES -> ExpenseScreen(
+                                onNavigateToExpenseDetail = onNavigateToExpenseDetail
+                            )
+
                             NavDestination.GROUPS -> GroupScreen(
-                                shouldRefreshGroupList = shouldRefreshGroupList ?: false,
                                 onNavigateToGroupDetail = onNavigateToGroupDetail
                             )
 

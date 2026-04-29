@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.example.balancify.R
 
 @Composable
-fun ColumnScope.AppLogo() {
+fun ColumnScope.LoginAppLogo() {
     Box(
         modifier = Modifier
             .fillMaxWidth()

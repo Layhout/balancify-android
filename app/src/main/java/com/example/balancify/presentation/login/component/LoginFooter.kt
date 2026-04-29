@@ -19,7 +19,7 @@ import com.example.balancify.presentation.login.LoginViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun Footer(viewModel: LoginViewModel = koinViewModel(), onLoginComplete: () -> Unit) {
+fun LoginFooter(viewModel: LoginViewModel = koinViewModel(), onLoginComplete: () -> Unit) {
     val context = LocalContext.current
     val state = viewModel.state.collectAsStateWithLifecycle()
     val isLoading = state.value.isLoading

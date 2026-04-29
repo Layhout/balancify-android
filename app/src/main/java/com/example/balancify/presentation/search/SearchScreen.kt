@@ -1,6 +1,8 @@
 package com.example.balancify.presentation.search
 
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -20,9 +22,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.balancify.component.AppBar
 import com.example.balancify.component.CardOrder
 import com.example.balancify.component.Empty
+import com.example.balancify.component.GroupCard
 import com.example.balancify.component.InfiniteLazyColumn
 import com.example.balancify.component.UserListCard
-import com.example.balancify.core.constant.SearchResult
 import com.example.balancify.core.constant.SearchType
 import com.example.balancify.core.util.ObserveAsEvents
 import com.example.balancify.domain.model.FoundItemData
@@ -30,10 +32,10 @@ import com.example.balancify.domain.model.UserModel
 import com.example.balancify.presentation.search.component.SearchTextField
 import org.koin.androidx.compose.koinViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SearchScreen(
     viewModel: SearchViewModel = koinViewModel(),
-    onResultSelected: (SearchResult) -> Unit,
     onBackClick: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -87,21 +89,32 @@ fun SearchScreen(
                     ) { index, item ->
                         if (index != 0) Spacer(modifier = Modifier.height(2.dp))
 
-                        if (state.value.searchType == SearchType.FRIEND) {
+                        val order = CardOrder.fromIndexAndSize(
+                            index,
+                            state.value.foundItems.size
+                        )
+
+                        if (state.value.searchType == SearchType.FRIEND)
                             UserListCard(
+                                hideAvatar = state.value.searchType == SearchType.GROUP,
                                 modifier = Modifier.clickable(
                                     onClick = {
-                                        onResultSelected(
-                                            SearchResult.Friend(
-                                                (item.data as FoundItemData.Friend).data
-                                            )
-                                        )
+                                        viewModel.onAction(SearchAction.OnItemClick(item.id))
+                                        onBackClick()
                                     }
                                 ),
-                                order = CardOrder.getOrderFrom(index, state.value.foundItems.size),
-                                user = (item.data as FoundItemData.Friend).data.user ?: UserModel()
+                                order = order,
+                                user = (item.data as FoundItemData.Friend).data.user ?: UserModel(),
                             )
-                        }
+                        else
+                            GroupCard(
+                                order = order,
+                                item = (item.data as FoundItemData.Group).data,
+                                onClick = {
+                                    viewModel.onAction(SearchAction.OnItemClick(item.id))
+                                    onBackClick()
+                                }
+                            )
                     }
                 }
             }

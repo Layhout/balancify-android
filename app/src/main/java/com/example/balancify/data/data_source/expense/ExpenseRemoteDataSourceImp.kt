@@ -2,13 +2,21 @@ package com.example.balancify.data.data_source.expense
 
 import com.example.balancify.core.constant.FirebaseCollectionName
 import com.example.balancify.core.constant.ITEMS_LIMIT
+import com.example.balancify.core.ext.getCurrencyFormatted
+import com.example.balancify.domain.model.ExpenseMemberModel
 import com.example.balancify.domain.model.ExpenseMetadataModel
 import com.example.balancify.domain.model.ExpenseModel
+import com.example.balancify.domain.model.TimelineModel
+import com.example.balancify.domain.model.UserModel
+import com.example.balancify.service.BatchDeleteItem
 import com.example.balancify.service.BatchSetItem
+import com.example.balancify.service.BatchUpdateItem
 import com.example.balancify.service.DatabaseService
 import com.example.balancify.service.PaginatedData
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldPath.documentId
+import com.google.firebase.firestore.FieldValue.arrayUnion
+import com.google.firebase.firestore.FieldValue.serverTimestamp
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
 
@@ -64,13 +72,134 @@ class ExpenseRemoteDataSourceImp(
         id: String,
         userId: String
     ): ExpenseModel {
-        val result = db.getPage(collectionName, 1, null, queryBuilder = {
+        val result = db.getDataWithQuery(collectionName, queryBuilder = {
             it.whereEqualTo(documentId(), id)
                 .whereArrayContains("memberIds", userId)
         })
 
-        val expense = result.snapshot.documents.firstOrNull()?.toObject<ExpenseModel>()
+        val expense = result.documents.firstOrNull()?.toObject<ExpenseModel>()
 
-        return expense ?: throw Exception("Group not found")
+        val timelines = expense?.timelines
+        val sortedTimelines = timelines?.sortedByDescending { it.createdAt }
+
+        return expense?.copy(
+            timelines = sortedTimelines ?: emptyList()
+        ) ?: throw Exception("Group not found")
+    }
+
+    override suspend fun getExpensesForGroup(
+        lastDoc: DocumentSnapshot?,
+        groupId: String
+    ): PaginatedData<ExpenseModel> {
+        val result = db.getPage(collectionName, ITEMS_LIMIT, lastDoc, queryBuilder = {
+            it.whereEqualTo("group.id", groupId)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+        })
+
+        val expense = result.snapshot.documents.mapNotNull {
+            it.toObject<ExpenseModel>()
+        }
+
+        val canLoadMore = result.canLoadMore
+
+        return PaginatedData(
+            data = expense,
+            canLoadMore = canLoadMore,
+            lastDoc = result.snapshot.documents.lastOrNull()
+        )
+    }
+
+    override suspend fun deleteExpense(id: String) {
+        db.batchDelete(
+            listOf(
+                BatchDeleteItem(
+                    collection = collectionName,
+                    id = id
+                ),
+                BatchDeleteItem(
+                    collection = metaDataCollectionName,
+                    id = id
+                )
+            )
+        )
+    }
+
+    override suspend fun settleExpense(
+        id: String,
+        amount: Double,
+        settledAmount: Double,
+        localUser: UserModel,
+        receiverName: String
+    ): ExpenseModel {
+        val createdAt = System.currentTimeMillis()
+        val events =
+            "${localUser.name} pays $receiverName with amount ${settledAmount.getCurrencyFormatted()}"
+
+        db.updateData(
+            collection = collectionName,
+            id = id,
+            data = mapOf(
+                "member.${localUser.id}.settledAmount" to amount,
+                "timelines" to arrayUnion(
+                    mapOf(
+                        "createdAt" to createdAt,
+                        "createdBy" to localUser,
+                        "events" to events
+                    )
+                )
+            )
+        )
+
+        return ExpenseModel(
+            member = mapOf(
+                localUser.id to ExpenseMemberModel(
+                    settledAmount = amount
+                ),
+            ),
+            timelines = listOf(
+                TimelineModel(
+                    createdAt = createdAt,
+                    createdBy = localUser,
+                    events = events
+                )
+            )
+        )
+    }
+
+    override suspend fun updateExpense(
+        id: String,
+        expense: ExpenseModel,
+        expenseMetadata: ExpenseMetadataModel
+    ) {
+        db.batchUpdate(
+            listOf(
+                BatchUpdateItem(
+                    collection = collectionName,
+                    id = id,
+                    fields = mapOf(
+                        "name" to expense.name,
+                        "createdAt" to serverTimestamp(),
+                        "amount" to expense.amount,
+                        "icon" to expense.icon,
+                        "iconBgColor" to expense.iconBgColor,
+                        "memberOption" to expense.memberOption,
+                        "splitOption" to expense.splitOption,
+                        "group" to expense.group,
+                        "member" to expense.member,
+                        "memberIds" to expense.memberIds,
+                        "paidBy" to expense.paidBy,
+                        "timelines" to expense.timelines,
+                    )
+                ),
+                BatchUpdateItem(
+                    collection = metaDataCollectionName,
+                    id = id,
+                    fields = mapOf(
+                        "nameTrigrams" to expenseMetadata.nameTrigrams,
+                        "membersFlag" to expenseMetadata.membersFlag,
+                    )
+                ),
+            )
+        )
     }
 }

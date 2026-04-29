@@ -35,7 +35,7 @@ fun AddMemberButton(
         ) {
             Text(
                 "Members (${state.value.members.size})",
-                style = MaterialTheme.typography.labelMedium.copy(
+                style = MaterialTheme.typography.labelLarge.copy(
                     color = if (state.value.isMemberInvalid)
                         MaterialTheme.colorScheme.error
                     else
@@ -45,7 +45,8 @@ fun AddMemberButton(
             TextButton(
                 onClick = {
                     viewModel.onAction(GroupFormAction.OnAddMemberClick)
-                }
+                },
+                enabled = state.value.isEnableAllAction && state.value.members.size < 10
             ) {
                 Icon((Icons.Outlined.PersonAdd), contentDescription = null)
                 Spacer(modifier = Modifier.width(6.dp))

@@ -1,4 +1,4 @@
-package com.example.balancify.presentation.home.component.account.component
+package com.example.balancify.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -26,26 +26,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.balancify.presentation.home.component.account.AccountAction
-import com.example.balancify.presentation.home.component.account.AccountViewModel
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogoutBottomSheet(
-    viewModel: AccountViewModel = koinViewModel(),
+fun ConfirmationBottomSheet(
+    title: String = "Warning!",
+    message: String = "",
+    confirmText: String = "",
+    cancelText: String = "Cancel",
+    onDismissRequest: (() -> Unit)? = null,
+    onConfirmClick: (() -> Unit)? = null,
 ) {
-    val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
 
     ModalBottomSheet(
         onDismissRequest = {
-            viewModel.onAction(AccountAction.OnLogoutDismiss)
+            onDismissRequest?.invoke()
         },
         sheetState = sheetState
     ) {
@@ -73,14 +73,14 @@ fun LogoutBottomSheet(
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                "Warning!",
+                title,
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.SemiBold
                 )
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                "Are you sure you want to logout?",
+                message,
             )
             Spacer(modifier = Modifier.height(16.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -88,18 +88,18 @@ fun LogoutBottomSheet(
                     onClick = {
                         coroutineScope.launch { sheetState.hide() }.invokeOnCompletion {
                             if (!sheetState.isVisible) {
-                                viewModel.onAction(AccountAction.OnLogoutDismiss)
+                                onDismissRequest?.invoke()
                             }
                         }
                     },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Cancel")
+                    Text(cancelText)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Button(
                     onClick = {
-                        viewModel.onAction(AccountAction.OnLogoutConfirmClick(context))
+                        onConfirmClick?.invoke()
                     },
                     modifier = Modifier
                         .weight(1f),
@@ -108,7 +108,7 @@ fun LogoutBottomSheet(
                     )
 
                 ) {
-                    Text("Logout")
+                    Text(confirmText)
                 }
             }
         }

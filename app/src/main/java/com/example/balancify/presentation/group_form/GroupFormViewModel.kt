@@ -4,6 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.example.balancify.core.constant.GlobalAppStateFlag
+import com.example.balancify.core.constant.SearchResult
+import com.example.balancify.core.manager.GlobalAppStateManager
 import com.example.balancify.domain.model.UserModel
 import com.example.balancify.domain.use_case.group.GroupUseCases
 import com.example.balancify.domain.use_case.user.UserUseCases
@@ -20,10 +23,11 @@ import kotlinx.coroutines.launch
 class GroupFormViewModel(
     private val groupUseCases: GroupUseCases,
     private val userUseCases: UserUseCases,
+    private val globalAppStateManager: GlobalAppStateManager,
     private val handle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(GroupFormState())
-    val state = _state.onStart { isEditGroupCheck() }.stateIn(
+    val state = _state.onStart { loadData() }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000L),
         initialValue = GroupFormState()
@@ -38,16 +42,31 @@ class GroupFormViewModel(
         )
     }
 
-    private fun isEditGroupCheck() {
-        val groupId = handle.toRoute<Routes.GroupFrom>().id
+    private fun loadData() {
+        val localUser: UserModel? = _state.value.localUser
 
-        groupId?.let {
-            viewModelScope.launch {
+        if (localUser != null) return
+
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isLoading = true,
+                    isEnableAllAction = false,
+                )
+            }
+
+            val userResult = userUseCases.getLocalUser()
+            if (userResult.isFailure) {
+                alertError(userResult.exceptionOrNull()?.message)
+                return@launch
+            }
+
+            val groupId = handle.toRoute<Routes.GroupFrom>().id
+
+            if (groupId != null) {
                 _state.update {
                     it.copy(
-                        isLoading = false,
                         isEditing = true,
-                        isEnableAllAction = false,
                     )
                 }
 
@@ -57,14 +76,9 @@ class GroupFormViewModel(
                     return@launch
                 }
 
-                val userResult = userUseCases.getLocalUser()
-                if (userResult.isFailure) {
-                    alertError(userResult.exceptionOrNull()?.message)
-                    return@launch
-                }
-
                 _state.update {
                     it.copy(
+                        localUser = userResult.getOrNull(),
                         isLoading = false,
                         isEnableAllAction = true,
                         name = result.getOrNull()?.name ?: "",
@@ -75,6 +89,14 @@ class GroupFormViewModel(
                             result.getOrNull()!!.members.filter { member ->
                                 member.id != userResult.getOrNull()?.id
                             },
+                    )
+                }
+            } else {
+                _state.update {
+                    it.copy(
+                        localUser = userResult.getOrNull(),
+                        isLoading = false,
+                        isEnableAllAction = true,
                     )
                 }
             }
@@ -151,7 +173,7 @@ class GroupFormViewModel(
                     _state.update {
                         it.copy(
                             isLoading = true,
-                            isNameInvalid = false,
+                            isEnableAllAction = false,
                         )
                     }
 
@@ -169,14 +191,30 @@ class GroupFormViewModel(
                     if (result.isFailure) {
                         alertError(result.exceptionOrNull()?.message)
                     } else {
+                        if (_state.value.isEditing) {
+                            globalAppStateManager.setFlag(GlobalAppStateFlag.GROUP_DID_UPDATE, true)
+                        } else {
+                            globalAppStateManager.setFlag(
+                                GlobalAppStateFlag.GROUP_LIST_SHOULD_REFRESH,
+                                true
+                            )
+                        }
                         _events.trySend(GroupFormEvent.OnSaveSuccess)
                     }
 
                     _state.update {
                         it.copy(
-                            isLoading = false
+                            isLoading = false,
+                            isEnableAllAction = true,
                         )
                     }
+                }
+            }
+
+            is GroupFormAction.OnCheckForSearchResult -> {
+                val searchResult = globalAppStateManager.getSearchResult() as SearchResult.Friend?
+                searchResult?.data?.let {
+                    onAction(GroupFormAction.OnAddMember(it))
                 }
             }
         }

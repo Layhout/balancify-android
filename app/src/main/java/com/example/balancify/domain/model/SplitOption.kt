@@ -5,7 +5,7 @@ package com.example.balancify.domain.model
  *   CUSTOM
  */
 
-enum class SplitOption {
-    SPLIT_EQUALLY,
-    CUSTOM,
+enum class SplitOption(val label: String) {
+    SPLIT_EQUALLY("Equally"),
+    CUSTOM("Custom"),
 }

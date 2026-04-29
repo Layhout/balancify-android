@@ -9,4 +9,5 @@ sealed interface GroupFormAction {
     data class OnNameChange(val name: String) : GroupFormAction
     data class OnDescriptionChange(val description: String) : GroupFormAction
     data object OnSaveClick : GroupFormAction
+    data object OnCheckForSearchResult : GroupFormAction
 }

@@ -8,4 +8,5 @@ sealed interface GroupDetailAction {
     data object OnLeaveGroupClick : GroupDetailAction
     data object OnLeaveDismiss : GroupDetailAction
     data object OnLeaveConfirmClick : GroupDetailAction
+    data object OnCollectFlag : GroupDetailAction
 }

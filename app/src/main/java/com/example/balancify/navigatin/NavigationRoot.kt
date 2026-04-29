@@ -7,9 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.balancify.core.constant.SavedStateKey
-import com.example.balancify.core.constant.SearchResult
 import com.example.balancify.core.constant.SearchType
+import com.example.balancify.presentation.expense_detail.ExpenseDetailScreen
+import com.example.balancify.presentation.expense_form.ExpenseFormScreen
 import com.example.balancify.presentation.friend.FriendScreen
 import com.example.balancify.presentation.group_detail.GroupDetailScreen
 import com.example.balancify.presentation.group_form.GroupFormScreen
@@ -51,7 +51,7 @@ fun NavigationRoot(
                 }
             }
         }
-        composable<Routes.Home> { entry ->
+        composable<Routes.Home> {
             HomeScreen(
                 onLogoutComplete = {
                     navController.navigate(Routes.Login) {
@@ -69,10 +69,11 @@ fun NavigationRoot(
                 onNavigateToGroupDetail = {
                     navController.navigate(Routes.GroupDetail(it))
                 },
-                onGroupListShouldRefreshFound = {
-                    entry.savedStateHandle.remove<Boolean>(
-                        SavedStateKey.GROUP_LIST_SHOULD_REFRESH.value
-                    )
+                onNavigateToExpenseForm = {
+                    navController.navigate(Routes.ExpenseForm())
+                },
+                onNavigateToExpenseDetail = {
+                    navController.navigate(Routes.ExpenseDetail(it))
                 },
             )
         }
@@ -81,7 +82,7 @@ fun NavigationRoot(
                 navController.popBackStack()
             }
         }
-        composable<Routes.GroupFrom> { entry ->
+        composable<Routes.GroupFrom> {
             GroupFormScreen(
                 onNavigateToSearchFriend = {
                     navController.navigate(
@@ -90,66 +91,51 @@ fun NavigationRoot(
                         )
                     )
                 },
-                onCreateSuccess = {
-                    navController.setPrevStackState(
-                        SavedStateKey.GROUP_LIST_SHOULD_REFRESH.value,
-                        true
-                    )
-                    navController.popBackStack()
-                },
-                onSearchResultFound = {
-                    val searchResult = entry.savedStateHandle.remove<SearchResult>(
-                        SavedStateKey.FRIEND_SEARCH_RESULT.value
-                    )
-
-                    searchResult as? SearchResult.Friend
-                },
-                onEditSuccess = {
-                    navController.setPrevStackState(
-                        SavedStateKey.GROUP_DID_UPDATE.value,
-                        true
-                    )
-                    navController.popBackStack()
-                }
             ) {
                 navController.popBackStack()
             }
         }
         composable<Routes.Search> {
-            SearchScreen(
-                onResultSelected = { searchResult ->
-                    navController.setPrevStackState(
-                        if (searchResult is SearchResult.Friend)
-                            SavedStateKey.FRIEND_SEARCH_RESULT.value
-                        else
-                            SavedStateKey.GROUP_SEARCH_RESULT.value,
-                        searchResult
-                    )
-                    navController.popBackStack()
-                }
-            ) {
+            SearchScreen {
                 navController.popBackStack()
             }
         }
         composable<Routes.GroupDetail> {
             GroupDetailScreen(
-                onLeaveGroupSuccess = {
-                    navController.setPrevStackState(
-                        SavedStateKey.GROUP_LIST_SHOULD_REFRESH.value,
-                        true
-                    )
-                    navController.popBackStack()
-                },
                 onNavigateToGroupFrom = {
                     navController.navigate(Routes.GroupFrom(it))
+                },
+                onNavigateToExpenseDetail = {
+                    navController.navigate(Routes.ExpenseDetail(it))
+                },
+                onNavigateToExpenseForm = {
+                    navController.navigate(Routes.ExpenseForm())
                 }
             ) {
                 navController.popBackStack()
             }
         }
+        composable<Routes.ExpenseDetail> {
+            ExpenseDetailScreen(
+                onNavigateToExpenseFrom = {
+                    navController.navigate(Routes.ExpenseForm(it))
+                }
+            ) {
+                navController.popBackStack()
+            }
+        }
+        composable<Routes.ExpenseForm> {
+            ExpenseFormScreen(
+                onNavigateToSearch = {
+                    navController.navigate(
+                        Routes.Search(
+                            type = it
+                        )
+                    )
+                },
+            ) {
+                navController.popBackStack()
+            }
+        }
     }
-}
-
-private fun NavHostController.setPrevStackState(key: String, value: Any) {
-    previousBackStackEntry?.savedStateHandle?.set(key, value)
 }

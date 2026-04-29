@@ -1,6 +1,7 @@
 package com.example.balancify.component
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +26,7 @@ fun <T> InfiniteLazyColumn(
     isLoadingMore: Boolean,
     canLoadMore: Boolean = true,
     onLoadMore: () -> Unit,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     key: ((T) -> Any)? = null,
     header: (@Composable () -> Unit)? = null,
     itemContent: @Composable (index: Int, item: T) -> Unit,
@@ -38,13 +40,14 @@ fun <T> InfiniteLazyColumn(
     LazyColumn(
         modifier = modifier,
         state = listState,
+        contentPadding = contentPadding,
     ) {
         header?.let {
             item(key = "header") {
                 it()
             }
         }
-        
+
         if (key != null) {
             itemsIndexed(
                 items = items,

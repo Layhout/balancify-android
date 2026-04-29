@@ -22,6 +22,7 @@ import org.koin.androidx.compose.koinViewModel
 fun FabMenu(
     viewModel: HomeViewModel = koinViewModel(),
     onCreateGroupClick: () -> Unit,
+    onCreateExpenseClick: () -> Unit,
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
 
@@ -44,7 +45,10 @@ fun FabMenu(
         }
     ) {
         FloatingActionButtonMenuItem(
-            onClick = {},
+            onClick = {
+                onCreateExpenseClick()
+                viewModel.onAction(HomeAction.OnToggleFabClick)
+            },
             text = { Text("Expense") },
             icon = { Icon(Icons.Outlined.DataSaverOn, contentDescription = null) },
         )

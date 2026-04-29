@@ -2,6 +2,7 @@ package com.example.balancify.data.data_source.group
 
 import com.example.balancify.core.constant.FirebaseCollectionName
 import com.example.balancify.core.constant.ITEMS_LIMIT
+import com.example.balancify.core.ext.getTrigram
 import com.example.balancify.domain.model.GroupMetadataModel
 import com.example.balancify.domain.model.GroupModel
 import com.example.balancify.service.BatchDeleteItem
@@ -39,11 +40,39 @@ class GroupRemoteDataSourceImp(
 
     override suspend fun getGroupsWithUser(
         lastDoc: DocumentSnapshot?,
-        id: String
+        id: String,
+        search: String?,
     ): PaginatedData<GroupModel> {
+        var metadatas: List<GroupMetadataModel> = emptyList()
+
+        if (!search.isNullOrBlank()) {
+            val metadataResult =
+                db.getPage(metaDataCollectionName, ITEMS_LIMIT, null, queryBuilder = {
+                    it.whereArrayContainsAny(
+                        "nameTrigrams",
+                        search.getTrigram()
+                    ).whereEqualTo("membersFlag.${id}", true)
+
+                })
+
+            metadatas = metadataResult.snapshot.documents.mapNotNull {
+                it.toObject<GroupMetadataModel>()
+            }
+        }
+
         val result = db.getPage(collectionName, ITEMS_LIMIT, lastDoc, queryBuilder = {
-            it.whereArrayContains("memberIds", id)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
+            var query = it.orderBy("createdAt", Query.Direction.DESCENDING)
+
+            if (metadatas.isNotEmpty()) {
+                query = query.whereIn(
+                    documentId(),
+                    metadatas.map { metadata -> metadata.groupId }
+                )
+            } else {
+                query.whereArrayContains("memberIds", id)
+            }
+
+            query
         })
 
         val groups = result.snapshot.documents.mapNotNull {

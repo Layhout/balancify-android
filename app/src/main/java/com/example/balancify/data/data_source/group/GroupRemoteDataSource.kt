@@ -7,7 +7,12 @@ import com.google.firebase.firestore.DocumentSnapshot
 
 interface GroupRemoteDataSource {
     suspend fun createGroup(group: GroupModel, groupMetadata: GroupMetadataModel)
-    suspend fun getGroupsWithUser(lastDoc: DocumentSnapshot?, id: String): PaginatedData<GroupModel>
+    suspend fun getGroupsWithUser(
+        lastDoc: DocumentSnapshot?,
+        id: String,
+        search: String?
+    ): PaginatedData<GroupModel>
+
     suspend fun getGroupById(id: String, userId: String): GroupModel
     suspend fun leaveGroup(
         id: String,

@@ -13,7 +13,8 @@ interface GroupRepository {
 
     suspend fun getGroupsWithUser(
         lastDoc: DocumentSnapshot?,
-        id: String
+        id: String,
+        search: String?,
     ): Result<PaginatedData<GroupModel>>
 
     suspend fun getGroupById(id: String, userId: String): Result<GroupModel>

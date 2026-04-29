@@ -4,6 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.example.balancify.core.constant.SearchResult
+import com.example.balancify.core.constant.SearchType
+import com.example.balancify.core.manager.GlobalAppStateManager
+import com.example.balancify.domain.model.FoundItemData
 import com.example.balancify.domain.use_case.search.SearchUseCases
 import com.example.balancify.navigatin.Routes
 import com.google.firebase.firestore.DocumentSnapshot
@@ -18,6 +22,7 @@ import kotlinx.coroutines.launch
 
 class SearchViewModel(
     private val searchUseCases: SearchUseCases,
+    private val globalAppStateManager: GlobalAppStateManager,
     private val handle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(SearchState())
@@ -45,7 +50,13 @@ class SearchViewModel(
     private fun loadData(lastDoc: DocumentSnapshot? = null, isLoading: Boolean = true) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = isLoading) }
-            val result = searchUseCases.findFriends(lastDoc, _state.value.searchTerm)
+            val result =
+                if (_state.value.searchType == SearchType.FRIEND) searchUseCases.findFriends(
+                    lastDoc,
+                    _state.value.searchTerm
+                )
+                else searchUseCases.findGroups(lastDoc, _state.value.searchTerm)
+
 
             if (result.isSuccess) {
                 _state.update {
@@ -91,7 +102,16 @@ class SearchViewModel(
             }
 
             is SearchAction.OnItemClick -> {
+                val result = _state.value.foundItems.find { it.id == action.id }
 
+                if (result != null) {
+                    globalAppStateManager.setSearchResult(
+                        if (_state.value.searchType == SearchType.FRIEND)
+                            SearchResult.Friend((result.data as FoundItemData.Friend).data)
+                        else
+                            SearchResult.Group((result.data as FoundItemData.Group).data)
+                    )
+                }
             }
         }
     }
