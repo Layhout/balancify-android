@@ -8,6 +8,8 @@ import com.example.balancify.data.data_source.friend.FriendRemoteDataSource
 import com.example.balancify.data.data_source.friend.FriendRemoteDataSourceImp
 import com.example.balancify.data.data_source.group.GroupRemoteDataSource
 import com.example.balancify.data.data_source.group.GroupRemoteDataSourceImp
+import com.example.balancify.data.data_source.notification.NotificationRemoteDataSource
+import com.example.balancify.data.data_source.notification.NotificationRemoteDataSourceImp
 import com.example.balancify.data.data_source.user.UserLocalDataSource
 import com.example.balancify.data.data_source.user.UserLocalDataSourceImp
 import com.example.balancify.data.data_source.user.UserRemoteDataSource
@@ -15,10 +17,12 @@ import com.example.balancify.data.data_source.user.UserRemoteDataSourceImp
 import com.example.balancify.data.repository.ExpenseRepositoryImp
 import com.example.balancify.data.repository.FriendRepositoryImp
 import com.example.balancify.data.repository.GroupRepositoryImp
+import com.example.balancify.data.repository.NotificationRepositoryImp
 import com.example.balancify.data.repository.UserRepositoryImp
 import com.example.balancify.domain.repository.ExpenseRepository
 import com.example.balancify.domain.repository.FriendRepository
 import com.example.balancify.domain.repository.GroupRepository
+import com.example.balancify.domain.repository.NotificationRepository
 import com.example.balancify.domain.repository.UserRepository
 import com.example.balancify.domain.service.FriendEnricher
 import com.example.balancify.domain.use_case.expense.CreateExpense
@@ -42,6 +46,10 @@ import com.example.balancify.domain.use_case.group.GetGroups
 import com.example.balancify.domain.use_case.group.GroupUseCases
 import com.example.balancify.domain.use_case.group.LeaveGroup
 import com.example.balancify.domain.use_case.group.UpdateGroup
+import com.example.balancify.domain.use_case.notification.CheckUnreadNotification
+import com.example.balancify.domain.use_case.notification.GetNotifications
+import com.example.balancify.domain.use_case.notification.NotificationUseCases
+import com.example.balancify.domain.use_case.notification.ReadNotification
 import com.example.balancify.domain.use_case.search.FindFriends
 import com.example.balancify.domain.use_case.search.FindGroups
 import com.example.balancify.domain.use_case.search.SearchUseCases
@@ -60,6 +68,7 @@ import com.example.balancify.presentation.home.component.account.AccountViewMode
 import com.example.balancify.presentation.home.component.expense.ExpenseViewModel
 import com.example.balancify.presentation.home.component.group.GroupViewModel
 import com.example.balancify.presentation.login.LoginViewModel
+import com.example.balancify.presentation.notification.NotificationViewModel
 import com.example.balancify.presentation.search.SearchViewModel
 import com.example.balancify.service.AuthService
 import com.example.balancify.service.DatabaseService
@@ -88,6 +97,8 @@ val appModule = module {
     singleOf(::GroupRepositoryImp) bind GroupRepository::class
     singleOf(::ExpenseRemoteDataSourceImp) bind ExpenseRemoteDataSource::class
     singleOf(::ExpenseRepositoryImp) bind ExpenseRepository::class
+    singleOf(::NotificationRemoteDataSourceImp) bind NotificationRemoteDataSource::class
+    singleOf(::NotificationRepositoryImp) bind NotificationRepository::class
 
     /* Use Case Services */
     singleOf(::FriendEnricher)
@@ -137,6 +148,13 @@ val appModule = module {
             updateExpense = UpdateExpense(get(), get()),
         )
     }
+    single {
+        NotificationUseCases(
+            getNotifications = GetNotifications(get()),
+            checkUnreadNotification = CheckUnreadNotification(get()),
+            readNotification = ReadNotification(get())
+        )
+    }
 
     /* View Models */
     viewModelOf(::MainViewModel)
@@ -151,4 +169,5 @@ val appModule = module {
     viewModelOf(::ExpenseViewModel)
     viewModelOf(::ExpenseDetailViewModel)
     viewModelOf(::ExpenseFormViewModel)
+    viewModelOf(::NotificationViewModel)
 }

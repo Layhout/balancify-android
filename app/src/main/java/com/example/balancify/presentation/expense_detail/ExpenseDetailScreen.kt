@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -105,7 +106,9 @@ fun ExpenseDetailScreen(
                         return@PullToRefreshBox
                     }
 
-                    LazyColumn {
+                    LazyColumn(
+                        contentPadding = PaddingValues(bottom = 6.dp)
+                    ) {
                         item {
                             ExpenseDetailHeader()
                         }
