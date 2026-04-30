@@ -1,5 +1,6 @@
 package com.example.balancify.data.data_source.friend
 
+import com.example.balancify.core.constant.FirebaseCollectionName
 import com.example.balancify.core.constant.ITEMS_LIMIT
 import com.example.balancify.core.ext.getTrigram
 import com.example.balancify.domain.model.FriendModel
@@ -19,7 +20,7 @@ class FriendRemoteDataSourceImp(
     private val auth: AuthService
 ) : FriendRemoteDataSource {
     private fun buildCollectionPath(id: String = auth.userId): String {
-        return "friends/${id}/data"
+        return "${FirebaseCollectionName.FRIENDS.value}/${id}/data"
     }
 
     override suspend fun getFriends(
