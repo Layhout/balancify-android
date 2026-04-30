@@ -12,8 +12,12 @@ import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.DataUsage
 import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
@@ -32,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -69,7 +74,9 @@ fun HomeScreen(
     onNavigateToExpenseForm: () -> Unit,
     onNavigateToGroupDetail: (String) -> Unit,
     onNavigateToExpenseDetail: (String) -> Unit,
+    onNavigateToNotification: () -> Unit,
 ) {
+    val state = viewModel.state.collectAsStateWithLifecycle()
     val navController = rememberNavController()
     val startDestination = NavDestination.DASHBOARD
     var selectedRoute by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
@@ -122,7 +129,26 @@ fun HomeScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { AppBar(title = NavDestination.entries[selectedRoute].label) },
+        topBar = {
+            AppBar(
+                title = NavDestination.entries[selectedRoute].label, actions = {
+                    IconButton(
+                        onClick = {
+                            onNavigateToNotification()
+                        }
+                    ) {
+                        BadgedBox(
+                            badge = {
+                                if (state.value.hasUnreadNotification)
+                                    Badge()
+                            }
+                        ) {
+                            Icon(Icons.Outlined.Notifications, contentDescription = null)
+                        }
+                    }
+                }
+            )
+        },
         bottomBar = {
             NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
                 NavDestination.entries.forEachIndexed { index, destination ->

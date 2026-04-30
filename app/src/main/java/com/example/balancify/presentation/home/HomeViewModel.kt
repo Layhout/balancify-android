@@ -4,19 +4,25 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.balancify.core.constant.GlobalAppStateFlag
 import com.example.balancify.core.manager.GlobalAppStateManager
+import com.example.balancify.domain.use_case.notification.NotificationUseCases
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class HomeViewModel(
+    private val notificationUseCases: NotificationUseCases,
     private val globalAppStateManager: GlobalAppStateManager
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
 
-    val state = _state.stateIn(
+    val state = _state.onStart {
+        checkNotification()
+    }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = HomeState()
@@ -24,6 +30,19 @@ class HomeViewModel(
 
     private val _events = Channel<HomeEvent>()
     val events = _events.receiveAsFlow()
+
+    private fun checkNotification() {
+        viewModelScope.launch {
+            val result = notificationUseCases.checkUnreadNotification()
+            if (result.isSuccess) {
+                _state.update {
+                    it.copy(
+                        hasUnreadNotification = result.getOrNull()!!
+                    )
+                }
+            }
+        }
+    }
 
     fun onAction(action: HomeAction) {
         when (action) {

@@ -15,6 +15,7 @@ import com.example.balancify.presentation.group_detail.GroupDetailScreen
 import com.example.balancify.presentation.group_form.GroupFormScreen
 import com.example.balancify.presentation.home.HomeScreen
 import com.example.balancify.presentation.login.LoginScreen
+import com.example.balancify.presentation.notification.NotificationScreen
 import com.example.balancify.presentation.search.SearchScreen
 import com.example.balancify.service.AuthService
 import org.koin.compose.koinInject
@@ -75,6 +76,9 @@ fun NavigationRoot(
                 onNavigateToExpenseDetail = {
                     navController.navigate(Routes.ExpenseDetail(it))
                 },
+                onNavigateToNotification = {
+                    navController.navigate(Routes.Notification)
+                },
             )
         }
         composable<Routes.Friend> {
@@ -132,6 +136,21 @@ fun NavigationRoot(
                             type = it
                         )
                     )
+                },
+            ) {
+                navController.popBackStack()
+            }
+        }
+        composable<Routes.Notification> {
+            NotificationScreen(
+                onNavigateToFriend = {
+                    navController.navigate(Routes.Friend)
+                },
+                onNavigateToExpenseDetail = {
+                    navController.navigate(Routes.ExpenseDetail(it))
+                },
+                onNavigateToGroupDetail = {
+                    navController.navigate(Routes.GroupDetail(it))
                 },
             ) {
                 navController.popBackStack()

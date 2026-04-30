@@ -37,4 +37,7 @@ sealed interface Routes {
     data class ExpenseForm(
         val id: String? = null,
     ) : Routes
+
+    @Serializable
+    data object Notification : Routes
 }
