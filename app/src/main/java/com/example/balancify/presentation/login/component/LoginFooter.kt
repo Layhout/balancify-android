@@ -5,7 +5,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,6 +51,10 @@ fun LoginFooter(viewModel: LoginViewModel = koinViewModel(), onLoginComplete: ()
                 .fillMaxWidth(),
             enabled = !isLoading
         ) {
+            if (state.value.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+            }
             Text("Sign In")
         }
     }
