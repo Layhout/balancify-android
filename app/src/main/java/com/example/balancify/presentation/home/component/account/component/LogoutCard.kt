@@ -19,7 +19,7 @@ fun LogoutCard(viewModel: AccountViewModel = koinViewModel()) {
         ),
         order = CardOrder.ALONE,
         onClick = {
-            viewModel.onAction(AccountAction.OnLogoutClick)
+            viewModel.onAction(AccountAction.OnLogoutBottomSheetToggle)
         },
     )
 }

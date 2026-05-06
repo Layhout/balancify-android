@@ -2,6 +2,8 @@ package com.example.balancify.di
 
 import com.example.balancify.MainViewModel
 import com.example.balancify.core.manager.GlobalAppStateManager
+import com.example.balancify.data.data_source.dashboard.DashboardRemoteDataSource
+import com.example.balancify.data.data_source.dashboard.DashboardRemoteDataSourceImp
 import com.example.balancify.data.data_source.expense.ExpenseRemoteDataSource
 import com.example.balancify.data.data_source.expense.ExpenseRemoteDataSourceImp
 import com.example.balancify.data.data_source.friend.FriendRemoteDataSource
@@ -14,17 +16,21 @@ import com.example.balancify.data.data_source.user.UserLocalDataSource
 import com.example.balancify.data.data_source.user.UserLocalDataSourceImp
 import com.example.balancify.data.data_source.user.UserRemoteDataSource
 import com.example.balancify.data.data_source.user.UserRemoteDataSourceImp
+import com.example.balancify.data.repository.DashboardRepositoryImp
 import com.example.balancify.data.repository.ExpenseRepositoryImp
 import com.example.balancify.data.repository.FriendRepositoryImp
 import com.example.balancify.data.repository.GroupRepositoryImp
 import com.example.balancify.data.repository.NotificationRepositoryImp
 import com.example.balancify.data.repository.UserRepositoryImp
+import com.example.balancify.domain.repository.DashboardRepository
 import com.example.balancify.domain.repository.ExpenseRepository
 import com.example.balancify.domain.repository.FriendRepository
 import com.example.balancify.domain.repository.GroupRepository
 import com.example.balancify.domain.repository.NotificationRepository
 import com.example.balancify.domain.repository.UserRepository
 import com.example.balancify.domain.service.FriendEnricher
+import com.example.balancify.domain.use_case.dashboard.DashboardUseCases
+import com.example.balancify.domain.use_case.dashboard.GetDashboardData
 import com.example.balancify.domain.use_case.expense.CreateExpense
 import com.example.balancify.domain.use_case.expense.DeleteExpense
 import com.example.balancify.domain.use_case.expense.ExpenseUseCases
@@ -65,6 +71,7 @@ import com.example.balancify.presentation.group_detail.GroupDetailViewModel
 import com.example.balancify.presentation.group_form.GroupFormViewModel
 import com.example.balancify.presentation.home.HomeViewModel
 import com.example.balancify.presentation.home.component.account.AccountViewModel
+import com.example.balancify.presentation.home.component.dashboard.DashboardViewModel
 import com.example.balancify.presentation.home.component.expense.ExpenseViewModel
 import com.example.balancify.presentation.home.component.group.GroupViewModel
 import com.example.balancify.presentation.login.LoginViewModel
@@ -99,6 +106,8 @@ val appModule = module {
     singleOf(::ExpenseRepositoryImp) bind ExpenseRepository::class
     singleOf(::NotificationRemoteDataSourceImp) bind NotificationRemoteDataSource::class
     singleOf(::NotificationRepositoryImp) bind NotificationRepository::class
+    singleOf(::DashboardRemoteDataSourceImp) bind DashboardRemoteDataSource::class
+    singleOf(::DashboardRepositoryImp) bind DashboardRepository::class
 
     /* Use Case Services */
     singleOf(::FriendEnricher)
@@ -118,7 +127,11 @@ val appModule = module {
             unfriend = Unfriend(get()),
             acceptFriend = AcceptFriend(get()),
             rejectFriend = RejectFriend(get()),
-            addFriendByEmail = AddFriendByEmail(get(), get()),
+            addFriendByEmail = AddFriendByEmail(
+                get(),
+                get(),
+                get()
+            ),
         )
     }
     single {
@@ -129,7 +142,11 @@ val appModule = module {
     }
     single {
         GroupUseCases(
-            createGroup = CreateGroup(get(), get()),
+            createGroup = CreateGroup(
+                get(),
+                get(),
+                get()
+            ),
             getGroups = GetGroups(get(), get()),
             getGroupDetail = GetGroupDetail(get(), get()),
             leaveGroup = LeaveGroup(get(), get()),
@@ -144,7 +161,11 @@ val appModule = module {
             getExpensesForGroup = GetExpensesForGroup(get()),
             deleteExpense = DeleteExpense(get()),
             settleExpense = SettleExpense(get(), get()),
-            createExpense = CreateExpense(get(), get()),
+            createExpense = CreateExpense(
+                get(),
+                get(),
+                get()
+            ),
             updateExpense = UpdateExpense(get(), get()),
         )
     }
@@ -153,6 +174,11 @@ val appModule = module {
             getNotifications = GetNotifications(get()),
             checkUnreadNotification = CheckUnreadNotification(get()),
             readNotification = ReadNotification(get())
+        )
+    }
+    single {
+        DashboardUseCases(
+            getDashboardData = GetDashboardData(get())
         )
     }
 
@@ -170,4 +196,5 @@ val appModule = module {
     viewModelOf(::ExpenseDetailViewModel)
     viewModelOf(::ExpenseFormViewModel)
     viewModelOf(::NotificationViewModel)
+    viewModelOf(::DashboardViewModel)
 }

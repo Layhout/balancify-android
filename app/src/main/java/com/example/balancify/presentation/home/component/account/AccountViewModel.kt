@@ -1,5 +1,6 @@
 package com.example.balancify.presentation.home.component.account
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.balancify.domain.use_case.user.UserUseCases
@@ -29,25 +30,19 @@ class AccountViewModel(
 
     fun onAction(action: AccountAction) {
         when (action) {
-            is AccountAction.OnLogoutClick -> {
-                _state.update { it.copy(isLogoutBottomSheetVisible = true) }
-            }
+            is AccountAction.OnLogoutBottomSheetToggle ->
+                _state.update {
+                    it.copy(isLogoutBottomSheetVisible = !it.isLogoutBottomSheetVisible)
+                }
 
-            is AccountAction.OnLogoutDismiss -> {
-                _state.update { it.copy(isLogoutBottomSheetVisible = false) }
-            }
+            is AccountAction.OnDeleteAccountBottomSheetToggle ->
+                _state.update {
+                    it.copy(isDeleteAccountBottomSheetVisible = !it.isDeleteAccountBottomSheetVisible)
+                }
 
             is AccountAction.OnLogoutConfirmClick -> {
                 _state.update { it.copy(isLogoutBottomSheetVisible = false) }
-
-                viewModelScope.launch {
-                    val result = authService.signOut(action.context)
-                    if (result) {
-                        _events.send(AccountEvent.OnLogoutSuccessful)
-                    } else {
-                        _events.send(AccountEvent.OnLogoutError("Couldn't logout"))
-                    }
-                }
+                handleSignOut(action.context)
             }
 
             is AccountAction.OnFriendClick -> {
@@ -57,15 +52,32 @@ class AccountViewModel(
             is AccountAction.OnDevBlogClick -> {
                 viewModelScope.launch { _events.send(AccountEvent.OnNavigateToDevBlog) }
             }
+
+            is AccountAction.OnDeleteAccountConfirmClick -> {
+                val result = authService.deleteCurrentUser()
+                if (result.successful) {
+                    handleSignOut(action.context)
+                }
+            }
         }
     }
-
 
     private fun loadData() {
         viewModelScope.launch {
             val result = userUseCases.getLocalUser()
             if (result.isSuccess) {
                 _state.update { it.copy(user = result.getOrNull()) }
+            }
+        }
+    }
+
+    private fun handleSignOut(context: Context) {
+        viewModelScope.launch {
+            val result = authService.signOut(context)
+            if (result) {
+                _events.send(AccountEvent.OnLogoutSuccessful)
+            } else {
+                _events.send(AccountEvent.OnLogoutError("Couldn't logout"))
             }
         }
     }

@@ -202,7 +202,9 @@ fun HomeScreen(
                 NavDestination.entries.forEach { destination ->
                     composable(destination.screen.route) {
                         when (destination) {
-                            NavDestination.DASHBOARD -> DashboardScreen()
+                            NavDestination.DASHBOARD -> DashboardScreen(
+                                onNavigateToExpenseDetail = onNavigateToExpenseDetail,
+                            )
 
                             NavDestination.EXPENSES -> ExpenseScreen(
                                 onNavigateToExpenseDetail = onNavigateToExpenseDetail
