@@ -5,4 +5,5 @@ import com.example.balancify.domain.model.UserModel
 data class AccountState(
     val user: UserModel? = null,
     val isLogoutBottomSheetVisible: Boolean = false,
+    val isDeleteAccountBottomSheetVisible: Boolean = false,
 )

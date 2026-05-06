@@ -143,4 +143,14 @@ class AuthService {
             AuthResult()
         }
     }
+
+    fun deleteCurrentUser(): AuthResult {
+        try {
+            auth.currentUser!!.delete()
+            return AuthResult(successful = true)
+        } catch (e: Exception) {
+            Log.w(TAG, e.message.orEmpty())
+            return AuthResult()
+        }
+    }
 }

@@ -4,14 +4,18 @@ import com.example.balancify.core.ext.getTrigram
 import com.example.balancify.domain.model.ExpenseMemberModel
 import com.example.balancify.domain.model.ExpenseMetadataModel
 import com.example.balancify.domain.model.ExpenseModel
+import com.example.balancify.domain.model.NotificationModel
+import com.example.balancify.domain.model.NotificationType
 import com.example.balancify.domain.model.TimelineModel
 import com.example.balancify.domain.repository.ExpenseRepository
+import com.example.balancify.domain.repository.NotificationRepository
 import com.example.balancify.domain.repository.UserRepository
 import java.util.UUID
 
 class CreateExpense(
     private val repository: ExpenseRepository,
     private val userRepository: UserRepository,
+    private val notificationRepository: NotificationRepository,
 ) {
     suspend operator fun invoke(
         expenseParam: ExpenseModel,
@@ -54,6 +58,18 @@ class CreateExpense(
             expenseId = expenseId,
             nameTrigrams = expense.name.getTrigram(),
             membersFlag = members.associate { it.id to true }
+        )
+
+        notificationRepository.createNotification(
+            NotificationModel(
+                id = UUID.randomUUID().toString(),
+                title = "New Expense",
+                description = "${userResult.getOrNull()!!.name} added a new expense.",
+                link = "/app/expenses/$expenseId",
+                type = NotificationType.EXPENSE,
+                userReadFlag = members.associate { it.id to false },
+                ownerIds = members.map { it.id },
+            )
         )
 
         return repository.createExpense(expense, expenseMetadata)

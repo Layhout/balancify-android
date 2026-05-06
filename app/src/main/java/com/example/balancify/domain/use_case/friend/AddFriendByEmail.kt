@@ -3,12 +3,17 @@ package com.example.balancify.domain.use_case.friend
 import com.example.balancify.core.ext.getTrigram
 import com.example.balancify.domain.model.FriendModel
 import com.example.balancify.domain.model.FriendStatus
+import com.example.balancify.domain.model.NotificationModel
+import com.example.balancify.domain.model.NotificationType
 import com.example.balancify.domain.repository.FriendRepository
+import com.example.balancify.domain.repository.NotificationRepository
 import com.example.balancify.domain.repository.UserRepository
+import java.util.UUID
 
 class AddFriendByEmail(
     private val repository: FriendRepository,
     private val userRepository: UserRepository,
+    private val notificationRepository: NotificationRepository,
 ) {
     suspend operator fun invoke(email: String): Result<FriendModel> {
         val userResult = userRepository.getUserByEmail(email)
@@ -60,6 +65,20 @@ class AddFriendByEmail(
 
         if (result.isFailure) return Result.failure(
             result.exceptionOrNull()!!
+        )
+
+        notificationRepository.createNotification(
+            NotificationModel(
+                id = UUID.randomUUID().toString(),
+                title = "New Friend Request",
+                description = "${userResult.getOrNull()!!.name} sent you a firend request.",
+                link = "/app/friends",
+                type = NotificationType.FRIEND_REQUEST,
+                userReadFlag = mapOf(
+                    foundFriend!!.userId to false
+                ),
+                ownerIds = listOf(foundFriend.userId),
+            )
         )
 
         return Result.success(friend.copy(user = foundUser))

@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Article
 import androidx.compose.material.icons.outlined.PeopleAlt
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.PersonOff
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -28,12 +30,12 @@ fun OptionCard(
         ) {
             viewModel.onAction(AccountAction.OnFriendClick)
         }
-        Spacer(modifier = Modifier.height(2.dp))
-        CardItem(
-            icon = Icons.Outlined.Settings,
-            label = "Settings",
-            order = CardOrder.MIDDLE
-        )
+//        Spacer(modifier = Modifier.height(2.dp))
+//        CardItem(
+//            icon = Icons.Outlined.Settings,
+//            label = "Settings",
+//            order = CardOrder.MIDDLE
+//        )
         Spacer(modifier = Modifier.height(2.dp))
         CardItem(
             onClick = { viewModel.onAction(AccountAction.OnDevBlogClick) },
@@ -41,6 +43,17 @@ fun OptionCard(
             label = "Dev Blogs",
             order = CardOrder.LAST
 
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        CardItem(
+            icon = Icons.Outlined.PersonOff, label = "Delete My Account",
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+            ),
+            order = CardOrder.ALONE,
+            onClick = {
+                viewModel.onAction(AccountAction.OnDeleteAccountBottomSheetToggle)
+            },
         )
     }
 }

@@ -17,7 +17,7 @@ import com.google.firebase.firestore.toObject
 
 class FriendRemoteDataSourceImp(
     private val db: DatabaseService,
-    private val auth: AuthService
+    private val auth: AuthService,
 ) : FriendRemoteDataSource {
     private fun buildCollectionPath(id: String = auth.userId): String {
         return "${FirebaseCollectionName.FRIENDS.value}/${id}/data"

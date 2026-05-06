@@ -47,13 +47,16 @@ class GroupRemoteDataSourceImp(
 
         if (!search.isNullOrBlank()) {
             val metadataResult =
-                db.getPage(metaDataCollectionName, ITEMS_LIMIT, null, queryBuilder = {
-                    it.whereArrayContainsAny(
-                        "nameTrigrams",
-                        search.getTrigram()
-                    ).whereEqualTo("membersFlag.${id}", true)
-
-                })
+                db.getPage(
+                    collection = metaDataCollectionName,
+                    pageSize = ITEMS_LIMIT,
+                    lastDoc = null,
+                    queryBuilder = {
+                        it.whereArrayContainsAny(
+                            "nameTrigrams",
+                            search.getTrigram()
+                        ).whereEqualTo("membersFlag.${id}", true)
+                    })
 
             metadatas = metadataResult.snapshot.documents.mapNotNull {
                 it.toObject<GroupMetadataModel>()
@@ -69,7 +72,7 @@ class GroupRemoteDataSourceImp(
                     metadatas.map { metadata -> metadata.groupId }
                 )
             } else {
-                query.whereArrayContains("memberIds", id)
+                query = query.whereArrayContains("memberIds", id)
             }
 
             query

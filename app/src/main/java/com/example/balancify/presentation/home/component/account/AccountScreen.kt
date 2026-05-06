@@ -82,8 +82,28 @@ fun AccountScreen(
                 ConfirmationBottomSheet(
                     message = "Are you sure you want to logout?",
                     confirmText = "Logout",
-                    onConfirmClick = { viewModel.onAction(AccountAction.OnLogoutConfirmClick(context)) },
-                    onDismissRequest = { viewModel.onAction(AccountAction.OnLogoutDismiss) },
+                    onConfirmClick = {
+                        viewModel.onAction(AccountAction.OnLogoutConfirmClick(context))
+                    },
+                    onDismissRequest = {
+                        viewModel.onAction(AccountAction.OnLogoutBottomSheetToggle)
+                    },
+                )
+            }
+            if (state.value.isDeleteAccountBottomSheetVisible) {
+                ConfirmationBottomSheet(
+                    message = "Are you sure you want to delete your account?",
+                    confirmText = "Delete",
+                    onConfirmClick = {
+                        viewModel.onAction(
+                            AccountAction.OnDeleteAccountConfirmClick(
+                                context
+                            )
+                        )
+                    },
+                    onDismissRequest = {
+                        viewModel.onAction(AccountAction.OnDeleteAccountBottomSheetToggle)
+                    },
                 )
             }
         }
