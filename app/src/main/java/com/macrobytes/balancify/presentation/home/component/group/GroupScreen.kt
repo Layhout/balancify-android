@@ -1,0 +1,101 @@
+package com.macrobytes.balancify.presentation.home.component.group
+
+import android.os.Build
+import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.macrobytes.balancify.component.CardOrder
+import com.macrobytes.balancify.component.Empty
+import com.macrobytes.balancify.component.GroupCard
+import com.macrobytes.balancify.component.InfiniteLazyColumn
+import com.macrobytes.balancify.core.util.ObserveAsEvents
+import org.koin.androidx.compose.koinViewModel
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun GroupScreen(
+    viewModel: GroupViewModel = koinViewModel(),
+    onNavigateToGroupDetail: (String) -> Unit,
+) {
+    val context = LocalContext.current
+    val state = viewModel.state.collectAsStateWithLifecycle()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.onAction(GroupAction.OnCollectFlag)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is GroupEvent.OnError -> {
+                Toast.makeText(
+                    context,
+                    event.message,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    Surface(
+        modifier = Modifier.background(
+            MaterialTheme.colorScheme.background
+        )
+    ) {
+        PullToRefreshBox(
+            isRefreshing = state.value.isRefreshing,
+            onRefresh = { viewModel.onAction(GroupAction.OnRefresh) },
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+        ) {
+            if (!state.value.isLoading && state.value.groups.isEmpty()) {
+                Empty()
+            }
+
+            InfiniteLazyColumn(
+                items = state.value.groups,
+                isLoadingMore = state.value.isLoading,
+                canLoadMore = state.value.canLoadMore,
+                onLoadMore = {
+                    viewModel.onAction(GroupAction.OnLoadMore)
+                },
+                modifier = Modifier
+                    .fillMaxSize(),
+            ) { index, item ->
+                if (index != 0) Spacer(modifier = Modifier.height(2.dp))
+
+                GroupCard(
+                    order = CardOrder.fromIndexAndSize(index, state.value.groups.size),
+                    item = item,
+                    onClick = {
+                        onNavigateToGroupDetail(item.id)
+                    }
+                )
+            }
+        }
+    }
+}

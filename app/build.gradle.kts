@@ -7,14 +7,14 @@ plugins {
 }
 
 android {
-    namespace = "com.example.balancify"
+    namespace = "com.macrobytes.balancify"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.balancify"
+        applicationId = "com.macrobytes.balancify"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
+        versionCode = 3
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

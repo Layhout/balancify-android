@@ -1,0 +1,162 @@
+package com.macrobytes.balancify.presentation.expense_form
+
+import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.macrobytes.balancify.component.AmountInputField
+import com.macrobytes.balancify.component.AppBar
+import com.macrobytes.balancify.component.CardOrder
+import com.macrobytes.balancify.core.constant.SearchType
+import com.macrobytes.balancify.core.util.ObserveAsEvents
+import com.macrobytes.balancify.domain.model.MemberOption
+import com.macrobytes.balancify.presentation.expense_form.component.ExpenseFormFooter
+import com.macrobytes.balancify.presentation.expense_form.component.ExpenseMemberButton
+import com.macrobytes.balancify.presentation.expense_form.component.ExpenseMemberCard
+import com.macrobytes.balancify.presentation.expense_form.component.ExpenseNameInput
+import com.macrobytes.balancify.presentation.expense_form.component.ExpenseSetting
+import org.koin.androidx.compose.koinViewModel
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun ExpenseFormScreen(
+    viewModel: ExpenseFormViewModel = koinViewModel(),
+    onNavigateToSearch: (SearchType) -> Unit,
+    onBackClick: () -> Unit,
+) {
+    val localFocusManager = LocalFocusManager.current
+    val context = LocalContext.current
+    val state = viewModel.state.collectAsStateWithLifecycle()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.onAction(ExpenseFormAction.OnCollectFlag)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    ObserveAsEvents(viewModel.events) {
+        when (it) {
+            is ExpenseFormEvent.OnError -> {
+                Toast.makeText(context, it.message, Toast.LENGTH_LONG).show()
+            }
+
+            is ExpenseFormEvent.OnAddMemberClicked -> {
+                onNavigateToSearch(
+                    if (state.value.memberOption == MemberOption.FRIEND)
+                        SearchType.FRIEND else
+                        SearchType.GROUP
+                )
+            }
+
+            is ExpenseFormEvent.OnSaveSuccess -> {
+                onBackClick()
+            }
+        }
+    }
+
+    Surface(
+        modifier = Modifier.background(
+            MaterialTheme.colorScheme.background
+        )
+    ) {
+        Scaffold(
+            topBar = {
+                AppBar(
+                    "${if (state.value.isEditing) "Update" else "Create"} Expense",
+                    onBackClick
+                )
+            },
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)
+                    .padding(horizontal = 16.dp)
+                    .pointerInput(Unit) {
+                        detectTapGestures(onTap = {
+                            localFocusManager.clearFocus()
+                        })
+                    }
+            ) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    item {
+                        Column(
+                            modifier = Modifier.height(150.dp),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            AmountInputField(
+                                enabled = state.value.isEnableAllAction,
+                                amount = state.value.amount,
+                                errorMessage = state.value.amountErrorMessage,
+                                onAmountChange = { amount ->
+                                    viewModel.onAction(
+                                        ExpenseFormAction.OnAmountChange(
+                                            amount
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                    }
+                    item {
+                        ExpenseNameInput()
+                    }
+                    item {
+                        ExpenseSetting()
+                    }
+                    item {
+                        ExpenseMemberButton()
+                    }
+                    itemsIndexed(
+                        items = state.value.members,
+                    ) { index, item ->
+                        if (index != 0) Spacer(modifier = Modifier.height(2.dp))
+
+                        ExpenseMemberCard(
+                            data = item,
+                            order = CardOrder.fromIndexAndSize(index, state.value.members.size),
+                            index = index
+                        )
+                    }
+                }
+                ExpenseFormFooter()
+            }
+        }
+    }
+}
+
