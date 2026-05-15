@@ -12,22 +12,23 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.ClearCredentialException
-import com.macrobytes.balancify.R
-import com.macrobytes.balancify.core.constant.BG_COLORS
-import com.macrobytes.balancify.domain.model.UserModel
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import com.google.firebase.Firebase
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
+import com.macrobytes.balancify.R
+import com.macrobytes.balancify.core.constant.BG_COLORS
+import com.macrobytes.balancify.domain.model.UserModel
 import io.viascom.nanoid.NanoId
 import kotlinx.coroutines.tasks.await
 import kotlin.random.Random
 
-data class AuthResult(
+data class AuthServiceResponse(
     val successful: Boolean = false,
     val isNewUser: Boolean = false,
     val userId: String? = null,
@@ -43,7 +44,23 @@ class AuthService {
     val userId: String
         get() = auth.currentUser?.uid ?: ""
 
-    suspend fun signInWithBottomSheet(context: Context): AuthResult {
+    fun generateSuccessResponse(authResult: AuthResult): AuthServiceResponse {
+        return AuthServiceResponse(
+            successful = true,
+            userId = authResult.user?.uid,
+            isNewUser = authResult.additionalUserInfo?.isNewUser ?: false,
+            user = if (authResult.additionalUserInfo?.isNewUser ?: false) UserModel(
+                id = authResult.user?.uid.orEmpty(),
+                email = authResult.user?.email.orEmpty(),
+                imageUrl = authResult.user?.photoUrl.toString(),
+                name = authResult.user?.displayName.orEmpty(),
+                profileBgColor = BG_COLORS[Random.nextInt(BG_COLORS.size)],
+                referralCode = NanoId.generate(9)
+            ) else null
+        )
+    }
+
+    suspend fun signInWithBottomSheet(context: Context): AuthServiceResponse {
         try {
             val option = GetGoogleIdOption.Builder()
                 .setFilterByAuthorizedAccounts(true)
@@ -55,11 +72,11 @@ class AuthService {
             return signInWithGoogle(context, credentialResponse.credential)
         } catch (e: Exception) {
             Log.w(TAG, e.message.orEmpty())
-            return AuthResult()
+            return AuthServiceResponse()
         }
     }
 
-    suspend fun signInWithDialog(context: Context): AuthResult {
+    suspend fun signInWithDialog(context: Context): AuthServiceResponse {
         try {
             val option =
                 GetSignInWithGoogleOption.Builder(
@@ -71,7 +88,7 @@ class AuthService {
             return signInWithGoogle(context, credentialResponse.credential)
         } catch (e: Exception) {
             Log.w(TAG, e.message.orEmpty())
-            return AuthResult()
+            return AuthServiceResponse()
         }
     }
 
@@ -112,11 +129,11 @@ class AuthService {
     private suspend fun signInWithGoogle(
         context: Context,
         credential: Credential
-    ): AuthResult {
+    ): AuthServiceResponse {
         if (credential !is CustomCredential || credential.type != TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
             Toast.makeText(context, "Credential is not of type Google ID!", Toast.LENGTH_LONG)
                 .show()
-            return AuthResult()
+            return AuthServiceResponse()
         }
 
         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
@@ -125,32 +142,61 @@ class AuthService {
 
         return try {
             val signInResult = auth.signInWithCredential(firebaseCredential).await()
-            AuthResult(
-                successful = true,
-                userId = signInResult.user?.uid,
-                isNewUser = signInResult.additionalUserInfo?.isNewUser ?: false,
-                user = if (signInResult.additionalUserInfo?.isNewUser ?: false) UserModel(
-                    id = signInResult.user?.uid.orEmpty(),
-                    email = signInResult.user?.email.orEmpty(),
-                    imageUrl = signInResult.user?.photoUrl.toString(),
-                    name = signInResult.user?.displayName.orEmpty(),
-                    profileBgColor = BG_COLORS[Random.nextInt(BG_COLORS.size)],
-                    referralCode = NanoId.generate(9)
-                ) else null
-            )
+            generateSuccessResponse(signInResult)
         } catch (e: Exception) {
             Toast.makeText(context, e.message.orEmpty(), Toast.LENGTH_LONG).show()
-            AuthResult()
+            AuthServiceResponse()
         }
     }
 
-    fun deleteCurrentUser(): AuthResult {
+    fun deleteCurrentUser(): AuthServiceResponse {
         try {
             auth.currentUser!!.delete()
-            return AuthResult(successful = true)
+            return AuthServiceResponse(successful = true)
         } catch (e: Exception) {
             Log.w(TAG, e.message.orEmpty())
-            return AuthResult()
+            return AuthServiceResponse()
+        }
+    }
+
+    suspend fun signUpWithEmailAndPassword(
+        context: Context,
+        email: String,
+        password: String,
+    ): AuthServiceResponse {
+        return try {
+            val signUpResult = auth.createUserWithEmailAndPassword(email, password).await()
+            generateSuccessResponse(signUpResult)
+        } catch (e: Exception) {
+            Toast.makeText(context, e.message.orEmpty(), Toast.LENGTH_LONG).show()
+            AuthServiceResponse()
+        }
+    }
+
+    suspend fun signInWithEmailAndPassword(
+        context: Context,
+        email: String,
+        password: String,
+    ): AuthServiceResponse {
+        return try {
+            val signInResult = auth.signInWithEmailAndPassword(email, password).await()
+            generateSuccessResponse(signInResult)
+        } catch (e: Exception) {
+            Toast.makeText(context, e.message.orEmpty(), Toast.LENGTH_LONG).show()
+            AuthServiceResponse()
+        }
+    }
+
+    suspend fun sendResetPasswordEmail(
+        context: Context,
+        email: String,
+    ): AuthServiceResponse {
+        return try {
+            auth.sendPasswordResetEmail(email).await()
+            AuthServiceResponse(successful = true)
+        } catch (e: Exception) {
+            Toast.makeText(context, e.message.orEmpty(), Toast.LENGTH_LONG).show()
+            AuthServiceResponse()
         }
     }
 }

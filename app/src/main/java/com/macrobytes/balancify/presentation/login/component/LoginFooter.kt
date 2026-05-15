@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -45,7 +46,9 @@ fun LoginFooter(viewModel: LoginViewModel = koinViewModel(), onLoginComplete: ()
         Spacer(modifier = Modifier.height(32.dp))
         Button(
             onClick = {
-                viewModel.onAction(LoginAction.OnSignInClick(context, onLoginComplete))
+//                viewModel.onAction(LoginAction.OnSignInClick(context, onLoginComplete))
+                viewModel.onAction(LoginAction.OnIsSignUp(false))
+                viewModel.onAction(LoginAction.OnLoginFormBottomSheetToggle)
             },
             modifier = Modifier
                 .fillMaxWidth(),
@@ -55,7 +58,24 @@ fun LoginFooter(viewModel: LoginViewModel = koinViewModel(), onLoginComplete: ()
                 CircularProgressIndicator(modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(4.dp))
             }
-            Text("Sign In")
+            Text("Login")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedButton(
+            onClick = {
+//                viewModel.onAction(LoginAction.OnSignInClick(context, onLoginComplete))
+                viewModel.onAction(LoginAction.OnIsSignUp(true))
+                viewModel.onAction(LoginAction.OnLoginFormBottomSheetToggle)
+            },
+            modifier = Modifier
+                .fillMaxWidth(),
+            enabled = !isLoading
+        ) {
+            if (state.value.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+            Text("Sign Up")
         }
     }
 }
